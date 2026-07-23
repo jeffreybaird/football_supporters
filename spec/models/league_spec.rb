@@ -39,4 +39,36 @@ RSpec.describe League do
     expect(League.new(slug: nil, name: "X")).not_to be_valid
     expect(League.new(slug: "x", name: nil)).not_to be_valid
   end
+
+  describe "scoring params" do
+    it "seeds the reference league with the Quiz::Data defaults" do
+      league = League.default
+
+      expect(league.chooser_threshold).to eq(Quiz::Data::CHOOSER_THRESHOLD)
+      expect(league.max_choices).to eq(Quiz::Data::MAX_CHOICES)
+      expect(league.amplify).to eq(Quiz::Data::AMPLIFY)
+    end
+
+    it "exposes scoring_params keyword-ready for Quiz::Score.call" do
+      expect(League.default.scoring_params).to eq(
+        chooser_threshold: Quiz::Data::CHOOSER_THRESHOLD,
+        max_choices: Quiz::Data::MAX_CHOICES,
+        amplify: Quiz::Data::AMPLIFY
+      )
+    end
+
+    it "gives new leagues the column defaults" do
+      league = League.create(slug: "la-liga", name: "La Liga")
+
+      expect(league.chooser_threshold).to eq(0.25)
+      expect(league.max_choices).to eq(3)
+      expect(league.amplify).to eq(2.5)
+    end
+
+    it "rejects out-of-range scoring params" do
+      expect(League.new(slug: "a", name: "A", chooser_threshold: -0.1)).not_to be_valid
+      expect(League.new(slug: "b", name: "B", max_choices: 0)).not_to be_valid
+      expect(League.new(slug: "c", name: "C", amplify: -1.0)).not_to be_valid
+    end
+  end
 end

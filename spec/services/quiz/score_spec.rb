@@ -63,4 +63,29 @@ RSpec.describe Quiz::Score do
       expect(ranked.dist - r.rank.first.dist).to be < Quiz::Data::CHOOSER_THRESHOLD
     end
   end
+
+  it "caps candidates at a per-call max_choices" do
+    answers = Array.new(13, 3) # default offers ["Chelsea", "Man City"]
+    r = described_class.call(teams:, answers:, weights: [5, 5, 5, 5], max_choices: 1)
+
+    expect(r.candidates.map(&:name)).to eq(["Chelsea"])
+  end
+
+  it "widens the alternates with a larger chooser_threshold" do
+    answers = Array.new(13, 3)
+    r = described_class.call(teams:, answers:, weights: [5, 5, 5, 5], chooser_threshold: 100.0, max_choices: 5)
+
+    expect(r.candidates.length).to eq(5)
+    expect(r.candidates.map(&:name)).to eq(r.rank.first(5).map(&:name))
+  end
+
+  it "applies a per-call amplify when ranking" do
+    answers = Array.new(13, 0)
+    tight = described_class.call(teams:, answers:, weights: [5, 5, 5, 5], amplify: 1.0)
+    wide  = described_class.call(teams:, answers:, weights: [5, 5, 5, 5], amplify: 2.5)
+
+    # vec is amplify-independent; the ranking distances are not.
+    expect(rounded(tight.vec)).to eq(rounded(wide.vec))
+    expect(tight.rank.first.dist).not_to eq(wide.rank.first.dist)
+  end
 end

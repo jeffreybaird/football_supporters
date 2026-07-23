@@ -11,7 +11,10 @@ module Quiz
   module Seed
     module_function
 
-    LEAGUE = { slug: "premier-league", name: "Premier League", season: "2026-27" }.freeze
+    LEAGUE = {
+      slug: "premier-league", name: "Premier League", season: "2026-27",
+      chooser_threshold: Data::CHOOSER_THRESHOLD, max_choices: Data::MAX_CHOICES, amplify: Data::AMPLIFY
+    }.freeze
 
     # name, [vibe, play, ethics, fanbase], crest file, blurb — in display order.
     TEAMS = [
@@ -68,7 +71,9 @@ module Quiz
 
     def upsert_league
       league = League.first(slug: LEAGUE[:slug]) || League.new(slug: LEAGUE[:slug])
-      league.set(name: LEAGUE[:name], season: LEAGUE[:season], active: true, position: 0)
+      league.set(name: LEAGUE[:name], season: LEAGUE[:season], active: true, position: 0,
+                 chooser_threshold: LEAGUE[:chooser_threshold], max_choices: LEAGUE[:max_choices],
+                 amplify: LEAGUE[:amplify])
       league.save
       league
     end

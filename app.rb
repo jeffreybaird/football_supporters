@@ -94,7 +94,7 @@ class App < Sinatra::Base
     halt 404, erb(:"quiz/not_found") unless @league
 
     @teams = @league.scored_teams
-    @score = Quiz::Score.call(teams: @teams, answers: @record.answers, weights: @record.weights)
+    @score = Quiz::Score.call(teams: @teams, answers: @record.answers, weights: @record.weights, **@league.scoring_params)
     @share_url = url("/q/#{@record.slug}")
 
     pick = @score.pick

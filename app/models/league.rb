@@ -21,10 +21,18 @@ class League < Sequel::Model
     teams_dataset.where(deleted_at: nil).order(:position, :name).all
   end
 
+  # The league's recommender tuning, keyword-ready for Quiz::Score.call.
+  def scoring_params
+    { chooser_threshold:, max_choices:, amplify: }
+  end
+
   def validate
     super
-    validates_presence %i[slug name]
+    validates_presence %i[slug name chooser_threshold max_choices amplify]
     validates_unique :slug
+    validates_operator(:>=, 0.0, :chooser_threshold) if chooser_threshold
+    validates_operator(:>=, 1, :max_choices) if max_choices
+    validates_operator(:>=, 0.0, :amplify) if amplify
   end
 
   def soft_delete!

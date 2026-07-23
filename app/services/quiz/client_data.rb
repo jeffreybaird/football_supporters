@@ -17,9 +17,9 @@ module Quiz
         "SLIDERS"           => Data::SLIDERS,
         "FLAVOR"            => teams.to_h { |t| [t.name, t.blurb] },
         "BADGE"             => teams.reject { |t| t.crest.nil? }.to_h { |t| [t.name, t.crest] },
-        "CHOOSER_THRESHOLD" => Data::CHOOSER_THRESHOLD,
-        "MAX_CHOICES"       => Data::MAX_CHOICES,
-        "AMPLIFY"           => Data::AMPLIFY,
+        "CHOOSER_THRESHOLD" => league ? league.chooser_threshold : Data::CHOOSER_THRESHOLD,
+        "MAX_CHOICES"       => league ? league.max_choices : Data::MAX_CHOICES,
+        "AMPLIFY"           => league ? league.amplify : Data::AMPLIFY,
       }
     end
   end

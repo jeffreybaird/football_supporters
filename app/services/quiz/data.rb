@@ -12,12 +12,17 @@ module Quiz
 
     AXES = %w[Vibe Play Ethics Fanbase].freeze
 
-    # max weighted-distance gap from the winner for an alternate to be offered
+    # Default scoring tuning. Each league now carries its own values (columns on
+    # the leagues table); these are the fallback used when no league is in play
+    # and the seed's starting values, and they must match the migration defaults.
+    #
+    # CHOOSER_THRESHOLD: max weighted-distance gap from the winner for an
+    # alternate to be offered. MAX_CHOICES: cap on offered alternates. AMPLIFY:
+    # user-vector centrality amplification — stretch the user's vector outward
+    # from the team centroid before matching so moderate answers stop collapsing
+    # onto the centre team (1 = off).
     CHOOSER_THRESHOLD = 0.25
     MAX_CHOICES = 3
-    # user-vector centrality amplification: stretch the user's vector outward from
-    # the team centroid before matching so moderate answers stop collapsing onto
-    # the centre team. 1 = off.
     AMPLIFY = 2.5
 
     Q = [

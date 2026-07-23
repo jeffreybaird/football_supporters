@@ -23,12 +23,17 @@ module Quiz
     # teams:   ordered Array of Team (a league's kept teams).
     # answers: Array(len Q) of chosen option index or nil.
     # weights: Array(4) of slider values.
-    def call(teams:, answers:, weights:)
+    # chooser_threshold / max_choices / amplify: per-league tuning (see
+    #   Quiz::Data); default to the shared constants for callers with no league.
+    def call(teams:, answers:, weights:,
+             chooser_threshold: Data::CHOOSER_THRESHOLD,
+             max_choices: Data::MAX_CHOICES,
+             amplify: Data::AMPLIFY)
       vec  = score_axes(answers)
-      rank = rank_teams(vec, weights, teams)
+      rank = rank_teams(vec, weights, teams, amplify)
       candidates = rank.each_with_index
-                       .select { |r, i| i.zero? || (r.dist - rank[0].dist) < Data::CHOOSER_THRESHOLD }
-                       .first(Data::MAX_CHOICES)
+                       .select { |r, i| i.zero? || (r.dist - rank[0].dist) < chooser_threshold }
+                       .first(max_choices)
                        .map { |r, _i| r.team }
       gap = rank.length > 1 ? rank[1].dist - rank[0].dist : 0.0
       Result.new(vec:, rank:, candidates:, pick: rank[0].team, gap:)
@@ -58,13 +63,13 @@ module Quiz
     # slider-weighted distance matching (nearest team). The user's vector is first
     # stretched outward from the team centroid (AMPLIFY) so moderate answers stop
     # collapsing onto the centre team.
-    def rank_teams(vec, weights, teams)
+    def rank_teams(vec, weights, teams, amplify)
       centroid = centroid_of(teams)
       wsum = weights.sum.to_f
       wsum = 1.0 if wsum.zero?
       w = weights.map { |x| x / wsum }
       u = vec.each_index.map do |k|
-        a = centroid[k] + (vec[k] - centroid[k]) * Data::AMPLIFY
+        a = centroid[k] + (vec[k] - centroid[k]) * amplify
         [[a, 0.0].max, 10.0].min
       end
       teams.each_with_index.map do |team, idx|

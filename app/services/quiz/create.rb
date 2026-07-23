@@ -26,7 +26,7 @@ module Quiz
       teams = league.scored_teams
       return Failure([:validation, { league: "has no teams" }]) if teams.empty?
 
-      pick = Score.call(teams:, answers:, weights:).pick
+      pick = Score.call(teams:, answers:, weights:, **league.scoring_params).pick
       record = insert_with_slug(league:, answers:, weights:, pick: pick.name)
       Success(record)
     rescue Sequel::UniqueConstraintViolation

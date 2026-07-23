@@ -22,3 +22,6 @@ DB.run "PRAGMA foreign_keys=ON"
 # App-wide model plugins (models are defined after this file loads).
 Sequel::Model.plugin :timestamps, update_on_create: true
 Sequel::Model.plugin :validation_helpers
+# Populate schema column defaults on new instances so presence validation sees
+# them before the insert (e.g. a League's scoring params).
+Sequel::Model.plugin :defaults_setter
