@@ -152,14 +152,16 @@ jobs:
             "echo '$DOCR_TOKEN' | docker login registry.digitalocean.com -u '$DOCR_TOKEN' --password-stdin \
              && cd /root && docker compose pull"
 
-      # Migration gate: runs the new image as a one-off BEFORE serving traffic.
-      # A non-zero exit fails this step -> the job fails -> the swap is skipped
-      # -> the previously-running color keeps serving. A bad migration can never
-      # serve a half-updated DB.
-      - name: Run migrations (gate before traffic)
+      # Migration + seed gate: runs the new image as a one-off BEFORE serving
+      # traffic. A non-zero exit fails this step -> the job fails -> the swap is
+      # skipped -> the previously-running color keeps serving. A bad migration can
+      # never serve a half-updated DB. `db:seed` is idempotent (upserts the
+      # reference league/teams), so it is safe to run on every deploy and keeps
+      # a fresh environment's data present without a manual step.
+      - name: Run migrations + seed (gate before traffic)
         run: |
           ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=accept-new root@"$HOST" \
-            "cd /root && docker compose run --rm migrate bundle exec rake db:migrate"
+            "cd /root && docker compose run --rm migrate bundle exec rake db:migrate db:seed"
 
       # Health-checked blue/green swap: start the idle color from the new image,
       # wait for its healthcheck, only then stop the old color. Caddy holds

@@ -7,8 +7,9 @@
 #   * The app service runs `puma` (image CMD), not `bin/<app> start`. There is
 #     no PHX_SERVER gate and no APP_NAME — a Rack app serves unconditionally on
 #     $PORT.
-#   * Migrations run `rake db:migrate` (Sequel::Migrator) in the one-off migrate
-#     runner, not `bin/<app> eval '<Module>.Release.migrate()'`.
+#   * Migrations + seed run `rake db:migrate db:seed` (Sequel::Migrator, then the
+#     idempotent Quiz::Seed) in the one-off migrate runner, not
+#     `bin/<app> eval '<Module>.Release.migrate()'`.
 #   * The DB is a SQLite file on a NAMED DOCKER VOLUME (app_data -> /data),
 #     shared by both colors + the migrate runner. Litestream streams its WAL to
 #     Spaces continuously and restores it on a recreated droplet.
@@ -100,8 +101,9 @@ services:
   app_blue: *app
   app_green: *app
 
-  # One-off migration runner (profile keeps it out of `up -d`):
-  #   docker compose run --rm migrate bundle exec rake db:migrate
+  # One-off migration + seed runner (profile keeps it out of `up -d`):
+  #   docker compose run --rm migrate bundle exec rake db:migrate db:seed
+  # db:seed is idempotent (upserts the reference league/teams), safe every deploy.
   migrate:
     <<: *app
     restart: "no"

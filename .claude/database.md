@@ -170,9 +170,9 @@ Rules:
   create-copy-drop-rename dance — Sequel does this for you where it can).
 - **Never edit a migration that has run in production.** Add a new one.
 
-Migrations run in production via `docker compose run --rm migrate bundle exec rake db:migrate`
-(the deploy's migration gate — see `.claude/deployment.md`), and in tests via `Sequel::Migrator`
-in `spec/spec_helper.rb` against a fresh test DB.
+Migrations run in production via `docker compose run --rm migrate bundle exec rake db:migrate db:seed`
+(the deploy's migration + seed gate — see `.claude/deployment.md`), and in tests via `Sequel::Migrator`
+in `spec/spec_helper.rb` against a fresh test DB (which then runs `Quiz::Seed`).
 
 ---
 

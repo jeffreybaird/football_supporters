@@ -65,8 +65,8 @@ fi
 echo "==> Installing gems"
 bundle install
 
-echo "==> Creating + migrating the development database"
-bundle exec rake db:migrate
+echo "==> Creating, migrating, and seeding the development database"
+bundle exec rake db:migrate db:seed
 
 echo "==> Preparing the test database"
 RACK_ENV=test bundle exec rake db:migrate

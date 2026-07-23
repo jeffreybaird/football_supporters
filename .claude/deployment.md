@@ -19,15 +19,16 @@ git push main
         2. build     — docker build + push to DO Container Registry (SHA-pinned)
         3. deploy    — over SSH to the droplet:
              a. pull the new image
-             b. MIGRATE (gate): rake db:migrate as a one-off, BEFORE traffic moves
+             b. MIGRATE+SEED (gate): rake db:migrate db:seed as a one-off, BEFORE traffic moves
              c. SWAP: start the idle color, wait for its healthcheck, stop the old color
 ```
 
 - **The test job is a hard gate.** `build` `needs: test`; a failing spec means nothing ships.
 - **Images are immutable and SHA-pinned.** The registry repo is named after the app (read from
   the committed `.app-name` file). `:latest` and `:<git-sha>` are both pushed; deploys pin the SHA.
-- **Migrations run before the swap.** `rake db:migrate` runs as a one-off container against the
-  live DB volume. If it exits non-zero the job fails and the swap is skipped — the old release
+- **Migrations + seed run before the swap.** `rake db:migrate db:seed` runs as a one-off container
+  against the live DB volume. `db:seed` is idempotent (upserts the reference league/teams) so it is
+  safe on every deploy. If it exits non-zero the job fails and the swap is skipped — the old release
   keeps serving. A bad migration can never serve a half-updated schema. This is why migrations
   must be additive and backward-compatible (see `.claude/database.md`).
 - **Zero-downtime swap.** Exactly one of `app_blue`/`app_green` serves at a time. The deploy
