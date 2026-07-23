@@ -7,6 +7,7 @@ source "https://rubygems.org"
 ruby file: ".ruby-version"
 
 gem "sinatra", "~> 4.1", require: "sinatra/base" # modular app, no classic DSL
+gem "erubi", "~> 1.13"                           # makes `set :erb, escape_html: true` real (ERB auto-escaping)
 gem "puma", "~> 6.6"                             # app server (config/puma.rb)
 gem "rackup", "~> 2.2"                           # `run App` entrypoint (config.ru)
 gem "sequel", "~> 5.90"                          # ORM + migrations

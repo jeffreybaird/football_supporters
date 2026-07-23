@@ -1,0 +1,47 @@
+<% others = @score.candidates.drop(1) %>
+<div class="result" data-testid="result">
+  <p class="result__eyebrow">
+    <%= others.empty? ? "Full time · your club" : "Full time · a close call" %>
+  </p>
+
+  <div class="result__head">
+    <%== erb :"quiz/_badge", locals: { name: @score.pick } %>
+    <h1 class="result__name" data-testid="result-pick"><%= @score.pick %></h1>
+  </div>
+
+  <p class="result__flavor"><%= flavor_for(@score.pick) %></p>
+
+  <section class="share" data-testid="share" aria-labelledby="share-label">
+    <p class="share__label" id="share-label">Share your result</p>
+    <div class="share__row">
+      <input class="share__url" data-testid="share-url" readonly
+             value="<%= @share_url %>"
+             data-share-text="I should support <%= @score.pick %>."
+             aria-label="Shareable link to your result">
+      <button type="button" class="btn btn--ghost" data-testid="share-copy">Copy link</button>
+      <button type="button" class="btn btn--primary" data-testid="share-native">Share ↗</button>
+    </div>
+    <p class="share__status" data-testid="share-status" role="status" aria-live="polite"></p>
+  </section>
+
+  <% unless others.empty? %>
+    <section class="alts" data-testid="alts">
+      <p class="alts__label">Or maybe you're more…</p>
+      <% others.each do |name| %>
+        <div class="alt" data-testid="alt-<%= name.downcase.gsub(/[^a-z0-9]+/, "-") %>">
+          <%== erb :"quiz/_badge", locals: { name:, sm: true } %>
+          <span>
+            <span class="alt__name"><%= name %></span>
+            <span class="alt__blurb"><%= short_blurb(name) %></span>
+          </span>
+        </div>
+      <% end %>
+    </section>
+  <% end %>
+
+  <div class="result__actions">
+    <a class="btn btn--primary" href="/" data-testid="take-quiz">Take the quiz →</a>
+  </div>
+</div>
+
+<script src="/js/share.js" defer></script>

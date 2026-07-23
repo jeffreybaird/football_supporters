@@ -1,0 +1,614 @@
+<div id="root"><div id="boot">Loading…</div></div>
+
+<style>
+  #boot { min-height: 100vh; display: flex; align-items: center; justify-content: center;
+          color: #9DB0A2; font-family: monospace; font-size: 13px; letter-spacing: 1px; }
+</style>
+
+<script>
+  window.QUIZ_DATA = <%== @quiz_data_json %>;
+  window.QUIZ_COACH = <%== @coach ? "true" : "false" %>;
+</script>
+
+<script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+<script id="app-src" type="text/plain">
+const { useState } = React;
+
+/* Premier League Club Recommender — client view. Static dataset + scoring weights
+   come from window.QUIZ_DATA (server-owned, see Quiz::Data) so the browser and the
+   Ruby scorer that renders shared /q/:slug pages can never drift. On "Show my club"
+   the completed quiz (answers + weights) is POSTed to /quizzes, which returns a
+   shareable slug the ShareCard surfaces. */
+
+const D = window.QUIZ_DATA;
+// Coach's view is enabled only when served from /coach (see App route).
+const COACH_ENABLED = !!window.QUIZ_COACH;
+const AXES = D.AXES;
+const AXIS_LABEL = { Vibe: "Vibe", Play: "Play", Ethics: "Ethics", Fanbase: "Fanbase" };
+const CHOOSER_THRESHOLD = D.CHOOSER_THRESHOLD;
+const MAX_CHOICES = D.MAX_CHOICES;
+const AMPLIFY = D.AMPLIFY;
+
+const TEAMS = D.TEAMS;
+const TEAM_NAMES = Object.keys(TEAMS);
+const Q = D.Q;
+const SLIDERS = D.SLIDERS;
+const FLAVOR = D.FLAVOR;
+const BADGE = D.BADGE;
+
+// ---- scoring: loadings-weighted mean per axis ----
+function scoreAxes(answers) {
+  const num = [0, 0, 0, 0], den = [0, 0, 0, 0];
+  answers.forEach((oi, qIdx) => {
+    if (oi == null) return;
+    const q = Q[qIdx], opt = q.a[oi];
+    for (let k = 0; k < 4; k++) {
+      const L = q.load[k], val = opt.v[k];
+      if (L > 0 && val != null) { num[k] += L * val; den[k] += L; }
+    }
+  });
+  return num.map((n, k) => (den[k] > 0 ? n / den[k] : 5.0));
+}
+
+const CENTROID = AXES.map((_, k) =>
+  TEAM_NAMES.reduce((s, n) => s + TEAMS[n][k], 0) / TEAM_NAMES.length
+);
+
+function rankTeams(vec, weights) {
+  const wsum = weights.reduce((s, x) => s + x, 0) || 1;
+  const w = weights.map((x) => x / wsum);
+  const u = vec.map((x, k) => {
+    const a = CENTROID[k] + (x - CENTROID[k]) * AMPLIFY;
+    return Math.max(0, Math.min(10, a));
+  });
+  return TEAM_NAMES
+    .map((name) => {
+      const t = TEAMS[name];
+      const dist = Math.sqrt(w.reduce((s, wk, k) => s + wk * (u[k] - t[k]) * (u[k] - t[k]), 0));
+      return { name, dist, sim: 1 / (1 + dist) };
+    })
+    .sort((a, b) => b.sim - a.sim);
+}
+
+// ---- palette / type ----
+const C = {
+  pitch: "#0A1C13", pitch2: "#0F2A1C", chalk: "#EDF1EA", chalkDim: "#9DB0A2",
+  amber: "#F0B23E", amberDim: "#8A6E33", line: "#20402E", lime: "#5BD98A", shadow: "rgba(0,0,0,0.35)",
+};
+const FONTS = `@import url('https://fonts.googleapis.com/css2?family=Archivo:wght@400;600;800;900&family=Space+Grotesk:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap');`;
+const mono = { fontFamily: "'Space Mono', monospace" };
+const disp = { fontFamily: "'Archivo', sans-serif" };
+const body = { fontFamily: "'Space Grotesk', sans-serif" };
+
+function TraitBoard({ vec }) {
+  return (
+    <div style={{ display: "grid", gap: 5 }}>
+      {AXES.map((ax, i) => (
+        <div key={ax} style={{ display: "grid", gridTemplateColumns: "70px 1fr 32px", alignItems: "center", gap: 10 }}>
+          <span style={{ ...mono, fontSize: 9.5, letterSpacing: 0.4, color: C.chalkDim, textTransform: "uppercase" }}>{AXIS_LABEL[ax]}</span>
+          <div style={{ height: 7, background: "#0c2417", borderRadius: 2, overflow: "hidden", border: `1px solid ${C.line}` }}>
+            <div style={{ width: `${(vec[i] / 10) * 100}%`, height: "100%", background: C.amber, transition: "width .5s cubic-bezier(.2,.8,.2,1)" }} />
+          </div>
+          <span style={{ ...mono, fontSize: 10.5, color: C.amber, textAlign: "right" }}>{vec[i].toFixed(1)}</span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function LiveRanking({ vec, weights, basePos, started, compare, onPick }) {
+  const rank = rankTeams(vec, weights);
+
+  if (compare) {
+    const eqRank = rankTeams(vec, [5, 5, 5, 5]);
+    const eqSim = {}, eqPos = {};
+    eqRank.forEach((r, idx) => { eqSim[r.name] = r.sim; eqPos[r.name] = idx; });
+    return (
+      <div style={{ display: "grid", gap: 3 }}>
+        <div style={{ display: "grid", gridTemplateColumns: "18px 1fr 44px 44px 30px", alignItems: "center", gap: 8, padding: "0 8px 4px" }}>
+          <span />
+          <span style={{ ...mono, fontSize: 8.5, letterSpacing: 0.5, color: C.amberDim, textTransform: "uppercase" }}>team</span>
+          <span style={{ ...mono, fontSize: 8.5, letterSpacing: 0.5, color: C.amberDim, textTransform: "uppercase", textAlign: "right" }}>equal</span>
+          <span style={{ ...mono, fontSize: 8.5, letterSpacing: 0.5, color: C.amberDim, textTransform: "uppercase", textAlign: "right" }}>yours</span>
+          <span />
+        </div>
+        {rank.map((r, i) => {
+          const moved = eqPos[r.name] - i;
+          let cue = "·", cueColor = C.chalkDim;
+          if (moved > 0) { cue = `▲${moved}`; cueColor = C.lime; }
+          else if (moved < 0) { cue = `▼${-moved}`; cueColor = "#E06B6B"; }
+          const inChooser = i > 0 && (r.dist - rank[0].dist) < CHOOSER_THRESHOLD;
+          const Row = onPick ? "button" : "div";
+          const rowProps = onPick ? { className: "simrow", title: "Read this club's blurb", onClick: () => onPick(r.name) } : {};
+          return (
+            <Row key={r.name} {...rowProps} style={{ display: "grid", gridTemplateColumns: "18px 1fr 44px 44px 30px", alignItems: "center", gap: 8,
+              width: "100%", textAlign: "left", border: "none", font: "inherit", color: "inherit",
+              padding: "3px 8px", borderRadius: 6,
+              background: i === 0 ? "rgba(240,178,62,.14)" : (inChooser ? "rgba(91,217,138,.07)" : "transparent") }}>
+              <span style={{ ...mono, fontSize: 11, color: C.chalkDim }}>{i + 1}</span>
+              <span style={{ fontSize: 13, color: i === 0 ? C.amber : C.chalk }}>{r.name}</span>
+              <span style={{ ...mono, fontSize: 10.5, color: C.chalkDim, textAlign: "right" }}>{eqSim[r.name].toFixed(2)}</span>
+              <span style={{ ...mono, fontSize: 10.5, color: i === 0 ? C.amber : C.chalk, textAlign: "right" }}>{r.sim.toFixed(2)}</span>
+              <span style={{ ...mono, fontSize: 10, color: cueColor, textAlign: "right" }}>{cue}</span>
+            </Row>
+          );
+        })}
+      </div>
+    );
+  }
+
+  return (
+    <div style={{ display: "grid", gap: 3 }}>
+      {rank.map((r, i) => {
+        let cue = "", cueColor = C.chalkDim;
+        if (started && basePos[r.name] !== undefined) {
+          const delta = basePos[r.name] - i;
+          if (delta > 0) { cue = `▲${delta}`; cueColor = C.lime; }
+          else if (delta < 0) { cue = `▼${-delta}`; cueColor = "#E06B6B"; }
+          else { cue = "·"; }
+        }
+        const gap = i === 0 ? "leader" : `+${(r.dist - rank[0].dist).toFixed(2)}`;
+        const inChooser = i > 0 && (r.dist - rank[0].dist) < CHOOSER_THRESHOLD;
+        const Row = onPick ? "button" : "div";
+        const rowProps = onPick ? { className: "simrow", title: "Jump to this club's blurb", onClick: () => onPick(r.name) } : {};
+        return (
+          <Row key={r.name} {...rowProps} style={{ display: "grid", gridTemplateColumns: "18px 1fr 48px 34px", alignItems: "center", gap: 8,
+            width: "100%", textAlign: "left", border: "none", font: "inherit", color: "inherit",
+            padding: "3px 8px", borderRadius: 6,
+            background: i === 0 ? "rgba(240,178,62,.14)" : (inChooser ? "rgba(91,217,138,.07)" : "transparent") }}>
+            <span style={{ ...mono, fontSize: 11, color: C.chalkDim }}>{i + 1}</span>
+            <span style={{ fontSize: 13, color: i === 0 ? C.amber : C.chalk }}>{r.name}</span>
+            <span style={{ ...mono, fontSize: 10.5, color: C.chalkDim, textAlign: "right" }}>{gap}</span>
+            <span style={{ ...mono, fontSize: 10.5, color: cueColor, textAlign: "right" }}>{cue}</span>
+          </Row>
+        );
+      })}
+    </div>
+  );
+}
+
+function Badge({ name, size = 92 }) {
+  const file = BADGE[name];
+  const initials = name.split(" ").map((w) => w[0]).join("").slice(0, 3).toUpperCase();
+  return (
+    <div style={{
+      width: size, height: size, flex: "0 0 auto", borderRadius: 14,
+      background: `linear-gradient(160deg, ${C.pitch2}, #071410)`, border: `1.5px solid ${C.line}`,
+      display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden",
+      boxShadow: `inset 0 1px 0 rgba(255,255,255,.04), 0 8px 24px ${C.shadow}`,
+    }}>
+      {file ? (
+        <img src={`/images/${encodeURIComponent(file)}`} alt={name}
+          style={{ width: size * 0.74, height: size * 0.74, objectFit: "contain" }}
+          onError={(e) => {
+            e.target.style.display = "none";
+            e.target.nextSibling.style.display = "block";
+          }} />
+      ) : null}
+      <span style={{ ...disp, fontWeight: 900, fontSize: size * 0.32, color: C.amber, letterSpacing: 1,
+        display: file ? "none" : "block" }}>{initials}</span>
+    </div>
+  );
+}
+
+// Share a completed quiz. url is minted server-side (POST /quizzes -> /q/:slug).
+function ShareCard({ url, err, pick }) {
+  const [note, setNote] = useState("");
+
+  function copy() {
+    if (!url) return;
+    const done = () => { setNote("Link copied"); };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(url).then(done, () => setNote("Copy failed — select the link and copy"));
+    } else {
+      setNote("Select the link and copy");
+    }
+  }
+
+  function share() {
+    if (!url) return;
+    if (navigator.share) {
+      navigator.share({ title: document.title, text: `I should support ${pick}.`, url }).catch(() => {});
+    } else {
+      copy();
+    }
+  }
+
+  return (
+    <div style={{ margin: "2px 0 26px", padding: 16, borderRadius: 12, border: `1px solid ${C.line}`, background: "rgba(0,0,0,.2)" }}>
+      <div style={{ ...mono, fontSize: 10, letterSpacing: 1, color: C.amberDim, textTransform: "uppercase", marginBottom: 10 }}>
+        Share your result
+      </div>
+      {err ? (
+        <div style={{ ...mono, fontSize: 12, color: "#E06B6B" }}>Couldn't save a share link. You can still screenshot your result.</div>
+      ) : (
+        <div>
+          <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+            <input readOnly value={url || "Saving your result…"} onFocus={(e) => e.target.select()}
+              aria-label="Shareable link to your result"
+              style={{ flex: "1 1 200px", minWidth: 0, ...mono, fontSize: 13, color: C.chalk, background: C.pitch,
+                border: `1px solid ${C.line}`, borderRadius: 8, padding: "10px 12px" }} />
+            <button onClick={copy} disabled={!url} style={{
+              ...disp, fontWeight: 800, fontSize: 14, textTransform: "uppercase",
+              background: "transparent", color: url ? C.amber : C.amberDim, border: `1px solid ${url ? C.amber : C.line}`,
+              borderRadius: 8, padding: "10px 16px", minHeight: 44,
+            }}>Copy link</button>
+            <button onClick={share} disabled={!url} style={{
+              ...disp, fontWeight: 800, fontSize: 14, textTransform: "uppercase",
+              background: url ? C.amber : "transparent", color: url ? "#1a1305" : C.amberDim,
+              border: `1px solid ${url ? C.amber : C.line}`, borderRadius: 8, padding: "10px 16px", minHeight: 44,
+            }}>Share ↗</button>
+          </div>
+          <div aria-live="polite" style={{ ...mono, fontSize: 11, color: C.lime, marginTop: 8, minHeight: "1em" }}>{note}</div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function App() {
+  const [stage, setStage] = useState("intro");
+  const [qi, setQi] = useState(0);
+  const [answers, setAnswers] = useState(Q.map(() => null));
+  const [weights, setWeights] = useState(SLIDERS.map(() => 5));
+  const [coach, setCoach] = useState(COACH_ENABLED);
+  const [result, setResult] = useState(null);
+  const [chosen, setChosen] = useState(0);
+  const [override, setOverride] = useState(null);
+  const [basePos, setBasePos] = useState({});
+  const [history, setHistory] = useState([]);
+  const [shareUrl, setShareUrl] = useState(null);
+  const [shareErr, setShareErr] = useState(false);
+
+  const vec = scoreAxes(answers);
+
+  function chooseOption(oi) {
+    const na = answers.slice();
+    na[qi] = oi;
+    setHistory((h) => [...h, { qi, answers: answers.slice(), basePos: { ...basePos } }]);
+    if (Object.keys(basePos).length === 0) {
+      const base = {};
+      rankTeams(scoreAxes(na), SLIDERS.map(() => 5)).forEach((r, idx) => { base[r.name] = idx; });
+      setBasePos(base);
+    }
+    setAnswers(na);
+    if (qi < Q.length - 1) setQi(qi + 1);
+    else setStage("sliders");
+  }
+
+  // Persist the completed quiz and surface its shareable slug.
+  function persist(finalAnswers, finalWeights) {
+    setShareUrl(null); setShareErr(false);
+    fetch("/quizzes", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ answers: finalAnswers, weights: finalWeights }),
+    })
+      .then((r) => (r.ok ? r.json() : Promise.reject(r.status)))
+      .then((d) => setShareUrl(d.url))
+      .catch(() => setShareErr(true));
+  }
+
+  function finish() {
+    const rank = rankTeams(scoreAxes(answers), weights);
+    const candidates = rank.filter((r, idx) => idx === 0 || r.dist - rank[0].dist < CHOOSER_THRESHOLD).slice(0, MAX_CHOICES);
+    setResult({ rank, candidates, gap: rank[1].dist - rank[0].dist });
+    setChosen(0);
+    setOverride(null);
+    setStage("result");
+    persist(answers, weights);
+  }
+
+  function showTeam(name) {
+    const rank = rankTeams(scoreAxes(answers), weights);
+    const candidates = rank.filter((r, idx) => idx === 0 || r.dist - rank[0].dist < CHOOSER_THRESHOLD).slice(0, MAX_CHOICES);
+    setResult({ rank, candidates, gap: rank[1].dist - rank[0].dist });
+    setChosen(0);
+    setOverride(name);
+    setStage("result");
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  function goBack() {
+    if (stage === "result") { setOverride(null); setStage("sliders"); return; }
+    if (stage === "sliders") { setStage("quiz"); setQi(Q.length - 1); return; }
+    if (history.length === 0) return;
+    const prev = history[history.length - 1];
+    setHistory((h) => h.slice(0, -1));
+    setAnswers(prev.answers); setBasePos(prev.basePos); setQi(prev.qi);
+  }
+
+  function reset() {
+    setStage("intro"); setQi(0); setAnswers(Q.map(() => null));
+    setWeights(SLIDERS.map(() => 5)); setResult(null); setChosen(0); setOverride(null); setBasePos({}); setHistory([]);
+    setShareUrl(null); setShareErr(false);
+  }
+
+  const shell = {
+    minHeight: "100vh", background: `radial-gradient(1200px 600px at 50% -10%, ${C.pitch2}, ${C.pitch} 60%)`,
+    color: C.chalk, ...body, padding: "28px 18px 64px", backgroundAttachment: "fixed",
+  };
+
+  return (
+    <div style={shell}>
+      <style>{FONTS}</style>
+      <style>{`
+        * { box-sizing: border-box; }
+        button { cursor: pointer; font-family: inherit; }
+        @media (prefers-reduced-motion: reduce){ * { transition:none !important; animation:none !important; } }
+        .qbtn:hover{ border-color:${C.amber} !important; transform:translateY(-1px); }
+        .qbtn:focus-visible{ outline:2px solid ${C.lime}; outline-offset:2px; }
+        .altchip:hover{ border-color:${C.amber} !important; }
+        .simrow{ cursor:pointer; }
+        .simrow:hover{ outline:1px solid rgba(240,178,62,.5); }
+        .simrow:focus-visible{ outline:2px solid ${C.lime}; outline-offset:1px; }
+        input[type=range]{ -webkit-appearance:none; appearance:none; height:6px; border-radius:999px;
+          background:${C.line}; outline:none; }
+        input[type=range]::-webkit-slider-thumb{ -webkit-appearance:none; appearance:none; width:20px; height:20px;
+          border-radius:50%; background:${C.amber}; border:2px solid #1a1305; cursor:pointer; }
+        input[type=range]::-moz-range-thumb{ width:20px; height:20px; border-radius:50%; background:${C.amber};
+          border:2px solid #1a1305; cursor:pointer; }
+        input[type=range]:focus-visible{ outline:2px solid ${C.lime}; outline-offset:4px; }
+      `}</style>
+
+      <div style={{ maxWidth: 620, margin: "0 auto" }}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 22 }}>
+          <div style={{ display: "flex", gap: 8 }}>
+            {stage !== "intro" && (
+              <button onClick={reset} title="Restart from the first question" style={{
+                ...mono, fontSize: 10, letterSpacing: 1, textTransform: "uppercase",
+                background: "transparent", color: C.chalkDim,
+                border: `1px solid ${C.line}`, borderRadius: 999, padding: "5px 10px",
+              }}>↺ Restart</button>
+            )}
+            {COACH_ENABLED && (
+              <button onClick={() => setCoach((c) => !c)} style={{
+                ...mono, fontSize: 10, letterSpacing: 1, textTransform: "uppercase",
+                background: coach ? C.amber : "transparent", color: coach ? "#1a1305" : C.amberDim,
+                border: `1px solid ${coach ? C.amber : C.amberDim}`, borderRadius: 999, padding: "5px 10px",
+              }}>Coach's view</button>
+            )}
+          </div>
+        </div>
+
+        {stage === "intro" && (
+          <div>
+            <h1 style={{ ...disp, fontWeight: 900, fontSize: 52, lineHeight: 0.95, margin: "0 0 14px", letterSpacing: -1 }}>
+              FIND THE CLUB<br />YOU SHOULD<br /><span style={{ color: C.amber }}>SUPPORT.</span>
+            </h1>
+            <p style={{ color: C.chalkDim, fontSize: 16, lineHeight: 1.5, maxWidth: 470, margin: "0 0 26px" }}>
+              Still searching for your team? Take a few minutes to answer questions about your daily life, your values, and the little things that get under your skin. Tell us what matters most, and we'll find the Premier League club that fits you—flaws and all.
+            </p>
+            <button onClick={() => setStage("quiz")} style={{
+              ...disp, fontWeight: 800, fontSize: 17, letterSpacing: 0.5, textTransform: "uppercase",
+              background: C.amber, color: "#1a1305", border: "none", borderRadius: 10, padding: "14px 30px", boxShadow: `0 8px 24px ${C.shadow}`,
+            }}>Kick off →</button>
+          </div>
+        )}
+
+        {stage === "quiz" && (
+          <div>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
+              <div style={{ display: "flex", alignItems: "baseline", gap: 12 }}>
+                {(qi > 0 || history.length > 0) && (
+                  <button onClick={goBack} style={{
+                    ...mono, fontSize: 11, letterSpacing: 0.5, textTransform: "uppercase",
+                    background: "transparent", color: C.chalkDim, border: "none", padding: 0,
+                  }}>← Back</button>
+                )}
+                <span style={{ ...mono, fontSize: 12, color: C.amber, letterSpacing: 1 }}>{String(qi + 1).padStart(2, "0")} <span style={{ color: C.amberDim }}>/ {Q.length}</span></span>
+              </div>
+              <span style={{ ...mono, fontSize: 11, color: C.chalkDim }}>{Math.round((qi / Q.length) * 100)}% played</span>
+            </div>
+            <div style={{ height: 4, background: "#0c2417", borderRadius: 999, marginBottom: 24, overflow: "hidden", border: `1px solid ${C.line}` }}>
+              <div style={{ width: `${(qi / Q.length) * 100}%`, height: "100%", background: C.lime, transition: "width .4s ease" }} />
+            </div>
+            <h2 style={{ ...disp, fontWeight: 800, fontSize: 25, lineHeight: 1.14, margin: "0 0 20px" }}>{Q[qi].t}</h2>
+            {coach && (
+              <div style={{ ...mono, fontSize: 10.5, letterSpacing: 0.5, color: C.amberDim, margin: "-10px 0 16px", display: "flex", gap: 10, flexWrap: "wrap" }}>
+                <span style={{ textTransform: "uppercase", letterSpacing: 1 }}>Loadings:</span>
+                {AXES.map((ax, k) => (
+                  <span key={ax} style={{ color: Q[qi].load[k] > 0 ? C.amber : "#3a5140" }}>
+                    {ax[0]}·{Q[qi].load[k]}
+                  </span>
+                ))}
+              </div>
+            )}
+            <div style={{ display: "grid", gap: 10 }}>
+              {Q[qi].a.map((opt, i) => (
+                <button key={i} className="qbtn" onClick={() => chooseOption(i)} style={{
+                  textAlign: "left", background: answers[qi] === i ? "rgba(240,178,62,.12)" : C.pitch2,
+                  color: C.chalk, border: `1px solid ${answers[qi] === i ? C.amber : C.line}`,
+                  borderRadius: 10, padding: "15px 16px", fontSize: 15.5, lineHeight: 1.35,
+                  transition: "border-color .15s, transform .15s", display: "flex", gap: 12, alignItems: "flex-start",
+                }}>
+                  <span style={{ ...mono, fontSize: 13, color: C.amber, flex: "0 0 auto", marginTop: 1 }}>{"abcd"[i]}</span>
+                  <span style={{ flex: 1 }}>{opt.l}</span>
+                  {coach && (
+                    <span style={{ ...mono, fontSize: 10.5, color: C.chalkDim, flex: "0 0 auto", marginTop: 2, textAlign: "right", whiteSpace: "nowrap" }}>
+                      {AXES.map((ax, k) => (
+                        Q[qi].load[k] > 0
+                          ? <span key={ax} style={{ marginLeft: 7, color: opt.v[k] == null ? "#3a5140" : C.chalk }}>
+                              {ax[0]}{opt.v[k] == null ? "—" : opt.v[k]}
+                            </span>
+                          : null
+                      ))}
+                    </span>
+                  )}
+                </button>
+              ))}
+            </div>
+            {coach && (
+              <div style={{ marginTop: 24, padding: 14, borderRadius: 10, border: `1px dashed ${C.amberDim}`, background: "rgba(0,0,0,.2)" }}>
+                <div style={{ ...mono, fontSize: 10, letterSpacing: 1, color: C.amberDim, textTransform: "uppercase", marginBottom: 10, display: "flex", justifyContent: "space-between" }}>
+                  <span>Live ranking · equal weights</span>
+                  <span style={{ color: C.chalkDim }}>gap · total move</span>
+                </div>
+                <LiveRanking vec={vec} weights={SLIDERS.map(() => 5)} basePos={basePos} started={history.length > 0} onPick={showTeam} />
+                <div style={{ ...mono, fontSize: 10, letterSpacing: 1, color: C.amberDim, textTransform: "uppercase", margin: "16px 0 10px" }}>Live trait board</div>
+                <TraitBoard vec={vec} />
+              </div>
+            )}
+          </div>
+        )}
+
+        {stage === "sliders" && (
+          <div>
+            <button onClick={goBack} style={{
+              ...mono, fontSize: 11, letterSpacing: 0.5, textTransform: "uppercase",
+              background: "transparent", color: C.chalkDim, border: "none", padding: 0, marginBottom: 16,
+            }}>← Back</button>
+            <div style={{ ...mono, fontSize: 12, color: C.lime, letterSpacing: 1, marginBottom: 10 }}>Last bit · what matters to you</div>
+            <h2 style={{ ...disp, fontWeight: 800, fontSize: 27, lineHeight: 1.05, margin: "0 0 8px" }}>How much does each thing count?</h2>
+            <p style={{ color: C.chalkDim, fontSize: 14.5, lineHeight: 1.5, margin: "0 0 26px" }}>
+              These are relative priorities — sliding everything to the top is the same as leaving everything in the middle. Only the balance between them changes your match.
+            </p>
+            <div style={{ display: "grid", gap: 22 }}>
+              {SLIDERS.map((s, i) => (
+                <div key={s.ax}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 8 }}>
+                    <span style={{ ...disp, fontWeight: 700, fontSize: 16 }}>{s.q}</span>
+                    <span style={{ ...mono, fontSize: 13, color: C.amber }}>{weights[i]}</span>
+                  </div>
+                  <input type="range" min="1" max="10" value={weights[i]} style={{ width: "100%" }}
+                    onChange={(e) => { const w = weights.slice(); w[i] = +e.target.value; setWeights(w); }} />
+                  <div style={{ display: "flex", justifyContent: "space-between", marginTop: 5 }}>
+                    <span style={{ ...mono, fontSize: 10, color: C.chalkDim }}>{s.lo}</span>
+                    <span style={{ ...mono, fontSize: 10, color: C.chalkDim, textAlign: "right" }}>{s.hi}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+            {coach && (
+              <div style={{ marginTop: 26, padding: 16, borderRadius: 12, border: `1px solid ${C.line}`, background: "rgba(0,0,0,.2)" }}>
+                <div style={{ ...mono, fontSize: 10, letterSpacing: 1, color: C.amberDim, textTransform: "uppercase", marginBottom: 12 }}>Your four attributes</div>
+                <TraitBoard vec={vec} />
+                <div style={{ ...mono, fontSize: 10, letterSpacing: 1, color: C.amberDim, textTransform: "uppercase", margin: "18px 0 4px", display: "flex", justifyContent: "space-between" }}>
+                  <span>Ranking · equal vs your weights</span>
+                  <span style={{ color: C.chalkDim }}>▲▼ move vs equal</span>
+                </div>
+                <LiveRanking vec={vec} weights={weights} compare={true} onPick={showTeam} />
+              </div>
+            )}
+            <button onClick={finish} style={{
+              ...disp, fontWeight: 800, fontSize: 17, letterSpacing: 0.5, textTransform: "uppercase", marginTop: 26,
+              background: C.amber, color: "#1a1305", border: "none", borderRadius: 10, padding: "14px 30px", boxShadow: `0 8px 24px ${C.shadow}`,
+            }}>Show my club →</button>
+          </div>
+        )}
+
+        {stage === "result" && result && (() => {
+          const pick = (override && result.rank.find((r) => r.name === override)) || result.candidates[chosen];
+          const others = result.candidates.filter((_, i) => i !== chosen);
+          const hasAlts = result.candidates.length > 1;
+          return (
+            <div>
+              <div style={{ ...mono, fontSize: 12, color: C.lime, letterSpacing: 1, marginBottom: 14 }}>
+                {hasAlts ? "Full time · it's close — take your pick" : "Full time · your club"}
+              </div>
+              <div style={{ display: "flex", gap: 18, alignItems: "center", marginBottom: 18 }}>
+                <Badge name={pick.name} />
+                <h1 style={{ ...disp, fontWeight: 900, fontSize: 38, lineHeight: 0.95, margin: 0, letterSpacing: -1 }}>{pick.name}</h1>
+              </div>
+              <p style={{ fontSize: 17, lineHeight: 1.5, color: C.chalk, margin: "0 0 24px" }}>{FLAVOR[pick.name]}</p>
+
+              <ShareCard url={shareUrl} err={shareErr} pick={pick.name} />
+
+              {hasAlts && (
+                <div style={{ marginBottom: 26 }}>
+                  <div style={{ ...mono, fontSize: 11, letterSpacing: 1, color: C.chalkDim, textTransform: "uppercase", marginBottom: 10 }}>Or maybe you're more…</div>
+                  <div style={{ display: "grid", gap: 8 }}>
+                    {others.map((o) => (
+                      <button key={o.name} className="altchip" onClick={() => { setChosen(result.candidates.indexOf(o)); setOverride(null); }} style={{
+                        textAlign: "left", background: C.pitch2, color: C.chalk, border: `1px solid ${C.line}`,
+                        borderRadius: 10, padding: "12px 14px", transition: "border-color .15s", display: "flex", gap: 12, alignItems: "center",
+                      }}>
+                        <Badge name={o.name} size={40} />
+                        <span>
+                          <span style={{ ...disp, fontWeight: 800, fontSize: 16 }}>{o.name}</span>
+                          <span style={{ display: "block", color: C.chalkDim, fontSize: 12.5, lineHeight: 1.3, marginTop: 2 }}>
+                            {FLAVOR[o.name].split(". ")[0]}.
+                          </span>
+                        </span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              <div style={{ display: "flex", gap: 10 }}>
+                <button onClick={goBack} style={{
+                  ...disp, fontWeight: 800, fontSize: 15, textTransform: "uppercase",
+                  background: "transparent", color: C.chalkDim, border: `1px solid ${C.line}`, borderRadius: 10, padding: "12px 24px",
+                }}>← Adjust dials</button>
+                <button onClick={reset} style={{
+                  ...disp, fontWeight: 800, fontSize: 15, textTransform: "uppercase",
+                  background: "transparent", color: C.amber, border: `1px solid ${C.amber}`, borderRadius: 10, padding: "12px 24px",
+                }}>Play again ↺</button>
+              </div>
+
+              {coach && (
+                <div style={{ marginTop: 30, padding: 16, borderRadius: 12, border: `1px dashed ${C.amberDim}`, background: "rgba(0,0,0,.22)" }}>
+                  <div style={{ ...mono, fontSize: 10, letterSpacing: 1, color: C.amberDim, textTransform: "uppercase", marginBottom: 12 }}>
+                    Similarity table · top-2 gap {result.gap.toFixed(3)} · {result.candidates.length} candidate{result.candidates.length > 1 ? "s" : ""} within {CHOOSER_THRESHOLD} · tap a team to read its blurb
+                  </div>
+                  <div style={{ display: "grid", gap: 3, marginBottom: 18 }}>
+                    {result.rank.map((r, i) => {
+                      const inPool = result.candidates.some((c) => c.name === r.name);
+                      const isPick = r.name === pick.name;
+                      return (
+                        <button key={r.name} className="simrow" title="Read this club's blurb"
+                          onClick={() => { setOverride(r.name); window.scrollTo({ top: 0, behavior: "smooth" }); }}
+                          style={{ display: "grid", gridTemplateColumns: "22px 1fr 56px", alignItems: "center", gap: 8, width: "100%",
+                          textAlign: "left", border: "none", padding: "4px 8px", borderRadius: 6,
+                          background: isPick ? "rgba(240,178,62,.24)" : (inPool ? "rgba(240,178,62,.12)" : "transparent") }}>
+                          <span style={{ ...mono, fontSize: 11, color: C.chalkDim }}>{i + 1}</span>
+                          <span style={{ fontSize: 13.5, color: (isPick || inPool) ? C.amber : C.chalk }}>{r.name}</span>
+                          <span style={{ ...mono, fontSize: 11, color: C.chalkDim, textAlign: "right" }}>{r.sim.toFixed(3)}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                  <div style={{ ...mono, fontSize: 10, letterSpacing: 1, color: C.amberDim, textTransform: "uppercase", marginBottom: 10 }}>Your vector · weights [{weights.join(", ")}]</div>
+                  <TraitBoard vec={vec} />
+                </div>
+              )}
+            </div>
+          );
+        })()}
+      </div>
+    </div>
+  );
+}
+
+const root = ReactDOM.createRoot(document.getElementById("root"));
+root.render(<App />);
+</script>
+<script>
+  (function () {
+    function fail(err) {
+      document.getElementById("root").innerHTML =
+        '<div style="color:#EDF1EA;font-family:monospace;padding:40px;max-width:600px;margin:0 auto;">' +
+        '<b>Something went wrong loading the quiz.</b><br/><br/>' +
+        'This page needs an internet connection (it loads React from a CDN). ' +
+        'If you are online and still see this, try a hard refresh.<br/><br/>' +
+        '<span style="color:#9DB0A2;font-size:12px;">' + String(err) + '</span></div>';
+      console.error(err);
+    }
+    function boot() {
+      if (typeof Babel === "undefined" || typeof React === "undefined" || typeof ReactDOM === "undefined") {
+        return fail(new Error("Libraries did not load (React/ReactDOM/Babel). Check your connection or try again."));
+      }
+      try {
+        var src = document.getElementById("app-src").textContent;
+        var out = Babel.transform(src, { presets: [["react", { runtime: "classic" }]] }).code;
+        (0, eval)(out);
+      } catch (err) { fail(err); }
+    }
+    if (document.readyState === "complete") { boot(); }
+    else { window.addEventListener("load", boot); }
+  })();
+</script>
