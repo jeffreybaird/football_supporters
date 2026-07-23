@@ -6,7 +6,8 @@ require "securerandom"
 module Quiz
   # Persist a completed quiz and mint its shareable slug.
   # Validates the submitted answers/weights, resolves the winning club with
-  # Quiz::Score, and stores it. Returns a tagged Result.
+  # Quiz::Score against the given league's teams, and stores it. Returns a tagged
+  # Result.
   class Create
     include Dry::Monads[:result]
 
@@ -14,14 +15,19 @@ module Quiz
 
     def self.call(...) = new.call(...)
 
-    def call(attrs)
+    def call(league:, attrs:)
+      return Failure([:not_found]) if league.nil?
+
       answers = coerce_answers(attrs["answers"])
       weights = coerce_weights(attrs["weights"])
       errors = validate(answers, weights)
       return Failure([:validation, errors]) unless errors.empty?
 
-      pick = Score.call(answers:, weights:).pick
-      record = insert_with_slug(answers:, weights:, pick:)
+      teams = league.scored_teams
+      return Failure([:validation, { league: "has no teams" }]) if teams.empty?
+
+      pick = Score.call(teams:, answers:, weights:).pick
+      record = insert_with_slug(league:, answers:, weights:, pick: pick.name)
       Success(record)
     rescue Sequel::UniqueConstraintViolation
       Failure([:conflict])
@@ -33,11 +39,11 @@ module Quiz
 
     # Persist, retrying on the astronomically unlikely slug collision. The unique
     # index is the real guard; SQLite's single writer serializes the insert.
-    def insert_with_slug(answers:, weights:, pick:)
+    def insert_with_slug(league:, answers:, weights:, pick:)
       attempts = 0
       begin
         attempts += 1
-        QuizResult.create(slug: SecureRandom.urlsafe_base64(8), answers:, weights:, pick:)
+        QuizResult.create(slug: SecureRandom.urlsafe_base64(8), league_id: league.id, answers:, weights:, pick:)
       rescue Sequel::UniqueConstraintViolation
         retry if attempts < MAX_SLUG_ATTEMPTS
         raise

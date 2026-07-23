@@ -17,6 +17,13 @@ RSpec.describe QuizResult do
     expect(reloaded.weights).to eq([5, 5, 5, 5])
   end
 
+  it "belongs to a league" do
+    league = League.default
+    record = build_result(league_id: league.id).tap(&:save)
+
+    expect(record.league).to eq(league)
+  end
+
   it "requires slug and pick" do
     expect(build_result(slug: nil)).not_to be_valid
     expect(build_result(pick: nil)).not_to be_valid

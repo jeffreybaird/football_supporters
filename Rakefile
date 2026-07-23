@@ -17,6 +17,13 @@ namespace :db do
     current = Sequel::Migrator.new(DB, "db/migrate").current
     Sequel::Migrator.run(DB, "db/migrate", target: [current - 1, 0].max)
   end
+
+  desc "Load seed data (idempotent — safe to re-run)"
+  task :seed do
+    require_relative "config/environment"
+    Quiz::Seed.call
+    puts "seeded: #{DB.opts[:database]}"
+  end
 end
 
 begin

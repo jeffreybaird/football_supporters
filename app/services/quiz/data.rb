@@ -1,13 +1,12 @@
 # frozen_string_literal: true
 
 module Quiz
-  # Single source of truth for the recommender's static dataset (2026-27 season).
-  # The Ruby scorer (Quiz::Score) reads these structures directly; the browser
-  # quiz reads the very same data as JSON via Quiz::Data.as_json, so the client
-  # and server can never drift. String keys throughout so the JSON shape matches
-  # what the React app expects verbatim.
+  # The questionnaire and scoring model — league-agnostic. Team scores and blurbs
+  # now live in the database (the League/Team models); this holds only the fixed
+  # bits shared across every league: the four axes, the questions and their
+  # loadings, the weight sliders, and the matching constants.
   #
-  # 4-coordinate model per team/answer: [Vibe, Play, Ethics, Fanbase].
+  # 4-coordinate model per answer/team: [Vibe, Play, Ethics, Fanbase].
   module Data
     module_function
 
@@ -20,31 +19,6 @@ module Quiz
     # the team centroid before matching so moderate answers stop collapsing onto
     # the centre team. 1 = off.
     AMPLIFY = 2.5
-
-    TEAMS = {
-      "Man City"       => [10.0, 5, 2, 3],
-      "Liverpool"      => [9.6, 9, 6, 7],
-      "Arsenal"        => [10.0, 5, 5, 3],
-      "Man United"     => [10.0, 6, 4, 8],
-      "Chelsea"        => [8.6, 8, 3, 4],
-      "Tottenham"      => [7.7, 10, 5, 5],
-      "Newcastle"      => [6.3, 8, 1, 10],
-      "Aston Villa"    => [4.1, 6, 4, 6],
-      "Brighton"       => [1.9, 6, 8, 1],
-      "Crystal Palace" => [2.7, 5, 7, 5],
-      "Nott'm Forest"  => [3.6, 3, 3, 6],
-      "Everton"        => [4.1, 2, 5, 8],
-      "Fulham"         => [1.8, 4, 6, 0],
-      "Brentford"      => [1.4, 5, 8, 2],
-      "Bournemouth"    => [1.4, 9, 7, 1],
-      "Sunderland"     => [1.4, 5, 6, 9],
-      "Leeds"          => [4.1, 8, 6, 8],
-      "Ipswich"        => [0.5, 7, 8, 5],
-      "Coventry"       => [0.0, 7, 7, 6],
-      "Hull"           => [0.0, 4, 4, 5],
-    }.freeze
-
-    TEAM_NAMES = TEAMS.keys.freeze
 
     Q = [
       { "id" => "V2", "t" => "A game's on with no team of yours involved. You want", "load" => [0.9, 0.5, 0, 0.0], "a" => [
@@ -133,73 +107,5 @@ module Quiz
       { "ax" => "Ethics",  "q" => "How much does who owns the club, and how they behave, matter?", "lo" => "Doesn't matter", "hi" => "Matters a lot" },
       { "ax" => "Fanbase", "q" => "How much does fitting in with the fanbase matter?",             "lo" => "Doesn't matter", "hi" => "Matters a lot" },
     ].freeze
-
-    FLAVOR = {
-      "Man City" => "Crowded beneath their blue banners, the voices of Manchester City fans echo through The Etihad. The lean years are a distant memory, and their newer fans don't remember them. Their team has been transformed by Abu Dhabi money and is unrecognizable compared to its fallow history. Some call it sports washing, others, glory-hunting. For City supporters, it's loyalty rewarded, no matter what outsiders say.",
-      "Chelsea" => "Stamford Bridge expects to win. That's the whole culture: big signings, quick sackings, trophies or else. The rest of the league finds this insufferable and says so at length. Stamford Bridge doesn't especially care.",
-      "Newcastle" => "Ask a Newcastle fan when they last won a major trophy and watch them not care about the answer. St James' Park sits right in the middle of the city and on matchday the whole place is black and white. No silverware for decades, sold out every week anyway. That's not hope so much as habit, and they wouldn't trade it. Just don't ask them about where all that money is coming from.",
-      "Man United" => "Every August, United fans decide this is the year. It usually isn't. Most of that enormous trophy count happened under one manager who left in 2013, which gets mentioned in pubs and then argued about for an hour. They fill Old Trafford regardless.",
-      "Arsenal" => "Arsenal fans spent years getting laughed at for “banter era” collapses, so the title means more than the trophy itself. It's vindication. Of course, being Arsenal fans, they've already moved on to arguing about it online. Every dropped point still gets a fifteen-minute video essay by Tuesday.",
-      "Liverpool" => "Every fanbase claims their atmosphere is special. At Anfield it's occasionally, annoyingly, true. The European nights are the thing: Kop in full voice, some doomed away side conceding twice in five minutes. Rival fans find the whole “This Means More” act insufferable, and Liverpool fans know that, and don't care. The self-mythologizing is part of the club. So is the fact that, every so often, the myth actually delivers. When you support Liverpool, You'll Never Walk Alone.",
-      "Tottenham" => "Spurs won a European trophy and nearly went down in the same season, Spursy. That is the life of a Spurs supporter: It'll be brilliant for a while, then it'll fall apart in the most creative way possible. They keep coming back anyway, partly out of loyalty, partly because when it clicks, it's genuinely the best football in London. They'd rather go down in a blaze of glory than watch Conte grind out a 1-0 win.",
-      "Aston Villa" => "Villa won the European Cup in 1982 and spent forty years being reminded it was a while ago. The Holte End remembers anyway. Now that the club's good again, it feels less like a surprise and more like things going back to normal.",
-      "Everton" => "The People's Club, and they're not joking. Everton fans have spent years convinced the whole system is against them, and to be fair, the points deductions didn't help the paranoia. Decades of grievance and free-flowing misery, and the crowd wouldn't have had it any other way.",
-      "Crystal Palace" => "The Holmesdale end at Selhurst is the loudest thing in south London on a derby day. Palace went a century without a major trophy, won the FA Cup in 2025, and South London hasn't shut up since. Fair enough.",
-      "Fulham" => "You walk to Craven Cottage along the river past people having a nice time. Nobody here is going to ruin their weekend over a defeat. It's the least stressful football in London, and there's a decent argument that's the correct way to do it.",
-      "Brighton" => "Thirty years ago Brighton was ground-sharing in Gillingham and nearly went under. Now they sell their best player every summer, buy someone nobody's heard of, and finish higher. They were ground-sharing in Gillingham and nearly went under; now it is a properly run club, and that's rarer than it should be.",
-      "Nott'm Forest" => "Two European Cups. Forest fans will get that in within the first minute of any football conversation, and fair enough, because Clough winning back-to-back with Nottingham Forest is still one of the maddest things that's ever happened in the sport. The tricky part is that everything since has to live next to it. The fans don't seem to mind. They know what they've got.",
-      "Bournemouth" => "At Bournemouth, fans know their club is small, and that's part of the charm. There's no weighty history—just the thrill of being part of something growing, one match at a time.",
-      "Leeds" => "Elland Road on a night game is genuinely intimidating, and the fans know it. Leeds spent sixteen years outside the top flight and the crowds barely dipped, which is either loyalty or madness depending on who you ask. Half of Yorkshire seems to support them. The other half hates them, and Leeds fans like it that way.",
-      "Brentford" => "At Brentford, the story is one of innovation—data, grit, and a refusal to follow the old rules. Once the underdog, now a club with its own identity, Brentford has earned respect one result at a time.",
-      "Sunderland" => "Sunderland spent years in League One playing in front of 30,000 people, which is either magnificent or deranged depending on your view of the north east. The Netflix documentary made the suffering famous; the fans lived it. Things are looking up now, and Wearside is cautiously letting itself believe again. Cautiously.",
-      "Ipswich" => "Portman Road, a quiet part of Suffolk, and the only club anyone there cares about. Went down, came straight back, didn't make much of either. Nobody's chasing headlines, and the fans seem to prefer it like that.",
-      "Coventry" => "Coventry City fans have weathered exile, heartbreak, and more. Still, the singing never stopped. For the Sky Blues, it's about loving the club, not chasing silverware.",
-      "Hull" => "Hull is the club nobody thinks about, which suits the fans fine. It's a long way from everywhere, the glamour ties are rare, and the ownership sagas have tested everyone's patience. People still turn up. There's no bandwagon to jump on at Hull, so everyone in the ground actually means it.",
-    }.freeze
-
-    # team name -> crest file in public/images/ (view falls back to initials if missing)
-    BADGE = {
-      "Man City"       => "8456-Man City.png",
-      "Liverpool"      => "8650-Liverpool.png",
-      "Arsenal"        => "9825-Arsenal.png",
-      "Man United"     => "10260-Man United.png",
-      "Chelsea"        => "8455-Chelsea.png",
-      "Tottenham"      => "8586-Tottenham.png",
-      "Newcastle"      => "10261-Newcastle.png",
-      "Aston Villa"    => "10252-Aston Villa.png",
-      "Brighton"       => "10204-Brighton.png",
-      "Crystal Palace" => "9826-Crystal Palace.png",
-      "Nott'm Forest"  => "10203-Nottm Forest.png",
-      "Everton"        => "8668-Everton.png",
-      "Fulham"         => "9879-Fulham.png",
-      "Brentford"      => "9937-Brentford.png",
-      "Bournemouth"    => "8678-Bournemouth.png",
-      "Sunderland"     => "8472-Sunderland.png",
-      "Leeds"          => "8463-Leeds.png",
-      "Ipswich"        => "9902-Ipswich.png",
-      "Coventry"       => "8669-Coventry.png",
-      "Hull"           => "8667-Hull.png",
-    }.freeze
-
-    # per-axis mean of every team vector — the centre of the team cloud
-    CENTROID = AXES.each_index.map do |k|
-      TEAMS.values.sum { |vec| vec[k] } / TEAMS.length.to_f
-    end.freeze
-
-    # The exact payload the browser quiz consumes, so client and server share one
-    # dataset. Shape mirrors the original standalone app's literals.
-    def as_json
-      {
-        "AXES"              => AXES,
-        "TEAMS"             => TEAMS,
-        "Q"                 => Q,
-        "SLIDERS"           => SLIDERS,
-        "FLAVOR"            => FLAVOR,
-        "BADGE"             => BADGE,
-        "CHOOSER_THRESHOLD" => CHOOSER_THRESHOLD,
-        "MAX_CHOICES"       => MAX_CHOICES,
-        "AMPLIFY"           => AMPLIFY,
-      }
-    end
   end
 end

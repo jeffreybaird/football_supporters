@@ -35,22 +35,17 @@ class App < Sinatra::Base
       end
     end
 
-    def flavor_for(name) = Quiz::Data::FLAVOR[name]
-
-    def badge_file(name) = Quiz::Data::BADGE[name]
-
     def team_initials(name)
       name.split.map { |word| word[0] }.join.slice(0, 3).upcase
     end
 
-    # First sentence of a clubs blurb — used for alternates and OG descriptions.
-    def short_blurb(name)
-      "#{flavor_for(name).split(". ").first}."
+    # First sentence of a blurb — used for alternates and OG descriptions.
+    def first_sentence(text)
+      "#{text.split('. ').first}."
     end
 
-    # Absolute, URL-encoded crest path for OG images (nil when no crest on file).
-    def badge_url(name)
-      file = badge_file(name)
+    # Absolute, URL-encoded crest path (nil when the team has no crest on file).
+    def crest_url(file)
       file && url("/images/#{ERB::Util.url_encode(file)}")
     end
   end
@@ -79,7 +74,7 @@ class App < Sinatra::Base
   # fetch() on "Show my club"; body is JSON { answers: [...], weights: [...] }.
   post "/quizzes" do
     content_type :json
-    result = Quiz::Create.call(parse_json_body)
+    result = Quiz::Create.call(league: League.default, attrs: parse_json_body)
     if result.success?
       record = result.value!
       status 201
@@ -95,21 +90,27 @@ class App < Sinatra::Base
     @record = QuizResult.kept.first(slug: params["slug"])
     halt 404, erb(:"quiz/not_found") unless @record
 
-    @score = Quiz::Score.call(answers: @record.answers, weights: @record.weights)
+    @league = @record.league || League.default
+    halt 404, erb(:"quiz/not_found") unless @league
+
+    @teams = @league.scored_teams
+    @score = Quiz::Score.call(teams: @teams, answers: @record.answers, weights: @record.weights)
     @share_url = url("/q/#{@record.slug}")
 
-    pick = @record.pick
-    @page_title = "I should support #{pick} — Which Premier League Club Should You Support?"
-    @meta_description = short_blurb(pick)
+    pick = @score.pick
+    @page_title = "I should support #{pick.name} — Which #{@league.name} Club Should You Support?"
+    @meta_description = first_sentence(pick.blurb)
     @og = { "title" => @page_title, "description" => @meta_description, "url" => @share_url }
-    @og["image"] = badge_url(pick) if badge_url(pick)
+    @og["image"] = crest_url(pick.crest) if pick.crest
     erb :"quiz/result"
   end
 
   private
 
   def render_quiz(coach:)
-    @quiz_data_json = json_for_script(Quiz::Data.as_json)
+    @league = League.default
+    @page_title = "Which #{@league.name} Club Should You Support?" if @league
+    @quiz_data_json = json_for_script(Quiz::ClientData.call(@league))
     @coach = coach
     erb :"quiz/index"
   end

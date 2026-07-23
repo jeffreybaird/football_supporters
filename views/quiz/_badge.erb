@@ -1,7 +1,7 @@
 <span class="badge<%= " badge--sm" if defined?(sm) && sm %>">
-  <% if badge_file(name) %>
-    <img src="<%= badge_url(name) %>" alt="<%= name %> crest">
+  <% if team.crest %>
+    <img src="<%= crest_url(team.crest) %>" alt="<%= team.name %> crest">
   <% else %>
-    <span class="badge__initials"><%= team_initials(name) %></span>
+    <span class="badge__initials"><%= team_initials(team.name) %></span>
   <% end %>
 </span>

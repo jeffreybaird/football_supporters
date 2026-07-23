@@ -48,6 +48,7 @@ RSpec.describe "Quiz", type: :request do
       expect(body["url"]).to include("/q/#{body['slug']}")
       expect(QuizResult.count).to eq(1)
       expect(QuizResult.first.pick).to eq("Everton")
+      expect(QuizResult.first.league_id).to eq(League.default.id)
     end
 
     it "returns 422 for an invalid payload" do

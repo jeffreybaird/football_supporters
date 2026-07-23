@@ -14,6 +14,10 @@ Sequel::Migrator.run(DB, File.expand_path("../db/migrate", __dir__))
 
 require_relative "../config/environment"
 
+# Seed the reference league + teams once, before the per-example transactions.
+# It commits, so every example sees it; example writes still roll back.
+Quiz::Seed.call
+
 require "rack/test"
 require "capybara/rspec"
 Capybara.app = App
