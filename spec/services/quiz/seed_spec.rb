@@ -75,6 +75,24 @@ RSpec.describe Quiz::Seed do
     expect(miami.blurb).to start_with("The Messi circus")
   end
 
+  it "creates NWSL with its sixteen clubs and per-league scoring tuning" do
+    league = League.first(slug: "nwsl")
+
+    expect(league).not_to be_nil
+    expect(league.name).to eq("NWSL")
+    expect(league.teams_dataset.count).to eq(16)
+    expect(league.amplify).to eq(2.5)
+    expect(league.chooser_threshold).to eq(0.25)
+  end
+
+  it "seeds NWSL scores, a league-scoped crest, and a blurb" do
+    angel = Team.first(league_id: League.first(slug: "nwsl").id, name: "Angel City FC")
+
+    expect(angel.vector).to eq([10.0, 6.0, 6.0, 8.0])
+    expect(angel.crest).to eq("nwsl/1335914-Angel_City_FC.png")
+    expect(angel.blurb).to start_with("Founded by Natalie Portman")
+  end
+
   it "honours each league's per-league amplify override" do
     expect(League.first(slug: "bundesliga").amplify).to eq(1.4)
     expect(League.first(slug: "premier-league").amplify).to eq(2.5)
