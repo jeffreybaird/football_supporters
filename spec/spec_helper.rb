@@ -3,7 +3,8 @@
 ENV["RACK_ENV"] = "test"
 # Isolated, disposable test DB — recreated from migrations before every run.
 ENV["DATABASE_PATH"] ||= File.expand_path("../db/test.sqlite3", __dir__)
-File.delete(ENV["DATABASE_PATH"]) if File.exist?(ENV["DATABASE_PATH"])
+require "fileutils"
+FileUtils.rm_f(ENV.fetch("DATABASE_PATH", nil))
 
 # Migrate BEFORE the app loads: a Sequel::Model introspects its table at
 # require-time, so the schema must already exist. Connect (config/database),
@@ -24,6 +25,7 @@ Capybara.app = App
 
 module RequestHelpers
   include Rack::Test::Methods
+
   def app = App
 end
 
@@ -33,7 +35,7 @@ RSpec.configure do |config|
 
   # Each example runs in a transaction rolled back at the end — fast, isolated,
   # and safe against SQLite's single writer (one connection throughout).
-  config.around(:each) do |example|
+  config.around do |example|
     DB.transaction(rollback: :always, savepoint: true) { example.run }
   end
 

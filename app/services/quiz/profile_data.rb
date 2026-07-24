@@ -18,11 +18,11 @@ module Quiz
       # against (see Quiz::Score#centroid_of).
       scorable = leagues.select { |league| league.scored_teams.any? }
       {
-        "AXES"      => Data::AXES,
-        "Q"         => Data::Q,
-        "SLIDERS"   => Data::SLIDERS,
+        "AXES" => Data::AXES,
+        "Q" => Data::Q,
+        "SLIDERS" => Data::SLIDERS,
         "ARCHETYPE" => Archetype.client_table,
-        "LEAGUES"   => scorable.map { |league| ClientData.call(league).reject { |k, _| SHARED_KEYS.include?(k) } },
+        "LEAGUES" => scorable.map { |league| ClientData.call(league).except(*SHARED_KEYS) }
       }
     end
   end

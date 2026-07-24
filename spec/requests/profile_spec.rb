@@ -27,7 +27,7 @@ RSpec.describe "Football Profile", type: :request do
 
       expect(last_response.status).to eq(201)
       body = JSON.parse(last_response.body)
-      expect(body["url"]).to include("/q/#{body['slug']}")
+      expect(body["url"]).to include("/q/#{body["slug"]}")
       record = QuizResult.first(slug: body["slug"])
       expect(record.profile?).to be(true)
       expect(record.league_id).to be_nil

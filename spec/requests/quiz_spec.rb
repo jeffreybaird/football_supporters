@@ -112,7 +112,7 @@ RSpec.describe "Quiz", type: :request do
       expect(last_response.status).to eq(201)
       body = JSON.parse(last_response.body)
       expect(body["slug"]).to be_a(String)
-      expect(body["url"]).to include("/q/#{body['slug']}")
+      expect(body["url"]).to include("/q/#{body["slug"]}")
       expect(QuizResult.count).to eq(1)
       expect(QuizResult.first.pick).to eq("Man United")
       expect(QuizResult.first.league_id).to eq(League.default.id)

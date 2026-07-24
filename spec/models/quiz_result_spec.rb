@@ -29,7 +29,7 @@ RSpec.describe QuizResult do
 
     profile = build_result(slug: "prof1", profile: true, league_id: nil, pick: "The Ultra")
     expect(profile).to be_valid
-    profile.save
+    profile.save_changes
     expect(profile.profile?).to be(true)
   end
 
@@ -39,7 +39,7 @@ RSpec.describe QuizResult do
   end
 
   it "enforces slug uniqueness" do
-    build_result(slug: "dup").save
+    build_result(slug: "dup").save_changes
     dupe = build_result(slug: "dup")
 
     expect(dupe).not_to be_valid

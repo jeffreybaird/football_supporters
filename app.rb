@@ -41,7 +41,7 @@ class App < Sinatra::Base
 
     # First sentence of a blurb — used for alternates and OG descriptions.
     def first_sentence(text)
-      "#{text.split('. ').first}."
+      "#{text.split(". ").first}."
     end
 
     # Absolute, URL-encoded crest path (nil when the team has no crest on file).
@@ -50,7 +50,7 @@ class App < Sinatra::Base
     def crest_url(file)
       return unless file
 
-      url("/images/#{file.split('/').map { |seg| ERB::Util.url_encode(seg) }.join('/')}")
+      url("/images/#{file.split("/").map { |seg| ERB::Util.url_encode(seg) }.join("/")}")
     end
   end
 
@@ -126,7 +126,8 @@ class App < Sinatra::Base
     halt 404, erb(:"quiz/not_found") unless @league
 
     @teams = @league.scored_teams
-    @score = Quiz::Score.call(teams: @teams, answers: @record.answers, weights: @record.weights, **@league.scoring_params)
+    @score = Quiz::Score.call(teams: @teams, answers: @record.answers, weights: @record.weights,
+                              **@league.scoring_params)
     @share_url = url("/q/#{@record.slug}")
 
     pick = @score.pick

@@ -54,7 +54,7 @@ module Quiz
       ["Coventry", [0.0, 7, 7, 6], "8669-Coventry.png",
        "Coventry City fans have weathered exile, heartbreak, and more. Still, the singing never stopped. For the Sky Blues, it's about loving the club, not chasing silverware."],
       ["Hull", [0.0, 4, 4, 5], "8667-Hull.png",
-       "Hull is the club nobody thinks about, which suits the fans fine. It's a long way from everywhere, the glamour ties are rare, and the ownership sagas have tested everyone's patience. People still turn up. There's no bandwagon to jump on at Hull, so everyone in the ground actually means it."],
+       "Hull is the club nobody thinks about, which suits the fans fine. It's a long way from everywhere, the glamour ties are rare, and the ownership sagas have tested everyone's patience. People still turn up. There's no bandwagon to jump on at Hull, so everyone in the ground actually means it."]
     ].freeze
 
     # Bundesliga clubs — same shape.
@@ -94,7 +94,7 @@ module Quiz
       ["SV Elversberg", [0, 8, 5, 3], "8232-Elversberg.png",
        "Spiesen-Elversberg has about thirteen thousand residents and now a Bundesliga club, reportedly the smallest town ever to manage it. They lost the promotion playoff in the last minute in 2025, lost their coach and best striker that summer, and came back and scored more goals than anyone in the division anyway. Someone on German TV called them Real Elversberg for the white kits and the passing. A ZDF reporter predicted the stay will be short. Probably right. Nobody in the Saarland cares yet."],
       ["SC Paderborn", [0, 6, 6, 5], "8460-Paderborn.png",
-       "Paderborn have finished dead last in the Bundesliga twice, which locals will tell you about themselves before you can. The club motto translates to “heroes never give up,” which sounds like a poster until you watch them win a promotion playoff in the 100th minute against Wolfsburg, sending a club down for the first time in 29 years. Nobody in Paderborn is planning the title parade. They know exactly how this movie usually ends, and they bought tickets anyway."],
+       "Paderborn have finished dead last in the Bundesliga twice, which locals will tell you about themselves before you can. The club motto translates to “heroes never give up,” which sounds like a poster until you watch them win a promotion playoff in the 100th minute against Wolfsburg, sending a club down for the first time in 29 years. Nobody in Paderborn is planning the title parade. They know exactly how this movie usually ends, and they bought tickets anyway."]
     ].freeze
 
     # Ligue 1 clubs — same shape.
@@ -134,7 +134,7 @@ module Quiz
       ["Troyes", [1, 5, 1, 2], "10242-Troyes.png",
        "City Football Group's tenth club, which is the least romantic sentence in French football. Troyes yo-yo between divisions as Manchester City's development shelf, nearly fell to the third tier two years ago, and just won Ligue 2 anyway. French ultras despise the feeder model on principle, and Troyes fans are stuck supporting a club whose transfer decisions get made in a portfolio review. The promotion was real, though. Even a laboratory gets a parade."],
       ["Le Mans", [0, 5, 6, 3], "8682-Le_Mans.png",
-       "Liquidated in 2013, dropped to the sixth division, back in Ligue 1 for the first time since 2010. The stadium sits inside the 24 Hours circuit, which is the best pub fact in the league. Promotion was confirmed after their final match got abandoned for crowd trouble and the league upheld the score, which is a very Ligue 2 way to go up. Nobody outside the Sarthe saw them coming. That's the whole appeal."],
+       "Liquidated in 2013, dropped to the sixth division, back in Ligue 1 for the first time since 2010. The stadium sits inside the 24 Hours circuit, which is the best pub fact in the league. Promotion was confirmed after their final match got abandoned for crowd trouble and the league upheld the score, which is a very Ligue 2 way to go up. Nobody outside the Sarthe saw them coming. That's the whole appeal."]
     ].freeze
 
     # MLS clubs — same shape, in CSV order.
@@ -198,7 +198,7 @@ module Quiz
       ["San Jose Earthquakes", [1, 8, 0, 2], "6603-San_Jose.png",
        "A founding club owned by the man who moved the A's out of Oakland, which tells Bay Area fans everything they need to know. Two cups, both more than twenty years ago, and mostly irrelevance since. Fisher put the club up for sale in 2025 and the 1906 Ultras would help him pack. Even hiring Bruce Arena couldn't drag them to the playoffs. The fans' best hope is the For Sale sign."],
       ["CF Montréal", [1, 3, 2, 4], "161195-Montreal.png",
-       "The fans loved the Impact. Ownership renamed it CF Montréal over their objections, and it's been an identity crisis with a snowflake logo ever since. 2025 was the worst season in club history, complete with a mid-season apology letter, and the family that owns the club keeps firing coaches who go win elsewhere. The Ultras deserve a club that knows what it is. They had one. It got rebranded."],
+       "The fans loved the Impact. Ownership renamed it CF Montréal over their objections, and it's been an identity crisis with a snowflake logo ever since. 2025 was the worst season in club history, complete with a mid-season apology letter, and the family that owns the club keeps firing coaches who go win elsewhere. The Ultras deserve a club that knows what it is. They had one. It got rebranded."]
     ].freeze
 
     # NWSL clubs — same shape, in CSV order.
@@ -234,7 +234,7 @@ module Quiz
       ["Houston Dash", [1, 3, 4, 3], "521233-Houston_Dash.png",
        "One playoff appearance in franchise history, a revolving door of executives, and a coach who once disappeared from the sideline mid-season and was quietly terminated weeks later without explanation. That last sentence is the most interesting thing that's happened to the Dash in years, which is the problem. The fans who remain are the league's most stress-tested. The owner's reportedly considering a sale. Houston fans are considering it too, hopefully."],
       ["Racing Louisville FC", [1, 7, 7, 6], "1237244-Racing_Louisville.png",
-       "For years the joke wrote itself: never made the playoffs, ninth place four seasons running. Then 2025 happened — a Decision Day clincher, a first-ever win over North Carolina (“the whale is less white now,” per the club's own social feed), and the streak died. The Lavender Legion supported this team through nothing but bad seasons and a genuinely ugly founding scandal. First playoff berths mean more at clubs like this. Louisville's meant everything."],
+       "For years the joke wrote itself: never made the playoffs, ninth place four seasons running. Then 2025 happened — a Decision Day clincher, a first-ever win over North Carolina (“the whale is less white now,” per the club's own social feed), and the streak died. The Lavender Legion supported this team through nothing but bad seasons and a genuinely ugly founding scandal. First playoff berths mean more at clubs like this. Louisville's meant everything."]
     ].freeze
 
     # Every shipped league: its metadata plus its clubs, in display order. The
@@ -243,9 +243,12 @@ module Quiz
     LEAGUES = [
       { slug: "premier-league", name: "Premier League", season: "2026-27", teams: PREMIER_LEAGUE_TEAMS, amplify: 2.5 },
       { slug: "bundesliga",     name: "Bundesliga",     season: "2026-27", teams: BUNDESLIGA_TEAMS,     amplify: 1.4 },
-      { slug: "ligue-1",        name: "Ligue 1",        season: "2026-27", teams: LIGUE_1_TEAMS,        amplify: 1.7, chooser_threshold: 0.25 },
-      { slug: "mls",            name: "MLS",            season: "2026",    teams: MLS_TEAMS,            amplify: 1.8, chooser_threshold: 0.20 },
-      { slug: "nwsl",           name: "NWSL",           season: "2026",    teams: NWSL_TEAMS,           amplify: 2.5, chooser_threshold: 0.25 },
+      { slug: "ligue-1",        name: "Ligue 1",        season: "2026-27", teams: LIGUE_1_TEAMS,        amplify: 1.7,
+        chooser_threshold: 0.25 },
+      { slug: "mls",            name: "MLS",            season: "2026",    teams: MLS_TEAMS,            amplify: 1.8,
+        chooser_threshold: 0.20 },
+      { slug: "nwsl",           name: "NWSL",           season: "2026",    teams: NWSL_TEAMS,           amplify: 2.5,
+        chooser_threshold: 0.25 }
     ].freeze
 
     # Upsert every league and its teams. Returns the Array of Leagues.
@@ -261,7 +264,7 @@ module Quiz
                  chooser_threshold: meta.fetch(:chooser_threshold, Data::CHOOSER_THRESHOLD),
                  max_choices: meta.fetch(:max_choices, Data::MAX_CHOICES),
                  amplify: meta.fetch(:amplify, Data::AMPLIFY))
-      league.save
+      league.save_changes
       # Crests live under public/images/<league-slug>/; the team arrays carry the
       # bare filename, so qualify it with the league dir before storing.
       meta[:teams].each_with_index do |(name, scores, crest, blurb), i|
@@ -274,7 +277,7 @@ module Quiz
       vibe, play, ethics, fanbase = scores
       team = Team.first(league_id: league.id, name:) || Team.new(league_id: league.id, name:)
       team.set(vibe:, play:, ethics:, fanbase:, blurb:, crest:, position:)
-      team.save
+      team.save_changes
       team
     end
   end

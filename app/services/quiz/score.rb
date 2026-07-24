@@ -61,13 +61,13 @@ module Quiz
         4.times do |k|
           load_k = q["load"][k]
           val = opt["v"][k]
-          if load_k > 0 && !val.nil?
+          if load_k.positive? && !val.nil?
             num[k] += load_k * val
             den[k] += load_k
           end
         end
       end
-      num.each_index.map { |k| den[k] > 0 ? num[k] / den[k] : 5.0 }
+      num.each_index.map { |k| den[k].positive? ? num[k] / den[k] : 5.0 }
     end
 
     # slider-weighted distance matching (nearest team). The user's vector is first
@@ -79,18 +79,19 @@ module Quiz
       wsum = 1.0 if wsum.zero?
       w = weights.map { |x| x / wsum }
       u = vec.each_index.map do |k|
-        a = centroid[k] + (vec[k] - centroid[k]) * amplify
-        [[a, 0.0].max, 10.0].min
+        a = centroid[k] + ((vec[k] - centroid[k]) * amplify)
+        a.clamp(0.0, 10.0)
       end
-      teams.each_with_index.map do |team, idx|
+      ranked = teams.each_with_index.map do |team, idx|
         t = team.vector
-        dist = Math.sqrt(w.each_index.sum { |k| w[k] * (u[k] - t[k])**2 })
+        dist = Math.sqrt(w.each_index.sum { |k| w[k] * ((u[k] - t[k])**2) })
         # match% is derived from the RAW user vector (no amplify): amplify is a
         # ranking spread trick and must not distort the human-facing percentage.
-        raw = Math.sqrt(w.each_index.sum { |k| w[k] * (vec[k] - t[k])**2 })
-        match = [[1.0 - raw / DIAMETER, 0.0].max, 1.0].min
+        raw = Math.sqrt(w.each_index.sum { |k| w[k] * ((vec[k] - t[k])**2) })
+        match = (1.0 - (raw / DIAMETER)).clamp(0.0, 1.0)
         [Ranked.new(team, dist, 1.0 / (1.0 + dist), match), idx]
-      end.sort_by { |r, idx| [-r.sim, idx] }.map(&:first)
+      end
+      ranked.sort_by { |r, idx| [-r.sim, idx] }.map(&:first)
     end
 
     # per-axis mean of the supplied teams' vectors — the centre of the team cloud

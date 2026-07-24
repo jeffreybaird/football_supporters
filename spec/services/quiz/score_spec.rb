@@ -100,7 +100,9 @@ RSpec.describe Quiz::Score do
     tight_match.each { |name, m| expect(m).to be_within(1e-9).of(wide_match[name]) }
 
     # at amplify 1.0 the ranking distance IS the raw distance, so match = 1 - dist/10.
-    tight.rank.each { |r| expect(r.match).to be_within(1e-9).of(1.0 - r.dist / Quiz::Score::DIAMETER) }
-    tight.rank.each { |r| expect(r.match).to be_between(0.0, 1.0) }
+    tight.rank.each do |r|
+      expect(r.match).to be_within(1e-9).of(1.0 - (r.dist / Quiz::Score::DIAMETER))
+      expect(r.match).to be_between(0.0, 1.0)
+    end
   end
 end

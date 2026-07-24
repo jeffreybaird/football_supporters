@@ -21,7 +21,9 @@ module Quiz
       weights = coerce_weights(attrs["weights"])
       errors = validate_answers_and_weights(answers, weights)
       return Failure([:validation, errors]) unless errors.empty?
-      return Failure([:validation, { leagues: "none available" }]) if League.active.ordered.all.none? { |l| l.scored_teams.any? }
+
+      no_scorable_leagues = League.active.ordered.all.none? { |l| l.scored_teams.any? }
+      return Failure([:validation, { leagues: "none available" }]) if no_scorable_leagues
 
       label = Archetype.call(Score.score_axes(answers))[:label]
       record = insert_with_slug(answers:, weights:, pick: label)
