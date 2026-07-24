@@ -22,18 +22,36 @@ EPL,hull,Hull,0.0,4,4,5
 BUNDESLIGA,bayern-munich,Bayern Munich,10,6,4,5
 BUNDESLIGA,borussia-dortmund,Borussia Dortmund,8,9,8,10
 BUNDESLIGA,rb-leipzig,RB Leipzig,8,8,0,2
-BUNDESLIGA,bayer-leverkusen,Bayer Leverkusen,5,7,2,2
+BUNDESLIGA,bayer-leverkusen,Bayer Leverkusen,6,7,3,2
 BUNDESLIGA,eintracht-frankfurt,Eintracht Frankfurt,5,7,8,9
-BUNDESLIGA,vfb-stuttgart,VfB Stuttgart,5,6,6,7
+BUNDESLIGA,vfb-stuttgart,VfB Stuttgart,6,6,6,7
 BUNDESLIGA,hamburger-sv,Hamburger SV,5,6,5,9
 BUNDESLIGA,schalke-04,Schalke 04,5,5,4,10
 BUNDESLIGA,werder-bremen,Werder Bremen,4,5,6,8
 BUNDESLIGA,borussia-monchengladbach,Borussia Mönchengladbach,4,7,7,7
 BUNDESLIGA,1-fc-koln,1. FC Köln,4,7,7,9
-BUNDESLIGA,tsg-hoffenheim,TSG Hoffenheim,3,5,2,1
-BUNDESLIGA,sc-freiburg,SC Freiburg,2,4,9,5
+BUNDESLIGA,tsg-hoffenheim,TSG Hoffenheim,4,5,2,1
+BUNDESLIGA,sc-freiburg,SC Freiburg,3,4,9,5
 BUNDESLIGA,union-berlin,Union Berlin,2,2,10,10
-BUNDESLIGA,mainz-05,Mainz 05,2,5,7,6
-BUNDESLIGA,fc-augsburg,FC Augsburg,1,3,6,5
+BUNDESLIGA,mainz-05,Mainz 05,3,5,8,6
+BUNDESLIGA,fc-augsburg,FC Augsburg,1,3,5,5
 BUNDESLIGA,sv-elversberg,SV Elversberg,0,8,5,3
 BUNDESLIGA,sc-paderborn,SC Paderborn,0,6,6,5
+LIGUE1,paris-saint-germain,Paris Saint-Germain,10,7,0,4
+LIGUE1,marseille,Marseille,8,9,5,10
+LIGUE1,monaco,Monaco,6,9,1,0
+LIGUE1,lyon,Lyon,6,6,4,6
+LIGUE1,lille,Lille,5,4,5,5
+LIGUE1,lens,Lens,4,7,9,10
+LIGUE1,rennes,Rennes,4,8,8,7
+LIGUE1,nice,Nice,3,4,3,5
+LIGUE1,strasbourg,Strasbourg,3,8,1,7
+LIGUE1,paris-fc,Paris FC,3,6,2,1
+LIGUE1,toulouse,Toulouse,2,5,3,4
+LIGUE1,brest,Brest,2,6,8,5
+LIGUE1,auxerre,Auxerre,2,3,7,5
+LIGUE1,angers,Angers,1,2,2,3
+LIGUE1,le-havre,Le Havre,1,2,8,7
+LIGUE1,lorient,Lorient,1,6,4,5
+LIGUE1,troyes,Troyes,1,5,1,2
+LIGUE1,le-mans,Le Mans,0,5,6,3

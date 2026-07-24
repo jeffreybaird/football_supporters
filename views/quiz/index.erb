@@ -198,7 +198,7 @@ function Badge({ name, size = 92 }) {
       boxShadow: `inset 0 1px 0 rgba(255,255,255,.04), 0 8px 24px ${C.shadow}`,
     }}>
       {file ? (
-        <img src={`/images/${encodeURIComponent(file)}`} alt={name}
+        <img src={`/images/${file.split("/").map(encodeURIComponent).join("/")}`} alt={name}
           style={{ width: size * 0.74, height: size * 0.74, objectFit: "contain" }}
           onError={(e) => {
             e.target.style.display = "none";

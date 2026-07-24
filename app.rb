@@ -45,8 +45,12 @@ class App < Sinatra::Base
     end
 
     # Absolute, URL-encoded crest path (nil when the team has no crest on file).
+    # A crest is a "<league-slug>/<file>" path, so encode each segment and keep
+    # the separators — url_encode on the whole string would escape the slash.
     def crest_url(file)
-      file && url("/images/#{ERB::Util.url_encode(file)}")
+      return unless file
+
+      url("/images/#{file.split('/').map { |seg| ERB::Util.url_encode(seg) }.join('/')}")
     end
   end
 
