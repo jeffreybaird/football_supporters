@@ -25,7 +25,7 @@ module Quiz
         # each league's amplify. sim (steep, amplify-based) still drives ranking.
         Entry.new(league:, pick: top.team, sim: top.sim, match_pct: (top.match * 100).round)
       end
-      Result.new(vec:, archetype: Archetype.call(vec), leagues: entries)
+      Result.new(vec:, archetype: Archetype.call(vec, weights:), leagues: entries)
     end
   end
 end

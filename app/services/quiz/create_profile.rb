@@ -25,7 +25,7 @@ module Quiz
       no_scorable_leagues = League.active.ordered.all.none? { |l| l.scored_teams.any? }
       return Failure([:validation, { leagues: "none available" }]) if no_scorable_leagues
 
-      label = Archetype.call(Score.score_axes(answers))[:label]
+      label = Archetype.call(Score.score_axes(answers), weights:)[:label]
       record = insert_with_slug(answers:, weights:, pick: label)
       Success(record)
     rescue Sequel::UniqueConstraintViolation

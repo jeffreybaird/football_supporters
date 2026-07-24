@@ -6,16 +6,27 @@ module Quiz
   # descriptive sentence.
   #
   # Archetypes are POINTS IN THE SAME 4-D SPACE AS THE CLUBS, and selection is
-  # nearest-centroid — the same operation Quiz::Score performs against teams,
-  # one level coarser. This replaces the old band/dominant-axis scheme, which
-  # threw away three of the four axes when choosing a label.
+  # nearest-centroid under the same normalised slider weights Quiz::Score applies
+  # to clubs — the same operation, one level coarser. This replaces the old
+  # band/dominant-axis scheme, which threw away three of the four axes.
   #
-  # The grid is 2 x 2 x 3 x 2 = 24: two levels on Vibe, Play and Fanbase, three
-  # on Ethics, because Ethics has roughly twice the spread of the other axes in
-  # the observed user distribution (sd ~2.5 vs ~1.2) and so earns the extra
-  # resolution. Level values are percentiles of that distribution (p20/p50/p80),
-  # NOT of the club distribution — an archetype describes the person, not the
-  # club they end up with. A club can legitimately straddle several archetypes.
+  # There are 2 x 2 x 3 x 2 = 24 archetypes — two levels on Vibe, Play and
+  # Fanbase, three on Ethics (Ethics has ~twice the spread of the others in the
+  # observed user distribution, sd ~2.5 vs ~1.2, so it earns the extra
+  # resolution). Each label's base position comes from the per-axis LEVELS
+  # percentiles (p20/p50/p80 of the raw user distribution, NOT the club
+  # distribution — an archetype describes the person, not the club they land on).
+  #
+  # Centroids are then SCATTERED OFF THAT LATTICE by a small symmetric cross-axis
+  # coupling: for base point g with per-axis midpoints mid = [5.235, 6.07, 4.12,
+  # 5.105] and s = g - mid, each axis becomes g[k] + 0.12 * (sum(s) - s[k]). A
+  # combination that is extreme on several axes is nudged further out. A pure
+  # lattice is separable: nearest-cell factorises
+  # per axis, so positive slider weights can never change the winner — only the
+  # tail. Scattering the points off the lattice makes archetype selection behave
+  # exactly like club selection: reweighting an axis can move the #1 pick, and
+  # the whole ranking re-sorts live as the sliders move. On-centroid vectors
+  # still resolve to their own label. Each label sits nearest its own centroid.
   #
   # Deliberately data-first: the table is shipped to the browser
   # (Quiz::ProfileData -> window ARCHETYPE) so the live client and this server
@@ -38,76 +49,76 @@ module Quiz
     # Codes read V-P-E-F. Vibe/Play/Fanbase are H or L; Ethics is H, M or L.
     # "vec" is aligned to Quiz::Data::AXES.
     ARCHETYPES = {
-      "HHHH" => { "vec" => [6.33, 7.14, 6.24, 6.14],
+      "HHHH" => { "vec" => [6.84, 7.65, 6.62, 6.65],
                   "label" => "The Dreamer",
                   "sentence" => "You want a club that feels like it matters, one that fills the stands and the city with energy. It should be run by people who care about doing things the right way, and it should never be afraid to put on a show. For you, a club can be all of these things at once—and you're holding out for the one that proves it." },
-      "HHHL" => { "vec" => [6.33, 7.14, 6.24, 4.07],
+      "HHHL" => { "vec" => [6.59, 7.4, 6.38, 4.58],
                   "label" => "The Connoisseur",
                   "sentence" => "You savor football that's played with style and care, by a club that knows how to hold its head high. You watch for the small moments—the clever pass, the perfect touch—and you want the room to appreciate every bit of it." },
-      "HLHH" => { "vec" => [6.33, 5.00, 6.24, 6.14],
+      "HLHH" => { "vec" => [6.58, 5.51, 6.37, 6.4],
                   "label" => "The Traditionalist",
                   "sentence" => "You care about the stories that came before—the old photos on the clubhouse wall, the families who've cheered from the same seats for decades. You want a club that stands for something and finds a way to win without losing itself." },
-      "HLHL" => { "vec" => [6.33, 5.00, 6.24, 4.07],
+      "HLHL" => { "vec" => [6.33, 5.26, 6.12, 4.33],
                   "label" => "The Perfectionist",
                   "sentence" => "You look for a club that's steady and ambitious, the kind that's built to last through good years and bad. Winning is sweeter when it comes from hard work and doing things the right way." },
-      "LHHH" => { "vec" => [4.14, 7.14, 6.24, 6.14],
+      "LHHH" => { "vec" => [4.65, 7.39, 6.36, 6.39],
                   "label" => "The Romantic",
                   "sentence" => "You find yourself rooting for the smaller club that plays with heart and never cuts corners. What matters most is seeing how much it means to the people in the stands, week after week." },
-      "LHHL" => { "vec" => [4.14, 7.14, 6.24, 4.07],
+      "LHHL" => { "vec" => [4.4, 7.14, 6.11, 4.32],
                   "label" => "The Aficionado",
                   "sentence" => "You can't help but cheer for the clever clubs that find a way to surprise everyone. There's something satisfying about watching a smart plan come together, especially when no one saw it coming." },
-      "LLHH" => { "vec" => [4.14, 5.00, 6.24, 6.14],
+      "LLHH" => { "vec" => [4.39, 5.25, 6.1, 6.13],
                   "label" => "The Communitarian",
                   "sentence" => "You want a club that feels like home, where the fans have a real say and stick together through thick and thin. For you, it's the community that makes it all matter." },
-      "LLHL" => { "vec" => [4.14, 5.00, 6.24, 4.07],
+      "LLHL" => { "vec" => [4.14, 5.0, 5.86, 4.06],
                   "label" => "The Quiet Conscience",
                   "sentence" => "You're after a club you can stand behind, one that's honest and doesn't put on airs. You like to watch the game your own way, without fuss." },
-      "HHMH" => { "vec" => [6.33, 7.14, 4.12, 6.14],
+      "HHMH" => { "vec" => [6.58, 7.4, 4.5, 6.4],
                   "label" => "The True Believer",
                   "sentence" => "You want the roar of a packed stadium, a team that keeps you on the edge of your seat, and fans who feel every win and loss. When you pick a side, you're all in." },
-      "HHML" => { "vec" => [6.33, 7.14, 4.12, 4.07],
+      "HHML" => { "vec" => [6.33, 7.15, 4.26, 4.33],
                   "label" => "The Showman",
                   "sentence" => "You show up for the biggest stage and the brightest lights. You want to be dazzled, and you expect your club to chase greatness every time out." },
-      "HLMH" => { "vec" => [6.33, 5.00, 4.12, 6.14],
+      "HLMH" => { "vec" => [6.33, 5.26, 4.25, 6.14],
                   "label" => "The Institution",
                   "sentence" => "You're drawn to clubs with deep roots—a packed ground, a team that knows how to win, and a history you can feel when you walk through the gates. You want something solid you can count on." },
-      "HLML" => { "vec" => [6.33, 5.00, 4.12, 4.07],
+      "HLML" => { "vec" => [6.08, 5.01, 4.0, 4.07],
                   "label" => "The Pragmatist",
                   "sentence" => "You want a club that means business, one that's run with care and knows how to get results. For you, it's about what's real, not just what looks good." },
-      "LHMH" => { "vec" => [4.14, 7.14, 4.12, 6.14],
+      "LHMH" => { "vec" => [4.39, 7.13, 4.24, 6.14],
                   "label" => "The Firebrand",
                   "sentence" => "You find yourself pulled toward the smaller clubs where every match feels like a fight and the crowd is right on top of the action. It's the intensity that keeps you coming back." },
-      "LHML" => { "vec" => [4.14, 7.14, 4.12, 4.07],
+      "LHML" => { "vec" => [4.14, 6.88, 3.99, 4.07],
                   "label" => "The Enthusiast",
                   "sentence" => "You chase good football wherever it turns up. For you, it's all about what happens on the pitch—the rest is just background noise." },
-      "LLMH" => { "vec" => [4.14, 5.00, 4.12, 6.14],
+      "LLMH" => { "vec" => [4.14, 4.99, 3.98, 5.88],
                   "label" => "The Regular",
                   "sentence" => "You want a club that feels like a second home—a small ground, your usual seat, and the same neighbors in the stands every Saturday. It's the comfort of the familiar that keeps you coming back." },
-      "LLML" => { "vec" => [4.14, 5.00, 4.12, 4.07],
+      "LLML" => { "vec" => [3.89, 4.74, 3.74, 3.81],
                   "label" => "The Easygoer",
                   "sentence" => "You want a club that fits into your life, something you look forward to without it taking over everything. Football is one of the things that makes your week better." },
-      "HHLH" => { "vec" => [6.33, 7.14, 2.00, 6.14],
+      "HHLH" => { "vec" => [6.33, 7.14, 2.38, 6.15],
                   "label" => "The Ultra",
                   "sentence" => "You want a club that feels larger than life—a wild team, a crowd that never stops moving. For you, it's all about the energy inside the ground." },
-      "HHLL" => { "vec" => [6.33, 7.14, 2.00, 4.07],
+      "HHLL" => { "vec" => [6.08, 6.89, 2.14, 4.08],
                   "label" => "The Headliner",
                   "sentence" => "You're here for the main event—the biggest show, the best football, the kind of spectacle you'll remember long after the final whistle." },
-      "HLLH" => { "vec" => [6.33, 5.00, 2.00, 6.14],
+      "HLLH" => { "vec" => [6.07, 5.0, 2.13, 5.89],
                   "label" => "The Empire Loyalist",
                   "sentence" => "You want to be part of something massive, standing shoulder to shoulder with thousands of others who wear the same colors. The feeling of belonging to something bigger than yourself is what draws you in." },
-      "HLLL" => { "vec" => [6.33, 5.00, 2.00, 4.07],
+      "HLLL" => { "vec" => [5.82, 4.75, 1.88, 3.82],
                   "label" => "The Winner",
                   "sentence" => "You want a club that's hungry for silverware—ambitious, relentless, and never satisfied with second place. For you, the trophies tell the story." },
-      "LHLH" => { "vec" => [4.14, 7.14, 2.00, 6.14],
+      "LHLH" => { "vec" => [4.14, 6.88, 2.12, 5.88],
                   "label" => "The Loyalist",
                   "sentence" => "You back the smaller club with a big heart, the kind of team that never gives up. No matter the score, you'll be there in the away end, singing until the final whistle." },
-      "LHLL" => { "vec" => [4.14, 7.14, 2.00, 4.07],
+      "LHLL" => { "vec" => [3.89, 6.63, 1.87, 3.81],
                   "label" => "The Thrill-Seeker",
                   "sentence" => "You want goals, drama, and a team that keeps you guessing. As long as the game is thrilling, you leave happy." },
-      "LLLH" => { "vec" => [4.14, 5.00, 2.00, 6.14],
+      "LLLH" => { "vec" => [3.88, 4.74, 1.86, 5.63],
                   "label" => "The Diehard",
                   "sentence" => "You want a club you can stick with, no matter what. For you, loyalty is everything." },
-      "LLLL" => { "vec" => [4.14, 5.00, 2.00, 4.07],
+      "LLLL" => { "vec" => [3.63, 4.49, 1.62, 3.56],
                   "label" => "The Stoic",
                   "sentence" => "You want football simple and true—a club, a match, a Saturday afternoon. You take it as it comes and enjoy every bit of it." }
     }.freeze
@@ -118,30 +129,47 @@ module Quiz
       "This is the kind of club you want: no single thing dominates — " \
       "you'll take a good club in almost any shape."
 
+    # Equal weighting, used when a caller has no slider weights to offer.
+    EQUAL_WEIGHTS = Array.new(4, 0.25).freeze
+
     # vec: Array(4) aligned to Quiz::Data::AXES — the RAW user vector from
     # Score#score_axes, not the amplified one. Amplification exists to reach the
     # club space; the archetype describes the person as they actually answered.
+    # weights: the raw 1..10 slider values, or nil for equal weighting.
     # Returns { label:, sentence: } (unchanged interface).
-    def call(vec)
-      code = code_for(vec)
+    def call(vec, weights: nil)
+      code = code_for(vec, weights:)
       return { label: ALL_MID_LABEL, sentence: ALL_MID_SENTENCE } if code.nil?
 
       row = ARCHETYPES.fetch(code)
       { label: row["label"], sentence: row["sentence"] }
     end
 
-    # Nearest archetype centroid by unweighted Euclidean distance. Unweighted on
-    # purpose: the slider weights say what the person wants PRIORITISED in a
-    # club, not who they are, so the archetype must not change when a slider
-    # moves without an answer changing. Ties resolved by key order.
-    def code_for(vec)
+    # Nearest archetype centroid by weighted Euclidean distance, using the same
+    # normalised slider weights Quiz::Score applies to clubs: an axis the person
+    # says matters more counts for more when naming the kind of supporter they
+    # are. Weights are normalised so only their balance matters. Ties resolved by
+    # key order. Keep the JS `rankArchetypes` in views/quiz/index.erb in step.
+    def code_for(vec, weights: nil)
       return nil unless vec.is_a?(Array) && vec.length == 4 && vec.all?(Numeric)
 
-      ARCHETYPES.min_by { |_code, row| sq_distance(vec, row["vec"]) }&.first
+      w = weight_vector(weights)
+      ARCHETYPES.min_by { |_code, row| sq_distance(vec, row["vec"], w) }&.first
     end
 
-    def sq_distance(vec_a, vec_b)
-      (0...4).sum { |i| (vec_a[i] - vec_b[i])**2 }
+    def sq_distance(vec_a, vec_b, weights = EQUAL_WEIGHTS)
+      (0...4).sum { |i| weights[i] * ((vec_a[i] - vec_b[i])**2) }
+    end
+
+    # Slider weights as a normalised 4-vector summing to 1. Anything malformed
+    # (nil, wrong arity, non-numeric, all zero) falls back to equal weighting.
+    def weight_vector(weights)
+      return EQUAL_WEIGHTS unless weights.is_a?(Array) && weights.length == 4 && weights.all?(Numeric)
+
+      sum = weights.sum.to_f
+      return EQUAL_WEIGHTS unless sum.positive?
+
+      weights.map { |w| w / sum }
     end
 
     # Backwards-compatible helper. The old signature took a bare value and used

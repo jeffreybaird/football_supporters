@@ -21,6 +21,7 @@ module Quiz
         "CHOOSER_THRESHOLD" => league ? league.chooser_threshold : Data::CHOOSER_THRESHOLD,
         "MAX_CHOICES"       => league ? league.max_choices : Data::MAX_CHOICES,
         "AMPLIFY"           => league ? league.amplify : Data::AMPLIFY,
+        "ARCHETYPE"         => Archetype.client_table,
       }
     end
   end

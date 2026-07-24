@@ -120,7 +120,12 @@ function rankTeamsIn(data, vec, weights) {
     .map((name) => {
       const t = data.TEAMS[name];
       const dist = Math.sqrt(w.reduce((s, wk, k) => s + wk * (u[k] - t[k]) * (u[k] - t[k]), 0));
-      return { name, dist, sim: 1 / (1 + dist) };
+      // match% is derived from the RAW user vector (no amplify): amplify is a
+      // ranking spread trick and must not distort the human-facing percentage.
+      // Mirrors Quiz::Score#rank_teams: match = 1 - raw_dist / DIAMETER (10).
+      const raw = Math.sqrt(w.reduce((s, wk, k) => s + wk * (vec[k] - t[k]) * (vec[k] - t[k]), 0));
+      const match = Math.max(0, Math.min(1, 1 - raw / 10));
+      return { name, dist, sim: 1 / (1 + dist), match };
     })
     .sort((a, b) => b.sim - a.sim);
 }
@@ -129,21 +134,40 @@ function rankTeams(vec, weights) {
   return rankTeamsIn({ TEAMS, TEAM_NAMES, CENTROID, AMPLIFY }, vec, weights);
 }
 
+// Slider weights as a normalized 4-vector summing to 1; anything malformed
+// falls back to equal weighting. Mirrors Quiz::Archetype.weight_vector.
+function archetypeWeights(weights) {
+  const equal = AXES.map(() => 1 / AXES.length);
+  if (!Array.isArray(weights) || weights.length !== AXES.length || !weights.every((x) => typeof x === "number")) return equal;
+  const sum = weights.reduce((s, x) => s + x, 0);
+  return sum > 0 ? weights.map((x) => x / sum) : equal;
+}
+
+// Rank every archetype by weighted Euclidean distance from the RAW user vector
+// — the same operation as Quiz::Archetype.code_for, extended to a full ordering
+// for the coach's view. Weighted (so moving a slider re-ranks) but unamplified:
+// amplify exists to reach the club space, and an archetype is not a club.
+// Ties keep table order (stable sort = Ruby min_by).
+function rankArchetypes(vec, weights) {
+  const w = archetypeWeights(weights);
+  return Object.entries(D.ARCHETYPE.archetypes)
+    .map(([code, row]) => {
+      const dist = Math.sqrt(row.vec.reduce((s, x, k) => s + w[k] * (vec[k] - x) * (vec[k] - x), 0));
+      return { code, name: row.label, sentence: row.sentence, dist };
+    })
+    .sort((a, b) => a.dist - b.dist);
+}
+
 // Abstract "kind of team you want" from the user vector — a literal transcription
-// of Quiz::Archetype#call over the shipped ARCHETYPE table (PROFILE_DATA.ARCHETYPE)
-// so the live result and the server-rendered share page agree. Returns { label,
-// sentence }.
-function archetypeFor(vec) {
-  const t = PROFILE_DATA.ARCHETYPE;
-  const band = (v) => (v <= t.bands.low ? "low" : v >= t.bands.high ? "high" : "mid");
-  const ordered = AXES.map((_, k) => k).sort((a, b) => (Math.abs(vec[b] - 5) - Math.abs(vec[a] - 5)) || (a - b));
-  const dom = ordered[0];
-  const label = band(vec[dom]) === "mid" ? t.allMidLabel : t.labels[AXES[dom]][band(vec[dom])];
-  const strong = ordered.filter((k) => band(vec[k]) !== "mid").slice(0, 2);
-  const sentence = strong.length === 0
-    ? t.allMidSentence
-    : "This is the kind of team you want: " + strong.map((k) => t.fragments[AXES[k]][band(vec[k])]).join(", and ") + ".";
-  return { label, sentence };
+// of Quiz::Archetype#call over the shipped ARCHETYPE table (D.ARCHETYPE):
+// nearest archetype centroid wins. Returns { label, sentence }.
+function archetypeFor(vec, weights) {
+  const t = D.ARCHETYPE;
+  if (!Array.isArray(vec) || vec.length !== 4 || !vec.every((v) => typeof v === "number")) {
+    return { label: t.allMidLabel, sentence: t.allMidSentence };
+  }
+  const top = rankArchetypes(vec, weights)[0];
+  return { label: top.name, sentence: top.sentence };
 }
 
 // ---- palette / type ----
@@ -172,71 +196,75 @@ function TraitBoard({ vec }) {
   );
 }
 
-function LiveRanking({ vec, weights, basePos, started, compare, onPick }) {
+// Coach's-view compare table: team ranking under equal weights vs the user's
+// weights. (The question-stage live ranking is ArchetypeRanking below.)
+function LiveRanking({ vec, weights, onPick }) {
   const rank = rankTeams(vec, weights);
-
-  if (compare) {
-    const eqRank = rankTeams(vec, [5, 5, 5, 5]);
-    const eqSim = {}, eqPos = {};
-    eqRank.forEach((r, idx) => { eqSim[r.name] = r.sim; eqPos[r.name] = idx; });
-    return (
-      <div style={{ display: "grid", gap: 3 }}>
-        <div style={{ display: "grid", gridTemplateColumns: "18px 1fr 44px 44px 30px", alignItems: "center", gap: 8, padding: "0 8px 4px" }}>
-          <span />
-          <span style={{ ...mono, fontSize: 8.5, letterSpacing: 0.5, color: C.amberDim, textTransform: "uppercase" }}>team</span>
-          <span style={{ ...mono, fontSize: 8.5, letterSpacing: 0.5, color: C.amberDim, textTransform: "uppercase", textAlign: "right" }}>equal</span>
-          <span style={{ ...mono, fontSize: 8.5, letterSpacing: 0.5, color: C.amberDim, textTransform: "uppercase", textAlign: "right" }}>yours</span>
-          <span />
-        </div>
-        {rank.map((r, i) => {
-          const moved = eqPos[r.name] - i;
-          let cue = "·", cueColor = C.chalkDim;
-          if (moved > 0) { cue = `▲${moved}`; cueColor = C.lime; }
-          else if (moved < 0) { cue = `▼${-moved}`; cueColor = "#E06B6B"; }
-          const inChooser = i > 0 && (r.dist - rank[0].dist) < CHOOSER_THRESHOLD;
-          const Row = onPick ? "button" : "div";
-          const rowProps = onPick ? { className: "simrow", title: "Read this club's blurb", onClick: () => onPick(r.name) } : {};
-          return (
-            <Row key={r.name} {...rowProps} style={{ display: "grid", gridTemplateColumns: "18px 1fr 44px 44px 30px", alignItems: "center", gap: 8,
-              width: "100%", textAlign: "left", border: "none", font: "inherit", color: "inherit",
-              padding: "3px 8px", borderRadius: 6,
-              background: i === 0 ? "rgba(240,178,62,.14)" : (inChooser ? "rgba(91,217,138,.07)" : "transparent") }}>
-              <span style={{ ...mono, fontSize: 11, color: C.chalkDim }}>{i + 1}</span>
-              <span style={{ fontSize: 13, color: i === 0 ? C.amber : C.chalk }}>{r.name}</span>
-              <span style={{ ...mono, fontSize: 10.5, color: C.chalkDim, textAlign: "right" }}>{eqSim[r.name].toFixed(2)}</span>
-              <span style={{ ...mono, fontSize: 10.5, color: i === 0 ? C.amber : C.chalk, textAlign: "right" }}>{r.sim.toFixed(2)}</span>
-              <span style={{ ...mono, fontSize: 10, color: cueColor, textAlign: "right" }}>{cue}</span>
-            </Row>
-          );
-        })}
-      </div>
-    );
-  }
-
+  const eqRank = rankTeams(vec, [5, 5, 5, 5]);
+  const eqSim = {}, eqPos = {};
+  eqRank.forEach((r, idx) => { eqSim[r.name] = r.sim; eqPos[r.name] = idx; });
   return (
     <div style={{ display: "grid", gap: 3 }}>
+      <div style={{ display: "grid", gridTemplateColumns: "18px 1fr 44px 44px 30px", alignItems: "center", gap: 8, padding: "0 8px 4px" }}>
+        <span />
+        <span style={{ ...mono, fontSize: 8.5, letterSpacing: 0.5, color: C.amberDim, textTransform: "uppercase" }}>team</span>
+        <span style={{ ...mono, fontSize: 8.5, letterSpacing: 0.5, color: C.amberDim, textTransform: "uppercase", textAlign: "right" }}>equal</span>
+        <span style={{ ...mono, fontSize: 8.5, letterSpacing: 0.5, color: C.amberDim, textTransform: "uppercase", textAlign: "right" }}>yours</span>
+        <span />
+      </div>
       {rank.map((r, i) => {
-        let cue = "", cueColor = C.chalkDim;
-        if (started && basePos[r.name] !== undefined) {
-          const delta = basePos[r.name] - i;
-          if (delta > 0) { cue = `▲${delta}`; cueColor = C.lime; }
-          else if (delta < 0) { cue = `▼${-delta}`; cueColor = "#E06B6B"; }
-          else { cue = "·"; }
-        }
-        const gap = i === 0 ? "leader" : `+${(r.dist - rank[0].dist).toFixed(2)}`;
+        const moved = eqPos[r.name] - i;
+        let cue = "·", cueColor = C.chalkDim;
+        if (moved > 0) { cue = `▲${moved}`; cueColor = C.lime; }
+        else if (moved < 0) { cue = `▼${-moved}`; cueColor = "#E06B6B"; }
         const inChooser = i > 0 && (r.dist - rank[0].dist) < CHOOSER_THRESHOLD;
         const Row = onPick ? "button" : "div";
-        const rowProps = onPick ? { className: "simrow", title: "Jump to this club's blurb", onClick: () => onPick(r.name) } : {};
+        const rowProps = onPick ? { className: "simrow", title: "Read this club's blurb", onClick: () => onPick(r.name) } : {};
         return (
-          <Row key={r.name} {...rowProps} style={{ display: "grid", gridTemplateColumns: "18px 1fr 48px 34px", alignItems: "center", gap: 8,
+          <Row key={r.name} {...rowProps} style={{ display: "grid", gridTemplateColumns: "18px 1fr 44px 44px 30px", alignItems: "center", gap: 8,
             width: "100%", textAlign: "left", border: "none", font: "inherit", color: "inherit",
             padding: "3px 8px", borderRadius: 6,
             background: i === 0 ? "rgba(240,178,62,.14)" : (inChooser ? "rgba(91,217,138,.07)" : "transparent") }}>
             <span style={{ ...mono, fontSize: 11, color: C.chalkDim }}>{i + 1}</span>
             <span style={{ fontSize: 13, color: i === 0 ? C.amber : C.chalk }}>{r.name}</span>
+            <span style={{ ...mono, fontSize: 10.5, color: C.chalkDim, textAlign: "right" }}>{eqSim[r.name].toFixed(2)}</span>
+            <span style={{ ...mono, fontSize: 10.5, color: i === 0 ? C.amber : C.chalk, textAlign: "right" }}>{r.sim.toFixed(2)}</span>
+            <span style={{ ...mono, fontSize: 10, color: cueColor, textAlign: "right" }}>{cue}</span>
+          </Row>
+        );
+      })}
+    </div>
+  );
+}
+
+// Coach's-view table of the current archetype ranking. Move cues are vs the
+// neutral all-5s vector (the pre-answer starting point), so the coach can see
+// which archetypes each answer pulls the user towards. Ranking respects the
+// slider weights (see rankArchetypes), so it re-orders live as dials move.
+function ArchetypeRanking({ vec, started, weights }) {
+  const rank = rankArchetypes(vec, weights);
+  const basePos = {};
+  rankArchetypes(AXES.map(() => 5), weights).forEach((r, idx) => { basePos[r.code] = idx; });
+  return (
+    <div style={{ display: "grid", gap: 3 }}>
+      {rank.map((r, i) => {
+        let cue = "", cueColor = C.chalkDim;
+        if (started) {
+          const delta = basePos[r.code] - i;
+          if (delta > 0) { cue = `▲${delta}`; cueColor = C.lime; }
+          else if (delta < 0) { cue = `▼${-delta}`; cueColor = "#E06B6B"; }
+          else { cue = "·"; }
+        }
+        const gap = i === 0 ? "leader" : `+${(r.dist - rank[0].dist).toFixed(2)}`;
+        return (
+          <div key={r.code} style={{ display: "grid", gridTemplateColumns: "18px 1fr 48px 34px", alignItems: "center", gap: 8,
+            padding: "3px 8px", borderRadius: 6,
+            background: i === 0 ? "rgba(240,178,62,.14)" : "transparent" }}>
+            <span style={{ ...mono, fontSize: 11, color: C.chalkDim }}>{i + 1}</span>
+            <span style={{ fontSize: 13, color: i === 0 ? C.amber : C.chalk }}>{r.name}</span>
             <span style={{ ...mono, fontSize: 10.5, color: C.chalkDim, textAlign: "right" }}>{gap}</span>
             <span style={{ ...mono, fontSize: 10.5, color: cueColor, textAlign: "right" }}>{cue}</span>
-          </Row>
+          </div>
         );
       })}
     </div>
@@ -378,7 +406,6 @@ function App() {
   const [result, setResult] = useState(null);
   const [chosen, setChosen] = useState(0);
   const [override, setOverride] = useState(null);
-  const [basePos, setBasePos] = useState({});
   const [history, setHistory] = useState([]);
   const [shareUrl, setShareUrl] = useState(null);
   const [shareErr, setShareErr] = useState(false);
@@ -402,7 +429,7 @@ function App() {
     setStage("intro"); setQi(0);
     setAnswers(Q.map(() => null)); setWeights(SLIDERS.map(() => 5));
     setResult(null); setChosen(0); setOverride(null);
-    setBasePos({}); setHistory([]);
+    setHistory([]);
     setShareUrl(null); setShareErr(false);
     setProfileResult(null);
     reshuffle();
@@ -474,12 +501,7 @@ function App() {
   function chooseOption(oi) {
     const na = answers.slice();
     na[qOrder[qi]] = oi;
-    setHistory((h) => [...h, { qi, answers: answers.slice(), basePos: { ...basePos } }]);
-    if (Object.keys(basePos).length === 0) {
-      const base = {};
-      rankTeams(scoreAxes(na), SLIDERS.map(() => 5)).forEach((r, idx) => { base[r.name] = idx; });
-      setBasePos(base);
-    }
+    setHistory((h) => [...h, { qi, answers: answers.slice() }]);
     setAnswers(na);
     if (qi < Q.length - 1) setQi(qi + 1);
     else setStage("sliders");
@@ -519,10 +541,10 @@ function App() {
       return {
         slug: entry.LEAGUE.slug, name: entry.LEAGUE.name,
         winner: top.name, flavor: entry.FLAVOR[top.name], crest: entry.BADGE[top.name] || null,
-        matchPct: Math.round(top.sim * 100),
+        matchPct: Math.round(top.match * 100),
       };
     });
-    setProfileResult({ vec: v, archetype: archetypeFor(v), leagues });
+    setProfileResult({ vec: v, archetype: archetypeFor(v, weights), leagues });
     setStage("result");
     persist(answers, weights, { answers, weights, profile: true });
   }
@@ -543,7 +565,7 @@ function App() {
     if (history.length === 0) return;
     const prev = history[history.length - 1];
     setHistory((h) => h.slice(0, -1));
-    setAnswers(prev.answers); setBasePos(prev.basePos); setQi(prev.qi);
+    setAnswers(prev.answers); setQi(prev.qi);
   }
 
   function reset() {
@@ -672,10 +694,10 @@ function App() {
             {coach && (
               <div style={{ marginTop: 24, padding: 14, borderRadius: 10, border: `1px dashed ${C.amberDim}`, background: "rgba(0,0,0,.2)" }}>
                 <div style={{ ...mono, fontSize: 10, letterSpacing: 1, color: C.amberDim, textTransform: "uppercase", marginBottom: 10, display: "flex", justifyContent: "space-between" }}>
-                  <span>Live ranking · equal weights</span>
-                  <span style={{ color: C.chalkDim }}>gap · total move</span>
+                  <span>Live ranking · archetypes</span>
+                  <span style={{ color: C.chalkDim }}>gap · move vs neutral</span>
                 </div>
-                <LiveRanking vec={vec} weights={SLIDERS.map(() => 5)} basePos={basePos} started={history.length > 0} onPick={showTeam} />
+                <ArchetypeRanking vec={vec} started={history.length > 0} weights={weights} />
                 <div style={{ ...mono, fontSize: 10, letterSpacing: 1, color: C.amberDim, textTransform: "uppercase", margin: "16px 0 10px" }}>Live trait board</div>
                 <TraitBoard vec={vec} />
               </div>
@@ -715,10 +737,12 @@ function App() {
                 <div style={{ ...mono, fontSize: 10, letterSpacing: 1, color: C.amberDim, textTransform: "uppercase", marginBottom: 12 }}>Your four attributes</div>
                 <TraitBoard vec={vec} />
                 <div style={{ ...mono, fontSize: 10, letterSpacing: 1, color: C.amberDim, textTransform: "uppercase", margin: "18px 0 4px", display: "flex", justifyContent: "space-between" }}>
-                  <span>Ranking · equal vs your weights</span>
-                  <span style={{ color: C.chalkDim }}>▲▼ move vs equal</span>
+                  <span>{profileMode ? "Ranking · archetypes" : "Ranking · equal vs your weights"}</span>
+                  <span style={{ color: C.chalkDim }}>{profileMode ? "gap · move vs neutral" : "▲▼ move vs equal"}</span>
                 </div>
-                <LiveRanking vec={vec} weights={weights} compare={true} onPick={showTeam} />
+                {profileMode
+                  ? <ArchetypeRanking vec={vec} started weights={weights} />
+                  : <LiveRanking vec={vec} weights={weights} onPick={showTeam} />}
               </div>
             )}
             <button onClick={finish} style={{
