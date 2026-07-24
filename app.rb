@@ -74,7 +74,8 @@ class App < Sinatra::Base
   # fetch() on "Show my club"; body is JSON { answers: [...], weights: [...] }.
   post "/quizzes" do
     content_type :json
-    result = Quiz::Create.call(league: League.default, attrs: parse_json_body)
+    attrs = parse_json_body
+    result = Quiz::Create.call(league: resolve_league(attrs["league"]), attrs:)
     if result.success?
       record = result.value!
       status 201
@@ -108,11 +109,19 @@ class App < Sinatra::Base
   private
 
   def render_quiz(coach:)
-    @league = League.default
+    @league = resolve_league(params["league"])
+    @leagues = League.active.ordered.all
     @page_title = "Which #{@league.name} Club Should You Support?" if @league
     @quiz_data_json = json_for_script(Quiz::ClientData.call(@league))
+    @leagues_json = json_for_script(@leagues.map { |l| { "slug" => l.slug, "name" => l.name } })
     @coach = coach
     erb :"quiz/index"
+  end
+
+  # The active league matching slug, falling back to the default league. Used by
+  # the league dropdown (via ?league=) and the quiz submit body.
+  def resolve_league(slug)
+    (slug && League.active.first(slug:)) || League.default
   end
 
   def parse_json_body

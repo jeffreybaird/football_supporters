@@ -7,6 +7,7 @@
 
 <script>
   window.QUIZ_DATA = <%== @quiz_data_json %>;
+  window.QUIZ_LEAGUES = <%== @leagues_json %>;
   window.QUIZ_COACH = <%== @coach ? "true" : "false" %>;
 </script>
 
@@ -26,6 +27,11 @@ const { useState } = React;
 const D = window.QUIZ_DATA;
 // Coach's view is enabled only when served from /coach (see App route).
 const COACH_ENABLED = !!window.QUIZ_COACH;
+// The league being matched against, plus the list a user can switch to. The
+// server owns the data, so switching leagues navigates (reloads with that
+// league's dataset) rather than swapping it client-side.
+const LEAGUE = D.LEAGUE;
+const LEAGUES = window.QUIZ_LEAGUES || [];
 const AXES = D.AXES;
 const AXIS_LABEL = { Vibe: "Vibe", Play: "Play", Ethics: "Ethics", Fanbase: "Fanbase" };
 const CHOOSER_THRESHOLD = D.CHOOSER_THRESHOLD;
@@ -249,6 +255,36 @@ function ShareCard({ url, err, pick }) {
   );
 }
 
+// League switcher under the hero headline. The headline shows the current
+// league's name as text; this compact pill lets a user change it. With a single
+// league there is nothing to choose, so it renders nothing. Changing it
+// navigates to that league's page — the server re-renders with the new dataset
+// (see App#resolve_league). Native <select> so the option list is normal-sized
+// and fully keyboard-accessible.
+function LeaguePicker() {
+  if (LEAGUES.length <= 1) return null;
+  function onChange(e) {
+    const u = new URL(window.location.href);
+    u.searchParams.set("league", e.target.value);
+    window.location.assign(u.toString());
+  }
+  return (
+    <div style={{ display: "flex", alignItems: "center", gap: 10, margin: "0 0 24px", flexWrap: "wrap" }}>
+      <label htmlFor="league-picker" style={{
+        ...mono, fontSize: 11, letterSpacing: 1, textTransform: "uppercase", color: C.chalkDim,
+      }}>League</label>
+      <select id="league-picker" value={LEAGUE ? LEAGUE.slug : ""} onChange={onChange} style={{
+        ...mono, fontSize: 14, letterSpacing: 0.3, color: C.amber, background: C.pitch2,
+        border: `1px solid ${C.amber}`, borderRadius: 999, padding: "9px 14px", cursor: "pointer", minHeight: 44,
+      }}>
+        {LEAGUES.map((l) => (
+          <option key={l.slug} value={l.slug} style={{ color: "#1a1305" }}>{l.name}</option>
+        ))}
+      </select>
+    </div>
+  );
+}
+
 function App() {
   const [stage, setStage] = useState("intro");
   const [qi, setQi] = useState(0);
@@ -285,7 +321,7 @@ function App() {
     fetch("/quizzes", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ answers: finalAnswers, weights: finalWeights }),
+      body: JSON.stringify({ answers: finalAnswers, weights: finalWeights, league: LEAGUE ? LEAGUE.slug : null }),
     })
       .then((r) => (r.ok ? r.json() : Promise.reject(r.status)))
       .then((d) => setShareUrl(d.url))
@@ -377,10 +413,11 @@ function App() {
         {stage === "intro" && (
           <div>
             <h1 style={{ ...disp, fontWeight: 900, fontSize: 52, lineHeight: 0.95, margin: "0 0 14px", letterSpacing: -1 }}>
-              FIND THE CLUB<br />YOU SHOULD<br /><span style={{ color: C.amber }}>SUPPORT.</span>
+              FIND THE<br /><span style={{ color: C.amber }}>{(LEAGUE ? LEAGUE.name : "").toUpperCase()}</span><br />CLUB YOU SHOULD<br /><span style={{ color: C.amber }}>SUPPORT.</span>
             </h1>
+            <LeaguePicker />
             <p style={{ color: C.chalkDim, fontSize: 16, lineHeight: 1.5, maxWidth: 470, margin: "0 0 26px" }}>
-              Still searching for your team? Take a few minutes to answer questions about your daily life, your values, and the little things that get under your skin. Tell us what matters most, and we'll find the Premier League club that fits you—flaws and all.
+              Still searching for your team? Take a few minutes to answer questions about your daily life, your values, and the little things that get under your skin. Tell us what matters most, and we'll find the {LEAGUE ? LEAGUE.name : ""} club that fits you—flaws and all.
             </p>
             <button onClick={() => setStage("quiz")} style={{
               ...disp, fontWeight: 800, fontSize: 17, letterSpacing: 0.5, textTransform: "uppercase",

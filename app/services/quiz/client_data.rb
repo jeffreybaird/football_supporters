@@ -11,6 +11,7 @@ module Quiz
     def call(league)
       teams = league ? league.scored_teams : []
       {
+        "LEAGUE"            => league && { "slug" => league.slug, "name" => league.name },
         "AXES"              => Data::AXES,
         "TEAMS"             => teams.to_h { |t| [t.name, t.vector] },
         "Q"                 => Data::Q,
