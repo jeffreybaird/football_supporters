@@ -21,6 +21,9 @@ group :development, :test do
   gem "rack-test", "~> 2.2", require: "rack/test"
   gem "factory_bot", "~> 6.5"
   gem "dotenv", "~> 3.1"
+  gem "rubocop", "~> 1.75", require: false
+  gem "rubocop-rspec", "~> 3.5", require: false
+  gem "rubocop-sequel", "~> 0.3", require: false
 end
 
 group :test do
