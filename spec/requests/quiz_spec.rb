@@ -114,7 +114,7 @@ RSpec.describe "Quiz", type: :request do
       expect(body["slug"]).to be_a(String)
       expect(body["url"]).to include("/q/#{body['slug']}")
       expect(QuizResult.count).to eq(1)
-      expect(QuizResult.first.pick).to eq("Everton")
+      expect(QuizResult.first.pick).to eq("Man United")
       expect(QuizResult.first.league_id).to eq(League.default.id)
     end
 
@@ -129,18 +129,18 @@ RSpec.describe "Quiz", type: :request do
 
   describe "GET /q/:slug" do
     it "renders the shared result server-side" do
-      record = create_record(slug: "everton1", pick: "Everton")
+      record = create_record(slug: "united01", pick: "Man United")
 
       get "/q/#{record.slug}"
 
       expect(last_response).to be_ok
-      expect(last_response.body).to include("Everton")
+      expect(last_response.body).to include("Man United")
       # the flavour text is rendered, not just the name (apostrophe-free snippet,
-      # since ERB auto-escapes the apostrophe in "People's")
-      expect(last_response.body).to include("Everton fans have spent years convinced")
+      # since ERB auto-escapes apostrophes)
+      expect(last_response.body).to include("Every August, United fans decide this is the year")
       # share controls + populated link
       expect(last_response.body).to include('data-testid="share-url"')
-      expect(last_response.body).to include("/q/everton1")
+      expect(last_response.body).to include("/q/united01")
       expect(last_response.body).to include("/js/share.js")
       # social preview metadata
       expect(last_response.body).to include('property="og:title"')

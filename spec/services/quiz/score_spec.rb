@@ -3,10 +3,11 @@
 require "spec_helper"
 
 RSpec.describe Quiz::Score do
-  # Values below are pinned against the original browser scorer — a Node replay of
-  # the source agreed with this port on 712 random cases (vector, full ranking,
-  # candidates and gap to 1e-9). The seeded Premier League teams carry the same
-  # coordinates in the same order, so the pins still hold after the DB refactor.
+  # Values below are pinned reference outputs of this scorer, re-derived after the
+  # ethics questions (E5/E6 -> E2/E3) were replaced in Quiz::Data. The algorithm
+  # itself was originally validated against a Node replay of the browser scorer on
+  # 712 random cases (vector, full ranking, candidates and gap to 1e-9); these pins
+  # guard against unintended drift in either the scorer or the question data.
   let(:teams) { League.default.scored_teams }
 
   def rounded(vec) = vec.map { |x| x.round(4) }
@@ -24,10 +25,10 @@ RSpec.describe Quiz::Score do
   it "matches the reference scorer for the all-first-option answer set" do
     r = described_class.call(teams:, answers: Array.new(13, 0), weights: [5, 5, 5, 5])
 
-    expect(r.pick.name).to eq("Everton")
-    expect(r.candidates.map(&:name)).to eq(["Everton"])
-    expect(rounded(r.vec)).to eq([6.0351, 4.5946, 10.0, 7.61])
-    expect(r.gap.round(4)).to eq(0.2922)
+    expect(r.pick.name).to eq("Man United")
+    expect(r.candidates.map(&:name)).to eq(["Man United", "Everton"])
+    expect(rounded(r.vec)).to eq([6.3396, 4.5946, 10.0, 7.3524])
+    expect(r.gap.round(4)).to eq(0.0196)
   end
 
   it "matches the reference scorer for the all-last-option answer set" do
@@ -35,7 +36,7 @@ RSpec.describe Quiz::Score do
 
     expect(r.pick.name).to eq("Chelsea")
     expect(r.candidates.map(&:name)).to eq(["Chelsea", "Man City"])
-    expect(rounded(r.vec)).to eq([5.6842, 6.8919, 1.0, 2.66])
+    expect(rounded(r.vec)).to eq([5.5094, 6.8919, 1.0, 3.0571])
   end
 
   it "matches the reference scorer for a mixed answer set" do
@@ -43,9 +44,9 @@ RSpec.describe Quiz::Score do
     r = described_class.call(teams:, answers:, weights: [5, 5, 5, 5])
 
     expect(r.pick.name).to eq("Liverpool")
-    expect(r.candidates.map(&:name)).to eq(["Liverpool", "Crystal Palace"])
-    expect(rounded(r.vec)).to eq([5.614, 6.3784, 7.8824, 5.09])
-    expect(r.gap.round(4)).to eq(0.1847)
+    expect(r.candidates.map(&:name)).to eq(["Liverpool"])
+    expect(rounded(r.vec)).to eq([5.8868, 6.3784, 7.8824, 4.981])
+    expect(r.gap.round(4)).to eq(0.3201)
   end
 
   it "defaults every axis with no evidence to 5.0" do
@@ -87,5 +88,19 @@ RSpec.describe Quiz::Score do
     # vec is amplify-independent; the ranking distances are not.
     expect(rounded(tight.vec)).to eq(rounded(wide.vec))
     expect(tight.rank.first.dist).not_to eq(wide.rank.first.dist)
+  end
+
+  it "derives match from the raw (pre-amplify) distance, so match% is amplify-independent" do
+    answers = Array.new(13, 0)
+    tight = described_class.call(teams:, answers:, weights: [5, 5, 5, 5], amplify: 1.0)
+    wide  = described_class.call(teams:, answers:, weights: [5, 5, 5, 5], amplify: 2.5)
+
+    tight_match = tight.rank.to_h { |r| [r.name, r.match] }
+    wide_match  = wide.rank.to_h { |r| [r.name, r.match] }
+    tight_match.each { |name, m| expect(m).to be_within(1e-9).of(wide_match[name]) }
+
+    # at amplify 1.0 the ranking distance IS the raw distance, so match = 1 - dist/10.
+    tight.rank.each { |r| expect(r.match).to be_within(1e-9).of(1.0 - r.dist / Quiz::Score::DIAMETER) }
+    tight.rank.each { |r| expect(r.match).to be_between(0.0, 1.0) }
   end
 end

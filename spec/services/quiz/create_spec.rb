@@ -16,7 +16,7 @@ RSpec.describe Quiz::Create do
 
     expect(result.success?).to be(true)
     record = result.value!
-    expect(record.pick).to eq("Everton")
+    expect(record.pick).to eq("Man United")
     expect(record.league_id).to eq(league.id)
     expect(record.slug).to be_a(String)
     expect(record.slug).not_to be_empty

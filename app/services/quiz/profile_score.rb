@@ -20,9 +20,10 @@ module Quiz
         next if teams.empty?
 
         top = Score.call(teams:, answers:, weights:, **league.scoring_params).rank.first
-        # match_pct is the winner's ABSOLUTE similarity (sim = 1/(1+dist)), not
-        # normalized per league — so numbers stay comparable across leagues.
-        Entry.new(league:, pick: top.team, sim: top.sim, match_pct: (top.sim * 100).round)
+        # match_pct is the winner's RAW-distance closeness (1 - raw_dist/10), linear
+        # across the space diameter — comparable across leagues and undistorted by
+        # each league's amplify. sim (steep, amplify-based) still drives ranking.
+        Entry.new(league:, pick: top.team, sim: top.sim, match_pct: (top.match * 100).round)
       end
       Result.new(vec:, archetype: Archetype.call(vec), leagues: entries)
     end

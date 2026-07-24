@@ -12,10 +12,20 @@ module Quiz
   #
   # Similarity is 1/(1+distance) so higher = better; ties break by the team's
   # position in the supplied list, matching the browser's stable sort.
+  #
+  # `sim` (1/(1+dist)) drives ranking and is intentionally steep, so it is a poor
+  # human-facing "% match". The displayed `match` is a separate, gentler number:
+  # the RAW (pre-amplify) weighted distance mapped linearly across the space
+  # diameter — see DIAMETER and #rank_teams.
   module Score
     module_function
 
-    Ranked = Struct.new(:team, :dist, :sim) do
+    # Axes span 0..10 and the normalized weights sum to 1, so the largest possible
+    # weighted distance is sqrt(sum(w) * 10**2) = 10. `match` maps a team's raw
+    # distance linearly across this diameter: match = 1 - raw_dist/DIAMETER.
+    DIAMETER = 10.0
+
+    Ranked = Struct.new(:team, :dist, :sim, :match) do
       def name = team.name
     end
     Result = Struct.new(:vec, :rank, :candidates, :pick, :gap, keyword_init: true)
@@ -75,7 +85,11 @@ module Quiz
       teams.each_with_index.map do |team, idx|
         t = team.vector
         dist = Math.sqrt(w.each_index.sum { |k| w[k] * (u[k] - t[k])**2 })
-        [Ranked.new(team, dist, 1.0 / (1.0 + dist)), idx]
+        # match% is derived from the RAW user vector (no amplify): amplify is a
+        # ranking spread trick and must not distort the human-facing percentage.
+        raw = Math.sqrt(w.each_index.sum { |k| w[k] * (vec[k] - t[k])**2 })
+        match = [[1.0 - raw / DIAMETER, 0.0].max, 1.0].min
+        [Ranked.new(team, dist, 1.0 / (1.0 + dist), match), idx]
       end.sort_by { |r, idx| [-r.sim, idx] }.map(&:first)
     end
 

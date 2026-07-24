@@ -32,7 +32,7 @@ module Quiz
         { "l" => "the weaker team to cause an upset", "v" => [1, 6, nil, nil] },
         { "l" => "I only watch the teams I support", "v" => [4, 3, nil, nil] },
       ] },
-      { "id" => "V4", "t" => "Something you love has a great year. When it's going well, you", "load" => [0.1, 0, 0, 0.8], "a" => [
+      { "id" => "V4", "t" => "A team you love has a great year. When it's going well, you", "load" => [0.1, 0, 0, 0.8], "a" => [
         { "l" => "make sure people know about it", "v" => [10, nil, nil, 2] },
         { "l" => "enjoy it privately", "v" => [5, nil, nil, 5] },
         { "l" => "celebrate with other fans of my team", "v" => [5, nil, nil, 8] },
@@ -68,17 +68,17 @@ module Quiz
         { "l" => "defends deep and counters", "v" => [nil, 2, nil, nil] },
         { "l" => "competes hard regardless of style", "v" => [nil, 8, nil, nil] },
       ] },
-      { "id" => "E5", "t" => "A country with a poor human-rights record hosts a major global event. You", "load" => [0.2, 0, 0.8, 0], "a" => [
-        { "l" => "refuse to watch it", "v" => [2, nil, 10, nil] },
-        { "l" => "watch, but it sits badly with you", "v" => [5, nil, 6, nil] },
-        { "l" => "watch and keep sport and politics separate", "v" => [6, nil, 2, nil] },
-        { "l" => "enjoy it, the event is what matters", "v" => [8, nil, 1, nil] },
+      { "id" => "E2", "t" => "Has anything a club did ever changed how you felt about supporting them?", "load" => [0, 0, 0.8, 0.4], "a" => [
+        { "l" => "Yes — enough that I stopped, or never started", "v" => [nil, nil, 10, 4] },
+        { "l" => "Yes — it changed things, but I stayed", "v" => [nil, nil, 7, 7] },
+        { "l" => "Not really — I've never had to think about it", "v" => [nil, nil, 4, 6] },
+        { "l" => "No — what happens off the pitch isn't the club to me", "v" => [nil, nil, 1, 8] },
       ] },
-      { "id" => "E6", "t" => "A brand you're loyal to is bought by a corporation that behaves in a way you ethically disagree with. You", "load" => [0, 0, 0.9, 0.15], "a" => [
-        { "l" => "stop using it", "v" => [nil, nil, 10, 7] },
-        { "l" => "keep using it, but it bothers you", "v" => [nil, nil, 6, 6] },
-        { "l" => "carry on, it doesn't really affect you", "v" => [nil, nil, 2, 4] },
-        { "l" => "don't mind, the backing means a better product", "v" => [nil, nil, 1, 3] },
+        { "id" => "E3", "t" => "Your favorite spot, the one you actually look forward to, gets bought by someone you'd cross the street to avoid. Nothing else about it changes.", "load" => [0, 0, 0.9, 0], "a" => [
+        { "l" => "I'd stop going for good", "v" => [nil, nil, 10, nil] },
+        { "l" => "I'd go less, and it'd feel off every time", "v" => [nil, nil, 6, nil] },
+        { "l" => "I'd keep going and try not to think about it", "v" => [nil, nil, 3, nil] },
+        { "l" => "I'd keep going, it's the same place", "v" => [nil, nil, 1, nil] },
       ] },
       { "id" => "F3", "t" => "The type of city or town you'd prefer to live", "load" => [0.4, 0, 0, 0.8], "a" => [
         { "l" => "my hometown", "v" => [2, nil, nil, 10] },
