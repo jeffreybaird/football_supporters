@@ -31,12 +31,19 @@ RSpec.describe Quiz::Seed do
     expect(League.default.slug).to eq("premier-league")
   end
 
-  it "seeds Bundesliga scores from the CSV, with no crest yet" do
+  it "seeds Bundesliga scores from the CSV, with a crest and blurb" do
     union = Team.first(league_id: League.first(slug: "bundesliga").id, name: "Union Berlin")
 
     expect(union.vector).to eq([2.0, 2.0, 10.0, 10.0])
-    expect(union.crest).to be_nil
+    expect(union.crest).to eq("8149-Union_Berlin.png")
     expect(union.blurb).not_to be_empty
+  end
+
+  it "points every seeded club at a crest file that exists on disk" do
+    Team.all.each do |team|
+      expect(team.crest).not_to be_nil, "#{team.name} has no crest"
+      expect(File.exist?(File.join("public/images", team.crest))).to be(true), "missing #{team.crest}"
+    end
   end
 
   it "is idempotent — re-running adds no rows" do
