@@ -43,6 +43,19 @@ const SLIDERS = D.SLIDERS;
 // during render, so components never see a half-switched dataset.
 let LEAGUE, TEAMS, TEAM_NAMES, FLAVOR, BADGE, CHOOSER_THRESHOLD, MAX_CHOICES, AMPLIFY, CENTROID;
 
+// Football Profile mode scores against every league at once. Its dataset (all
+// leagues + the archetype table) is fetched lazily from GET /leagues the first
+// time the user picks Profile (see enterProfile) and cached here.
+const PROFILE_SLUG = "__profile__";
+let PROFILE_DATA = null;
+
+// Centre of a team cloud — the point the user's vector is amplified away from
+// (see Quiz::Score#centroid_of). One implementation shared by applyLeague and
+// the per-league profile bundles.
+function centroidOf(teams, names) {
+  return AXES.map((_, k) => names.reduce((s, n) => s + teams[n][k], 0) / names.length);
+}
+
 function applyLeague(d) {
   LEAGUE = d.LEAGUE;
   TEAMS = d.TEAMS;
@@ -52,15 +65,18 @@ function applyLeague(d) {
   CHOOSER_THRESHOLD = d.CHOOSER_THRESHOLD;
   MAX_CHOICES = d.MAX_CHOICES;
   AMPLIFY = d.AMPLIFY;
-  // centre of this league's team cloud — the point the user's vector is
-  // amplified away from (see Quiz::Score#centroid_of).
-  CENTROID = AXES.map((_, k) =>
-    TEAM_NAMES.reduce((s, n) => s + TEAMS[n][k], 0) / TEAM_NAMES.length
-  );
+  CENTROID = centroidOf(TEAMS, TEAM_NAMES);
 }
 applyLeague(D);
 
-// ---- scoring: loadings-weighted mean per axis ----
+// A scoring bundle for one PROFILE_DATA.LEAGUES entry, shaped like the globals
+// rankTeamsIn reads.
+function leagueBundle(entry) {
+  const names = Object.keys(entry.TEAMS);
+  return { TEAMS: entry.TEAMS, TEAM_NAMES: names, CENTROID: centroidOf(entry.TEAMS, names), AMPLIFY: entry.AMPLIFY };
+}
+
+// ---- scoring: loadings-weighted mean per axis (league-independent) ----
 function scoreAxes(answers) {
   const num = [0, 0, 0, 0], den = [0, 0, 0, 0];
   answers.forEach((oi, qIdx) => {
@@ -74,20 +90,43 @@ function scoreAxes(answers) {
   return num.map((n, k) => (den[k] > 0 ? n / den[k] : 5.0));
 }
 
-function rankTeams(vec, weights) {
+// Rank a given team bundle for the user vector. rankTeams is the single-league
+// wrapper over the current globals; profile mode calls rankTeamsIn per league.
+function rankTeamsIn(data, vec, weights) {
   const wsum = weights.reduce((s, x) => s + x, 0) || 1;
   const w = weights.map((x) => x / wsum);
   const u = vec.map((x, k) => {
-    const a = CENTROID[k] + (x - CENTROID[k]) * AMPLIFY;
+    const a = data.CENTROID[k] + (x - data.CENTROID[k]) * data.AMPLIFY;
     return Math.max(0, Math.min(10, a));
   });
-  return TEAM_NAMES
+  return data.TEAM_NAMES
     .map((name) => {
-      const t = TEAMS[name];
+      const t = data.TEAMS[name];
       const dist = Math.sqrt(w.reduce((s, wk, k) => s + wk * (u[k] - t[k]) * (u[k] - t[k]), 0));
       return { name, dist, sim: 1 / (1 + dist) };
     })
     .sort((a, b) => b.sim - a.sim);
+}
+
+function rankTeams(vec, weights) {
+  return rankTeamsIn({ TEAMS, TEAM_NAMES, CENTROID, AMPLIFY }, vec, weights);
+}
+
+// Abstract "kind of team you want" from the user vector — a literal transcription
+// of Quiz::Archetype#call over the shipped ARCHETYPE table (PROFILE_DATA.ARCHETYPE)
+// so the live result and the server-rendered share page agree. Returns { label,
+// sentence }.
+function archetypeFor(vec) {
+  const t = PROFILE_DATA.ARCHETYPE;
+  const band = (v) => (v <= t.bands.low ? "low" : v >= t.bands.high ? "high" : "mid");
+  const ordered = AXES.map((_, k) => k).sort((a, b) => (Math.abs(vec[b] - 5) - Math.abs(vec[a] - 5)) || (a - b));
+  const dom = ordered[0];
+  const label = band(vec[dom]) === "mid" ? t.allMidLabel : t.labels[AXES[dom]][band(vec[dom])];
+  const strong = ordered.filter((k) => band(vec[k]) !== "mid").slice(0, 2);
+  const sentence = strong.length === 0
+    ? t.allMidSentence
+    : "This is the kind of team you want: " + strong.map((k) => t.fragments[AXES[k]][band(vec[k])]).join(", and ") + ".";
+  return { label, sentence };
 }
 
 // ---- palette / type ----
@@ -187,8 +226,10 @@ function LiveRanking({ vec, weights, basePos, started, compare, onPick }) {
   );
 }
 
-function Badge({ name, size = 92 }) {
-  const file = BADGE[name];
+function Badge({ name, size = 92, file }) {
+  // Single-league callers omit `file` and read the global BADGE map; profile
+  // cards pass file explicitly since BADGE isn't the right league's map there.
+  if (file === undefined) file = BADGE[name];
   const initials = name.split(" ").map((w) => w[0]).join("").slice(0, 3).toUpperCase();
   return (
     <div style={{
@@ -276,7 +317,8 @@ function LeaguePicker({ value, busy, error, onChange }) {
   const current = LEAGUES.find((l) => l.slug === value);
   let status = "";
   if (busy) status = "Loading clubs…";
-  else if (error) status = "Couldn't load that league. Try again.";
+  else if (error) status = "Couldn't load that. Try again.";
+  else if (value === PROFILE_SLUG) status = "Matching against every league.";
   else if (current) status = `Matching against ${current.name} clubs.`;
   return (
     <div style={{ margin: "0 0 24px" }}>
@@ -289,9 +331,14 @@ function LeaguePicker({ value, busy, error, onChange }) {
           border: `1px solid ${error ? "#E06B6B" : C.amber}`, borderRadius: 999, padding: "9px 14px",
           cursor: busy ? "progress" : "pointer", minHeight: 44, opacity: busy ? 0.6 : 1,
         }}>
-          {LEAGUES.map((l) => (
-            <option key={l.slug} value={l.slug} style={{ color: "#1a1305" }}>{l.name}</option>
-          ))}
+          <optgroup label="Leagues">
+            {LEAGUES.map((l) => (
+              <option key={l.slug} value={l.slug} style={{ color: "#1a1305" }}>{l.name}</option>
+            ))}
+          </optgroup>
+          <optgroup label="Across all leagues">
+            <option value={PROFILE_SLUG} style={{ color: "#1a1305" }}>⚽ Football Profile</option>
+          </optgroup>
         </select>
       </div>
       <div aria-live="polite" style={{
@@ -317,33 +364,85 @@ function App() {
   const [leagueSlug, setLeagueSlug] = useState(LEAGUE ? LEAGUE.slug : "");
   const [leagueBusy, setLeagueBusy] = useState(false);
   const [leagueErr, setLeagueErr] = useState(false);
+  const [profileMode, setProfileMode] = useState(false);
+  const [profileBusy, setProfileBusy] = useState(false);
+  const [profileErr, setProfileErr] = useState(false);
+  const [profileResult, setProfileResult] = useState(null);
 
   const vec = scoreAxes(answers);
+
+  // Clear all quiz progress — shared by every mode switch. Switching what we
+  // match against invalidates the old answers, so we always start over.
+  function resetQuiz() {
+    setStage("intro"); setQi(0);
+    setAnswers(Q.map(() => null)); setWeights(SLIDERS.map(() => 5));
+    setResult(null); setChosen(0); setOverride(null);
+    setBasePos({}); setHistory([]);
+    setShareUrl(null); setShareErr(false);
+    setProfileResult(null);
+  }
+
+  function setLeagueParam(slug) {
+    const u = new URL(window.location.href);
+    u.searchParams.set("league", slug);
+    window.history.replaceState({}, "", u.toString());
+  }
+
+  // Picker dispatcher: Profile enters profile mode; otherwise switch league.
+  // Leaving profile back to the league we were already on needs no refetch (the
+  // league globals were never swapped away), just turning profile mode off.
+  function onLeagueChange(v) {
+    if (v === PROFILE_SLUG) return enterProfile();
+    if (profileMode && v === leagueSlug) return exitProfile();
+    switchLeague(v);
+  }
 
   // Swap the matched-against league without a reload: fetch that league's
   // dataset, install it, and start the quiz over — the old answers were scored
   // against a different set of clubs, so keeping them would be meaningless. The
   // URL is kept in step so a reload or a shared link lands on the same league.
   function switchLeague(slug) {
-    if (!slug || slug === leagueSlug || leagueBusy) return;
+    if (!slug || (slug === leagueSlug && !profileMode) || leagueBusy) return;
     setLeagueBusy(true); setLeagueErr(false);
     fetch(`/leagues/${encodeURIComponent(slug)}`, { headers: { Accept: "application/json" } })
       .then((r) => (r.ok ? r.json() : Promise.reject(r.status)))
       .then((d) => {
         applyLeague(d);
+        setProfileMode(false);
         setLeagueSlug(slug);
-        setStage("intro"); setQi(0);
-        setAnswers(Q.map(() => null)); setWeights(SLIDERS.map(() => 5));
-        setResult(null); setChosen(0); setOverride(null);
-        setBasePos({}); setHistory([]);
-        setShareUrl(null); setShareErr(false);
+        resetQuiz();
         document.title = `Which ${LEAGUE.name} Club Should You Support?`;
-        const u = new URL(window.location.href);
-        u.searchParams.set("league", slug);
-        window.history.replaceState({}, "", u.toString());
+        setLeagueParam(slug);
       })
       .catch(() => setLeagueErr(true))
       .then(() => setLeagueBusy(false));
+  }
+
+  // Football Profile: fetch every league's dataset once (cached in PROFILE_DATA),
+  // then install profile mode. Mirrors switchLeague's fetch/reset shape.
+  function enterProfile() {
+    if (profileMode || profileBusy) return;
+    if (PROFILE_DATA) return installProfile();
+    setProfileBusy(true); setProfileErr(false);
+    fetch("/leagues", { headers: { Accept: "application/json" } })
+      .then((r) => (r.ok ? r.json() : Promise.reject(r.status)))
+      .then((d) => { PROFILE_DATA = d; installProfile(); })
+      .catch(() => setProfileErr(true))
+      .then(() => setProfileBusy(false));
+  }
+
+  function installProfile() {
+    setProfileMode(true);
+    resetQuiz();
+    document.title = "Your Football Profile";
+    setLeagueParam("profile");
+  }
+
+  function exitProfile() {
+    setProfileMode(false);
+    resetQuiz();
+    document.title = `Which ${LEAGUE.name} Club Should You Support?`;
+    setLeagueParam(leagueSlug);
   }
 
   function chooseOption(oi) {
@@ -360,13 +459,14 @@ function App() {
     else setStage("sliders");
   }
 
-  // Persist the completed quiz and surface its shareable slug.
-  function persist(finalAnswers, finalWeights) {
+  // Persist the completed quiz/profile and surface its shareable slug. The body
+  // shape decides the server path: { profile: true } vs { league }.
+  function persist(finalAnswers, finalWeights, body) {
     setShareUrl(null); setShareErr(false);
     fetch("/quizzes", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ answers: finalAnswers, weights: finalWeights, league: LEAGUE ? LEAGUE.slug : null }),
+      body: JSON.stringify(body),
     })
       .then((r) => (r.ok ? r.json() : Promise.reject(r.status)))
       .then((d) => setShareUrl(d.url))
@@ -374,13 +474,31 @@ function App() {
   }
 
   function finish() {
+    if (profileMode) return finishProfile();
     const rank = rankTeams(scoreAxes(answers), weights);
     const candidates = rank.filter((r, idx) => idx === 0 || r.dist - rank[0].dist < CHOOSER_THRESHOLD).slice(0, MAX_CHOICES);
     setResult({ rank, candidates, gap: rank[1].dist - rank[0].dist });
     setChosen(0);
     setOverride(null);
     setStage("result");
-    persist(answers, weights);
+    persist(answers, weights, { answers, weights, league: LEAGUE ? LEAGUE.slug : null });
+  }
+
+  // Score the answers against every league at once: one winner per league plus
+  // the abstract archetype (both derived from the same user vector).
+  function finishProfile() {
+    const v = scoreAxes(answers);
+    const leagues = PROFILE_DATA.LEAGUES.map((entry) => {
+      const top = rankTeamsIn(leagueBundle(entry), v, weights)[0];
+      return {
+        slug: entry.LEAGUE.slug, name: entry.LEAGUE.name,
+        winner: top.name, flavor: entry.FLAVOR[top.name], crest: entry.BADGE[top.name] || null,
+        matchPct: Math.round(top.sim * 100),
+      };
+    });
+    setProfileResult({ vec: v, archetype: archetypeFor(v), leagues });
+    setStage("result");
+    persist(answers, weights, { answers, weights, profile: true });
   }
 
   function showTeam(name) {
@@ -403,9 +521,7 @@ function App() {
   }
 
   function reset() {
-    setStage("intro"); setQi(0); setAnswers(Q.map(() => null));
-    setWeights(SLIDERS.map(() => 5)); setResult(null); setChosen(0); setOverride(null); setBasePos({}); setHistory([]);
-    setShareUrl(null); setShareErr(false);
+    resetQuiz();
   }
 
   const shell = {
@@ -458,11 +574,15 @@ function App() {
         {stage === "intro" && (
           <div>
             <h1 style={{ ...disp, fontWeight: 900, fontSize: 52, lineHeight: 0.95, margin: "0 0 14px", letterSpacing: -1 }}>
-              FIND THE<br /><span style={{ color: C.amber }}>{(LEAGUE ? LEAGUE.name : "").toUpperCase()}</span><br />CLUB YOU SHOULD<br /><span style={{ color: C.amber }}>SUPPORT.</span>
+              {profileMode
+                ? <React.Fragment>BUILD YOUR<br /><span style={{ color: C.amber }}>FOOTBALL</span><br />PROFILE.</React.Fragment>
+                : <React.Fragment>FIND THE<br /><span style={{ color: C.amber }}>{(LEAGUE ? LEAGUE.name : "").toUpperCase()}</span><br />CLUB YOU SHOULD<br /><span style={{ color: C.amber }}>SUPPORT.</span></React.Fragment>}
             </h1>
-            <LeaguePicker value={leagueSlug} busy={leagueBusy} error={leagueErr} onChange={switchLeague} />
+            <LeaguePicker value={profileMode ? PROFILE_SLUG : leagueSlug} busy={leagueBusy || profileBusy} error={leagueErr || profileErr} onChange={onLeagueChange} />
             <p style={{ color: C.chalkDim, fontSize: 16, lineHeight: 1.5, maxWidth: 470, margin: "0 0 26px" }}>
-              Still searching for your team? Take a few minutes to answer questions about your daily life, your values, and the little things that get under your skin. Tell us what matters most, and we'll find the {LEAGUE ? LEAGUE.name : ""} club that fits you—flaws and all.
+              {profileMode
+                ? "Answer the same questions once and we'll match you against every league at once — your best-fit club in each, plus the kind of team you're really after."
+                : <React.Fragment>Still searching for your team? Take a few minutes to answer questions about your daily life, your values, and the little things that get under your skin. Tell us what matters most, and we'll find the {LEAGUE ? LEAGUE.name : ""} club that fits you—flaws and all.</React.Fragment>}
             </p>
             <button onClick={() => setStage("quiz")} style={{
               ...disp, fontWeight: 800, fontSize: 17, letterSpacing: 0.5, textTransform: "uppercase",
@@ -661,6 +781,65 @@ function App() {
             </div>
           );
         })()}
+
+        {stage === "result" && profileMode && profileResult && (
+          <div>
+            <div style={{ ...mono, fontSize: 12, color: C.lime, letterSpacing: 1, marginBottom: 14 }}>
+              Full time · your football profile
+            </div>
+            <h1 style={{ ...disp, fontWeight: 900, fontSize: 40, lineHeight: 0.95, margin: "0 0 8px", letterSpacing: -1, color: C.amber }}>
+              {profileResult.archetype.label}
+            </h1>
+            <p style={{ fontSize: 16, lineHeight: 1.5, color: C.chalk, margin: "0 0 26px" }}>{profileResult.archetype.sentence}</p>
+
+            <div style={{ ...mono, fontSize: 11, letterSpacing: 1, color: C.chalkDim, textTransform: "uppercase", marginBottom: 10 }}>Your club in every league</div>
+            <div style={{ display: "grid", gap: 8, marginBottom: 26 }}>
+              {profileResult.leagues.map((l) => (
+                <div key={l.slug} style={{ display: "grid", gridTemplateColumns: "auto 1fr auto", gap: 14, alignItems: "center",
+                  background: C.pitch2, border: `1px solid ${C.line}`, borderRadius: 12, padding: "12px 14px" }}>
+                  <Badge name={l.winner} file={l.crest} size={44} />
+                  <span style={{ minWidth: 0 }}>
+                    <span style={{ ...mono, fontSize: 10, letterSpacing: 1, textTransform: "uppercase", color: C.amberDim, display: "block" }}>{l.name}</span>
+                    <span style={{ ...disp, fontWeight: 800, fontSize: 16 }}>{l.winner}</span>
+                    <span style={{ display: "block", color: C.chalkDim, fontSize: 12.5, lineHeight: 1.3, marginTop: 2 }}>{l.flavor.split(". ")[0]}.</span>
+                  </span>
+                  <span style={{ textAlign: "right", whiteSpace: "nowrap" }}>
+                    <span style={{ ...disp, fontWeight: 900, fontSize: 22, color: C.amber }}>{l.matchPct}</span>
+                    <span style={{ ...mono, fontSize: 9, letterSpacing: 0.5, textTransform: "uppercase", color: C.chalkDim, display: "block" }}>% match</span>
+                  </span>
+                </div>
+              ))}
+            </div>
+
+            <ShareCard url={shareUrl} err={shareErr} pick={profileResult.archetype.label} />
+
+            <div style={{ display: "flex", gap: 10 }}>
+              <button onClick={reset} style={{
+                ...disp, fontWeight: 800, fontSize: 15, textTransform: "uppercase",
+                background: "transparent", color: C.amber, border: `1px solid ${C.amber}`, borderRadius: 10, padding: "12px 24px",
+              }}>Play again ↺</button>
+            </div>
+
+            {coach && (
+              <div style={{ marginTop: 30, padding: 16, borderRadius: 12, border: `1px dashed ${C.amberDim}`, background: "rgba(0,0,0,.22)" }}>
+                <div style={{ ...mono, fontSize: 10, letterSpacing: 1, color: C.amberDim, textTransform: "uppercase", marginBottom: 12 }}>Per-league fit · match %</div>
+                <div style={{ display: "grid", gap: 6, marginBottom: 18 }}>
+                  {profileResult.leagues.map((l) => (
+                    <div key={l.slug} style={{ display: "grid", gridTemplateColumns: "30px 1fr 34px", alignItems: "center", gap: 10 }}>
+                      <Badge name={l.winner} file={l.crest} size={28} />
+                      <div style={{ height: 7, background: "#0c2417", borderRadius: 2, overflow: "hidden", border: `1px solid ${C.line}` }}>
+                        <div style={{ width: `${l.matchPct}%`, height: "100%", background: C.amber }} />
+                      </div>
+                      <span style={{ ...mono, fontSize: 11, color: C.amber, textAlign: "right" }}>{l.matchPct}</span>
+                    </div>
+                  ))}
+                </div>
+                <div style={{ ...mono, fontSize: 10, letterSpacing: 1, color: C.amberDim, textTransform: "uppercase", marginBottom: 10 }}>Your vector · weights [{weights.join(", ")}]</div>
+                <TraitBoard vec={profileResult.vec} />
+              </div>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );

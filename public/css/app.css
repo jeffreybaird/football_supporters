@@ -173,6 +173,35 @@ button, .btn { cursor: pointer; font-family: inherit; }
 
 .result__actions { display: flex; gap: 10px; flex-wrap: wrap; }
 
+/* ---- Football Profile (cross-league) ---- */
+.profile { max-width: 620px; margin: 0 auto; padding: 40px 18px 64px; }
+.profile__archetype { margin: 4px 0 28px; }
+.profile__sentence { color: var(--chalk-dim); font-size: 16px; line-height: 1.5; margin: 10px 0 0; }
+.profile__leagues { display: grid; gap: 10px; margin-bottom: 26px; }
+.profile__league {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 14px;
+  background: var(--pitch2);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+}
+.profile__club { min-width: 0; }
+.profile__league-name {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--amber-dim);
+  display: block;
+  margin-bottom: 2px;
+}
+.profile__match { text-align: right; white-space: nowrap; }
+.profile__match-num { font-family: var(--disp); font-weight: 900; font-size: 24px; color: var(--amber); }
+.profile__match-unit { font-family: var(--mono); font-size: 9.5px; letter-spacing: 0.5px; text-transform: uppercase; color: var(--chalk-dim); display: block; }
+
 /* ---- 404 ---- */
 .notfound { max-width: 620px; margin: 0 auto; padding: 64px 18px; text-align: center; }
 .notfound h1 { font-family: var(--disp); font-weight: 900; font-size: 40px; margin: 0 0 12px; }

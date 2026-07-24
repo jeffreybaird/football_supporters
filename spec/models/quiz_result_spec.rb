@@ -24,6 +24,15 @@ RSpec.describe QuizResult do
     expect(record.league).to eq(league)
   end
 
+  it "defaults profile to false and marks profile rows" do
+    expect(build_result.tap(&:save).profile?).to be(false)
+
+    profile = build_result(slug: "prof1", profile: true, league_id: nil, pick: "The Ultra")
+    expect(profile).to be_valid
+    profile.save
+    expect(profile.profile?).to be(true)
+  end
+
   it "requires slug and pick" do
     expect(build_result(slug: nil)).not_to be_valid
     expect(build_result(pick: nil)).not_to be_valid

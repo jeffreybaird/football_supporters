@@ -1,0 +1,60 @@
+- generic [ref=f1e2]:
+  - paragraph [ref=f1e3]: Full time · your football profile
+  - generic [ref=f1e4]:
+    - heading "The Idealist" [level=1] [ref=f1e5]
+    - paragraph [ref=f1e6]: "This is the kind of team you want: how a club is owned and run matters deeply to you, and you want to belong to a loud, tight-knit crowd."
+  - region "Your club in each league" [ref=f1e7]:
+    - generic [ref=f1e8]:
+      - img "Everton crest" [ref=f1e10]
+      - generic [ref=f1e11]:
+        - generic [ref=f1e12]: Premier League
+        - generic [ref=f1e13]: Everton
+        - generic [ref=f1e14]: The People's Club, and they're not joking.
+      - generic [ref=f1e15]:
+        - text: "22"
+        - generic [ref=f1e16]: "% match"
+    - generic [ref=f1e17]:
+      - img "Eintracht Frankfurt crest" [ref=f1e19]
+      - generic [ref=f1e20]:
+        - generic [ref=f1e21]: Bundesliga
+        - generic [ref=f1e22]: Eintracht Frankfurt
+        - generic [ref=f1e23]: When Frankfurt played at Camp Nou, about thirty thousand of them got in on a five thousand ticket allocation.
+      - generic [ref=f1e24]:
+        - text: "33"
+        - generic [ref=f1e25]: "% match"
+    - generic [ref=f1e26]:
+      - img "Lens crest" [ref=f1e28]
+      - generic [ref=f1e29]:
+        - generic [ref=f1e30]: Ligue 1
+        - generic [ref=f1e31]: Lens
+        - generic [ref=f1e32]: Bollaert has more seats than Lens has residents and has sold out every game for four years running.
+      - generic [ref=f1e33]:
+        - text: "28"
+        - generic [ref=f1e34]: "% match"
+    - generic [ref=f1e35]:
+      - img "Philadelphia Union crest" [ref=f1e37]
+      - generic [ref=f1e38]:
+        - generic [ref=f1e39]: MLS
+        - generic [ref=f1e40]: Philadelphia Union
+        - generic [ref=f1e41]: The supporters' group was founded three years before the team existed, specifically to demand one.
+      - generic [ref=f1e42]:
+        - text: "41"
+        - generic [ref=f1e43]: "% match"
+    - generic [ref=f1e44]:
+      - img "Kansas City Current crest" [ref=f1e46]
+      - generic [ref=f1e47]:
+        - generic [ref=f1e48]: NWSL
+        - generic [ref=f1e49]: Kansas City Current
+        - generic [ref=f1e50]: "Built the first purpose-built stadium in women's pro sports, sold it out every night, then produced the best regular season in league history: most points, most wins, most shutouts, Shield clinched with five games to spare."
+      - generic [ref=f1e51]:
+        - text: "37"
+        - generic [ref=f1e52]: "% match"
+  - region [ref=f1e53]:
+    - paragraph [ref=f1e54]: Share your profile
+    - generic [ref=f1e55]:
+      - textbox "Shareable link to your profile" [ref=f1e56]: http://localhost:4611/q/g9coBmDhfqE
+      - button "Copy link" [ref=f1e57] [cursor=pointer]
+      - button "Share ↗" [ref=f1e58] [cursor=pointer]
+    - status [ref=f1e59]
+  - link "Take the quiz →" [ref=f1e61] [cursor=pointer]:
+    - /url: /

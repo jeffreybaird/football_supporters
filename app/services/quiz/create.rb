@@ -10,6 +10,7 @@ module Quiz
   # Result.
   class Create
     include Dry::Monads[:result]
+    include AnswerValidation
 
     MAX_SLUG_ATTEMPTS = 5
 
@@ -20,7 +21,7 @@ module Quiz
 
       answers = coerce_answers(attrs["answers"])
       weights = coerce_weights(attrs["weights"])
-      errors = validate(answers, weights)
+      errors = validate_answers_and_weights(answers, weights)
       return Failure([:validation, errors]) unless errors.empty?
 
       teams = league.scored_teams
@@ -48,46 +49,6 @@ module Quiz
         retry if attempts < MAX_SLUG_ATTEMPTS
         raise
       end
-    end
-
-    def coerce_answers(raw)
-      return nil unless raw.is_a?(Array)
-
-      raw.map { |x| x.nil? ? nil : Integer(x, exception: false) }
-    end
-
-    def coerce_weights(raw)
-      return nil unless raw.is_a?(Array)
-
-      raw.map { |x| Integer(x, exception: false) }
-    end
-
-    def validate(answers, weights)
-      errors = {}
-      validate_answers(answers, errors)
-      validate_weights(weights, errors)
-      errors
-    end
-
-    def validate_answers(answers, errors)
-      if answers.nil? || answers.length != Data::Q.length
-        errors[:answers] = "must have #{Data::Q.length} entries"
-        return
-      end
-
-      bad = answers.each_with_index.any? do |oi, i|
-        oi.nil? || !oi.between?(0, Data::Q[i]["a"].length - 1)
-      end
-      errors[:answers] = "each answer must be a valid option index" if bad
-    end
-
-    def validate_weights(weights, errors)
-      if weights.nil? || weights.length != Data::AXES.length
-        errors[:weights] = "must have #{Data::AXES.length} entries"
-        return
-      end
-
-      errors[:weights] = "each weight must be 1..10" unless weights.all? { |w| w.is_a?(Integer) && w.between?(1, 10) }
     end
   end
 end

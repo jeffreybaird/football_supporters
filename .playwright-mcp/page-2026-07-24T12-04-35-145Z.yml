@@ -1,0 +1,15 @@
+- generic [ref=e5]:
+  - heading "FIND THE PREMIER LEAGUE CLUB YOU SHOULD SUPPORT." [level=1] [ref=e6]: FIND THEPREMIER LEAGUECLUB YOU SHOULDSUPPORT.
+  - generic [ref=e7]:
+    - generic [ref=e8]:
+      - generic [ref=e9]: League
+      - combobox "League" [disabled] [ref=e10]:
+        - option "Premier League" [selected]
+        - option "Bundesliga"
+        - option "Ligue 1"
+        - option "MLS"
+        - option "NWSL"
+        - option "⚽ Football Profile"
+    - generic [ref=e11]: Loading clubs…
+  - paragraph [ref=e12]: Still searching for your team? Take a few minutes to answer questions about your daily life, your values, and the little things that get under your skin. Tell us what matters most, and we'll find the Premier League club that fits you—flaws and all.
+  - button "Kick off →" [ref=e13] [cursor=pointer]

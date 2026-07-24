@@ -85,12 +85,24 @@ class App < Sinatra::Base
     Quiz::ClientData.call(league).to_json
   end
 
+  # Every active league's dataset in one payload, for the "Football Profile" mode
+  # that scores answers against all leagues at once. Fetched lazily when the user
+  # picks Profile (see the client's enterProfile).
+  get "/leagues" do
+    content_type :json
+    Quiz::ProfileData.call.to_json
+  end
+
   # Persist a completed quiz and return its shareable slug. Called by the quiz's
   # fetch() on "Show my club"; body is JSON { answers: [...], weights: [...] }.
   post "/quizzes" do
     content_type :json
     attrs = parse_json_body
-    result = Quiz::Create.call(league: resolve_league(attrs["league"]), attrs:)
+    result = if attrs["profile"]
+               Quiz::CreateProfile.call(attrs:)
+             else
+               Quiz::Create.call(league: resolve_league(attrs["league"]), attrs:)
+             end
     if result.success?
       record = result.value!
       status 201
@@ -105,6 +117,10 @@ class App < Sinatra::Base
   get "/q/:slug" do
     @record = QuizResult.kept.first(slug: params["slug"])
     halt 404, erb(:"quiz/not_found") unless @record
+
+    # A profile spans every league (league_id nil) — must branch before the
+    # single-league default fallback below, or it would render a bogus result.
+    halt render_profile(@record) if @record.profile?
 
     @league = @record.league || League.default
     halt 404, erb(:"quiz/not_found") unless @league
@@ -122,6 +138,19 @@ class App < Sinatra::Base
   end
 
   private
+
+  # Server-rendered shared Football Profile: re-score every league and render the
+  # per-league winners plus the archetype. Returns the HTML for the route to halt.
+  def render_profile(record)
+    @profile = Quiz::ProfileScore.call(answers: record.answers, weights: record.weights)
+    @share_url = url("/q/#{record.slug}")
+    @page_title = "My Football Profile — #{@profile.archetype[:label]}"
+    @meta_description = @profile.archetype[:sentence]
+    @og = { "title" => @page_title, "description" => @meta_description, "url" => @share_url }
+    top = @profile.leagues.max_by(&:sim)
+    @og["image"] = crest_url(top.pick.crest) if top&.pick&.crest
+    erb :"quiz/profile_result"
+  end
 
   def render_quiz(coach:)
     @league = resolve_league(params["league"])

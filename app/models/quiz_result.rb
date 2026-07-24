@@ -5,10 +5,16 @@
 # ranking on read (against `league`'s teams), so a shared result always matches
 # the live algorithm. `pick` is denormalized for cheap lookups and social/OG
 # metadata.
+#
+# A `profile` row is a cross-league Football Profile: it has `league_id: nil`
+# (scored against every league on read via Quiz::ProfileScore) and stores the
+# archetype label in `pick`.
 class QuizResult < Sequel::Model
   plugin :serialization, :json, :answers, :weights
 
   many_to_one :league
+
+  def profile? = !!profile
 
   dataset_module do
     # Read paths default to kept (non-soft-deleted) rows.

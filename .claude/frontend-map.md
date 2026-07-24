@@ -135,6 +135,25 @@ _Example row (delete when filled):_
 
 ---
 
+## This app — the club-recommender quiz (actual routes)
+
+The real frontend is a single client-rendered React (in-browser Babel) quiz in
+`views/quiz/index.erb`, fed server-owned data, plus server-rendered shared result pages.
+
+| Path & verb          | Route → Service                                   | Renders | Notes |
+|----------------------|---------------------------------------------------|---------|-------|
+| `GET /`              | `render_quiz(coach: false)` → `Quiz::ClientData`  | `views/quiz/index.erb` | Quiz for one league (`?league=<slug>`) |
+| `GET /coach`         | `render_quiz(coach: true)`                        | `views/quiz/index.erb` | Analyst view (live ranking, trait board) |
+| `GET /leagues/:slug` | `Quiz::ClientData.call(league)`                   | JSON    | One league's dataset — client swaps without reload |
+| `GET /leagues`       | `Quiz::ProfileData.call`                          | JSON    | **All** leagues' datasets + archetype table (Football Profile) |
+| `POST /quizzes`      | `Quiz::Create` / `Quiz::CreateProfile` (on `profile:`) | JSON `{slug,url}` | Persist a completed quiz or profile |
+| `GET /q/:slug`       | single-league `Quiz::Score` **or** `Quiz::ProfileScore` (on `record.profile?`) | `views/quiz/result.erb` / `views/quiz/profile_result.erb` | Server-rendered shared result |
+
+Archetype text (`Quiz::Archetype`) ships as a data table in `GET /leagues` so the client
+`archetypeFor` and the server `profile_result` render identical labels/sentences.
+
+---
+
 ## Views / Templates
 
 List your view directories and notable templates/partials by area. Note the stable
@@ -198,6 +217,13 @@ _Example rows (delete when filled):_
 | `notes-list`            | `views/notes/index.erb`       | `spec/features/notes_spec.rb`, `notes_filter.js` | The `<ul>` wrapping note cards |
 | `note-card`             | `views/notes/_card.erb`       | `spec/features/notes_spec.rb`    | A single note row |
 | `flash`                 | `views/shared/_flash.erb`     | `spec/features/*`                | `aria-live` flash region |
+
+Quiz result pages (server-rendered):
+| `result`                | `views/quiz/result.erb`         | `spec/requests/quiz_spec.rb`     | Single-league shared result root |
+| `profile-result`        | `views/quiz/profile_result.erb` | `spec/requests/profile_spec.rb`  | Football Profile result root |
+| `profile-archetype`     | `views/quiz/profile_result.erb` | `spec/requests/profile_spec.rb`  | Archetype label + sentence block |
+| `profile-league-<slug>` | `views/quiz/profile_result.erb` | `spec/requests/profile_spec.rb`  | One league's winning-club row |
+| `share-url` / `share-*` | both result views + `public/js/share.js` | `spec/requests/*`      | Shared copy/native-share controls (reused as-is) |
 
 Honest note on "partial updates": Sinatra renders full pages — there is no Turbo. A dynamic
 update is either (a) a vanilla JS module fetching a JSON route and patching the DOM, or (b) a
