@@ -1,0 +1,39 @@
+league,slug,name,vibe,play,ethics,fanbase
+EPL,man-city,Man City,10.0,5,2,3
+EPL,liverpool,Liverpool,9.6,9,6,7
+EPL,arsenal,Arsenal,10.0,5,5,3
+EPL,man-united,Man United,10.0,6,4,8
+EPL,chelsea,Chelsea,8.6,8,3,4
+EPL,tottenham,Tottenham,7.7,10,5,5
+EPL,newcastle,Newcastle,6.3,8,1,10
+EPL,aston-villa,Aston Villa,4.1,6,4,6
+EPL,brighton,Brighton,1.9,6,8,1
+EPL,crystal-palace,Crystal Palace,2.7,5,7,5
+EPL,nottm-forest,Nott'm Forest,3.6,3,3,6
+EPL,everton,Everton,4.1,2,5,8
+EPL,fulham,Fulham,1.8,4,6,0
+EPL,brentford,Brentford,1.4,5,8,2
+EPL,bournemouth,Bournemouth,1.4,9,7,1
+EPL,sunderland,Sunderland,1.4,5,6,9
+EPL,leeds,Leeds,4.1,8,6,8
+EPL,ipswich,Ipswich,0.5,7,8,5
+EPL,coventry,Coventry,0.0,7,7,6
+EPL,hull,Hull,0.0,4,4,5
+BUNDESLIGA,bayern-munich,Bayern Munich,10,6,4,5
+BUNDESLIGA,borussia-dortmund,Borussia Dortmund,8,9,8,10
+BUNDESLIGA,rb-leipzig,RB Leipzig,8,8,0,2
+BUNDESLIGA,bayer-leverkusen,Bayer Leverkusen,5,7,2,2
+BUNDESLIGA,eintracht-frankfurt,Eintracht Frankfurt,5,7,8,9
+BUNDESLIGA,vfb-stuttgart,VfB Stuttgart,5,6,6,7
+BUNDESLIGA,hamburger-sv,Hamburger SV,5,6,5,9
+BUNDESLIGA,schalke-04,Schalke 04,5,5,4,10
+BUNDESLIGA,werder-bremen,Werder Bremen,4,5,6,8
+BUNDESLIGA,borussia-monchengladbach,Borussia Mönchengladbach,4,7,7,7
+BUNDESLIGA,1-fc-koln,1. FC Köln,4,7,7,9
+BUNDESLIGA,tsg-hoffenheim,TSG Hoffenheim,3,5,2,1
+BUNDESLIGA,sc-freiburg,SC Freiburg,2,4,9,5
+BUNDESLIGA,union-berlin,Union Berlin,2,2,10,10
+BUNDESLIGA,mainz-05,Mainz 05,2,5,7,6
+BUNDESLIGA,fc-augsburg,FC Augsburg,1,3,6,5
+BUNDESLIGA,sv-elversberg,SV Elversberg,0,8,5,3
+BUNDESLIGA,sc-paderborn,SC Paderborn,0,6,6,5

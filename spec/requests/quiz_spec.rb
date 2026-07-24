@@ -71,6 +71,30 @@ RSpec.describe "Quiz", type: :request do
       expect(last_response.body).to include("Which Premier League Club Should You Support?")
     end
 
+    it "serves a league's dataset as JSON so the page can switch without a reload" do
+      second_league
+
+      get "/leagues/la-liga"
+
+      expect(last_response).to be_ok
+      expect(last_response.content_type).to include("application/json")
+      body = JSON.parse(last_response.body)
+      expect(body["LEAGUE"]).to eq("slug" => "la-liga", "name" => "La Liga")
+      expect(body["TEAMS"].keys).to eq(["Barcelona"])
+      expect(body["FLAVOR"]["Barcelona"]).to eq("Més que un club.")
+      expect(body["CHOOSER_THRESHOLD"]).to eq(0.25)
+    end
+
+    it "returns 404 for an unknown or inactive league dataset" do
+      League.create(slug: "hidden-liga", name: "Hidden", active: false, position: 9)
+
+      get "/leagues/hidden-liga"
+      expect(last_response.status).to eq(404)
+
+      get "/leagues/nope"
+      expect(last_response.status).to eq(404)
+    end
+
     it "stores a submitted quiz against the chosen league" do
       lg = second_league
 

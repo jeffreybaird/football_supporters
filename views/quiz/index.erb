@@ -27,23 +27,38 @@ const { useState } = React;
 const D = window.QUIZ_DATA;
 // Coach's view is enabled only when served from /coach (see App route).
 const COACH_ENABLED = !!window.QUIZ_COACH;
-// The league being matched against, plus the list a user can switch to. The
-// server owns the data, so switching leagues navigates (reloads with that
-// league's dataset) rather than swapping it client-side.
-const LEAGUE = D.LEAGUE;
+// The leagues a user can switch between (empty/one = no picker).
 const LEAGUES = window.QUIZ_LEAGUES || [];
+
+// League-agnostic: the axes, questionnaire and sliders come from Quiz::Data and
+// are the same whichever league you play, so they are fixed for the page's life.
 const AXES = D.AXES;
 const AXIS_LABEL = { Vibe: "Vibe", Play: "Play", Ethics: "Ethics", Fanbase: "Fanbase" };
-const CHOOSER_THRESHOLD = D.CHOOSER_THRESHOLD;
-const MAX_CHOICES = D.MAX_CHOICES;
-const AMPLIFY = D.AMPLIFY;
-
-const TEAMS = D.TEAMS;
-const TEAM_NAMES = Object.keys(TEAMS);
 const Q = D.Q;
 const SLIDERS = D.SLIDERS;
-const FLAVOR = D.FLAVOR;
-const BADGE = D.BADGE;
+
+// Everything below belongs to the *selected* league and is swapped in place by
+// applyLeague when the picker changes (fed by GET /leagues/:slug). Every swap is
+// immediately followed by a re-render and a quiz reset, and all reads happen
+// during render, so components never see a half-switched dataset.
+let LEAGUE, TEAMS, TEAM_NAMES, FLAVOR, BADGE, CHOOSER_THRESHOLD, MAX_CHOICES, AMPLIFY, CENTROID;
+
+function applyLeague(d) {
+  LEAGUE = d.LEAGUE;
+  TEAMS = d.TEAMS;
+  TEAM_NAMES = Object.keys(TEAMS);
+  FLAVOR = d.FLAVOR;
+  BADGE = d.BADGE;
+  CHOOSER_THRESHOLD = d.CHOOSER_THRESHOLD;
+  MAX_CHOICES = d.MAX_CHOICES;
+  AMPLIFY = d.AMPLIFY;
+  // centre of this league's team cloud — the point the user's vector is
+  // amplified away from (see Quiz::Score#centroid_of).
+  CENTROID = AXES.map((_, k) =>
+    TEAM_NAMES.reduce((s, n) => s + TEAMS[n][k], 0) / TEAM_NAMES.length
+  );
+}
+applyLeague(D);
 
 // ---- scoring: loadings-weighted mean per axis ----
 function scoreAxes(answers) {
@@ -58,10 +73,6 @@ function scoreAxes(answers) {
   });
   return num.map((n, k) => (den[k] > 0 ? n / den[k] : 5.0));
 }
-
-const CENTROID = AXES.map((_, k) =>
-  TEAM_NAMES.reduce((s, n) => s + TEAMS[n][k], 0) / TEAM_NAMES.length
-);
 
 function rankTeams(vec, weights) {
   const wsum = weights.reduce((s, x) => s + x, 0) || 1;
@@ -256,31 +267,36 @@ function ShareCard({ url, err, pick }) {
 }
 
 // League switcher under the hero headline. The headline shows the current
-// league's name as text; this compact pill lets a user change it. With a single
-// league there is nothing to choose, so it renders nothing. Changing it
-// navigates to that league's page — the server re-renders with the new dataset
-// (see App#resolve_league). Native <select> so the option list is normal-sized
-// and fully keyboard-accessible.
-function LeaguePicker() {
+// league's name; this compact pill changes it. With a single league there is
+// nothing to choose, so it renders nothing. Switching swaps the dataset in
+// place (App#switchLeague) — no reload. Native <select> so the option list is
+// normal-sized and fully keyboard-accessible.
+function LeaguePicker({ value, busy, error, onChange }) {
   if (LEAGUES.length <= 1) return null;
-  function onChange(e) {
-    const u = new URL(window.location.href);
-    u.searchParams.set("league", e.target.value);
-    window.location.assign(u.toString());
-  }
+  const current = LEAGUES.find((l) => l.slug === value);
+  let status = "";
+  if (busy) status = "Loading clubs…";
+  else if (error) status = "Couldn't load that league. Try again.";
+  else if (current) status = `Matching against ${current.name} clubs.`;
   return (
-    <div style={{ display: "flex", alignItems: "center", gap: 10, margin: "0 0 24px", flexWrap: "wrap" }}>
-      <label htmlFor="league-picker" style={{
-        ...mono, fontSize: 11, letterSpacing: 1, textTransform: "uppercase", color: C.chalkDim,
-      }}>League</label>
-      <select id="league-picker" value={LEAGUE ? LEAGUE.slug : ""} onChange={onChange} style={{
-        ...mono, fontSize: 14, letterSpacing: 0.3, color: C.amber, background: C.pitch2,
-        border: `1px solid ${C.amber}`, borderRadius: 999, padding: "9px 14px", cursor: "pointer", minHeight: 44,
-      }}>
-        {LEAGUES.map((l) => (
-          <option key={l.slug} value={l.slug} style={{ color: "#1a1305" }}>{l.name}</option>
-        ))}
-      </select>
+    <div style={{ margin: "0 0 24px" }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
+        <label htmlFor="league-picker" style={{
+          ...mono, fontSize: 11, letterSpacing: 1, textTransform: "uppercase", color: C.chalkDim,
+        }}>League</label>
+        <select id="league-picker" value={value} disabled={busy} onChange={(e) => onChange(e.target.value)} style={{
+          ...mono, fontSize: 14, letterSpacing: 0.3, color: error ? "#E06B6B" : C.amber, background: C.pitch2,
+          border: `1px solid ${error ? "#E06B6B" : C.amber}`, borderRadius: 999, padding: "9px 14px",
+          cursor: busy ? "progress" : "pointer", minHeight: 44, opacity: busy ? 0.6 : 1,
+        }}>
+          {LEAGUES.map((l) => (
+            <option key={l.slug} value={l.slug} style={{ color: "#1a1305" }}>{l.name}</option>
+          ))}
+        </select>
+      </div>
+      <div aria-live="polite" style={{
+        ...mono, fontSize: 11, color: error ? "#E06B6B" : C.chalkDim, marginTop: 8, minHeight: "1em",
+      }}>{status}</div>
     </div>
   );
 }
@@ -298,8 +314,37 @@ function App() {
   const [history, setHistory] = useState([]);
   const [shareUrl, setShareUrl] = useState(null);
   const [shareErr, setShareErr] = useState(false);
+  const [leagueSlug, setLeagueSlug] = useState(LEAGUE ? LEAGUE.slug : "");
+  const [leagueBusy, setLeagueBusy] = useState(false);
+  const [leagueErr, setLeagueErr] = useState(false);
 
   const vec = scoreAxes(answers);
+
+  // Swap the matched-against league without a reload: fetch that league's
+  // dataset, install it, and start the quiz over — the old answers were scored
+  // against a different set of clubs, so keeping them would be meaningless. The
+  // URL is kept in step so a reload or a shared link lands on the same league.
+  function switchLeague(slug) {
+    if (!slug || slug === leagueSlug || leagueBusy) return;
+    setLeagueBusy(true); setLeagueErr(false);
+    fetch(`/leagues/${encodeURIComponent(slug)}`, { headers: { Accept: "application/json" } })
+      .then((r) => (r.ok ? r.json() : Promise.reject(r.status)))
+      .then((d) => {
+        applyLeague(d);
+        setLeagueSlug(slug);
+        setStage("intro"); setQi(0);
+        setAnswers(Q.map(() => null)); setWeights(SLIDERS.map(() => 5));
+        setResult(null); setChosen(0); setOverride(null);
+        setBasePos({}); setHistory([]);
+        setShareUrl(null); setShareErr(false);
+        document.title = `Which ${LEAGUE.name} Club Should You Support?`;
+        const u = new URL(window.location.href);
+        u.searchParams.set("league", slug);
+        window.history.replaceState({}, "", u.toString());
+      })
+      .catch(() => setLeagueErr(true))
+      .then(() => setLeagueBusy(false));
+  }
 
   function chooseOption(oi) {
     const na = answers.slice();
@@ -415,7 +460,7 @@ function App() {
             <h1 style={{ ...disp, fontWeight: 900, fontSize: 52, lineHeight: 0.95, margin: "0 0 14px", letterSpacing: -1 }}>
               FIND THE<br /><span style={{ color: C.amber }}>{(LEAGUE ? LEAGUE.name : "").toUpperCase()}</span><br />CLUB YOU SHOULD<br /><span style={{ color: C.amber }}>SUPPORT.</span>
             </h1>
-            <LeaguePicker />
+            <LeaguePicker value={leagueSlug} busy={leagueBusy} error={leagueErr} onChange={switchLeague} />
             <p style={{ color: C.chalkDim, fontSize: 16, lineHeight: 1.5, maxWidth: 470, margin: "0 0 26px" }}>
               Still searching for your team? Take a few minutes to answer questions about your daily life, your values, and the little things that get under your skin. Tell us what matters most, and we'll find the {LEAGUE ? LEAGUE.name : ""} club that fits you—flaws and all.
             </p>

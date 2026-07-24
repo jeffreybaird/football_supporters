@@ -70,6 +70,17 @@ class App < Sinatra::Base
     render_quiz(coach: true)
   end
 
+  # A league's quiz dataset as JSON. The quiz page fetches this when the league
+  # picker changes so it can swap datasets without a reload; it is the very same
+  # payload the page embeds, so client and server still can't drift.
+  get "/leagues/:slug" do
+    content_type :json
+    league = League.active.first(slug: params["slug"])
+    halt 404, { error: "not_found" }.to_json unless league
+
+    Quiz::ClientData.call(league).to_json
+  end
+
   # Persist a completed quiz and return its shareable slug. Called by the quiz's
   # fetch() on "Show my club"; body is JSON { answers: [...], weights: [...] }.
   post "/quizzes" do
