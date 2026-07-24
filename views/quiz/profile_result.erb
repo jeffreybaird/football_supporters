@@ -8,18 +8,22 @@
 
   <section class="profile__leagues" aria-label="Your club in each league">
     <% @profile.leagues.each do |entry| %>
-      <div class="profile__league" data-testid="profile-league-<%= entry.league.slug %>">
-        <%== erb :"quiz/_badge", locals: { team: entry.pick, sm: true } %>
-        <span class="profile__club">
-          <span class="profile__league-name"><%= entry.league.name %></span>
-          <span class="alt__name"><%= entry.pick.name %></span>
-          <span class="alt__blurb"><%= first_sentence(entry.pick.blurb) %></span>
-        </span>
-        <span class="profile__match">
-          <span class="profile__match-num" data-testid="profile-match-<%= entry.league.slug %>"><%= entry.match_pct %></span>
-          <span class="profile__match-unit">% match</span>
-        </span>
-      </div>
+      <details class="profile__league" data-testid="profile-league-<%= entry.league.slug %>">
+        <summary class="profile__league-summary">
+          <%== erb :"quiz/_badge", locals: { team: entry.pick, sm: true } %>
+          <span class="profile__club">
+            <span class="profile__league-name"><%= entry.league.name %></span>
+            <span class="alt__name"><%= entry.pick.name %></span>
+            <span class="alt__blurb"><%= first_sentence(entry.pick.blurb) %></span>
+          </span>
+          <span class="profile__match">
+            <span class="profile__match-num" data-testid="profile-match-<%= entry.league.slug %>"><%= entry.match_pct %></span>
+            <span class="profile__match-unit">% match</span>
+          </span>
+          <span class="profile__chevron" aria-hidden="true">▾</span>
+        </summary>
+        <p class="profile__blurb" data-testid="profile-blurb-<%= entry.league.slug %>"><%= entry.pick.blurb %></p>
+      </details>
     <% end %>
   </section>
 

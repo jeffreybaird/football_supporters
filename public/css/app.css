@@ -179,14 +179,40 @@ button, .btn { cursor: pointer; font-family: inherit; }
 .profile__sentence { color: var(--chalk-dim); font-size: 16px; line-height: 1.5; margin: 10px 0 0; }
 .profile__leagues { display: grid; gap: 10px; margin-bottom: 26px; }
 .profile__league {
-  display: grid;
-  grid-template-columns: auto 1fr auto;
-  align-items: center;
-  gap: 14px;
-  padding: 12px 14px;
   background: var(--pitch2);
   border: 1px solid var(--line);
   border-radius: 12px;
+}
+.profile__league-summary {
+  display: grid;
+  grid-template-columns: auto 1fr auto auto;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 14px;
+  cursor: pointer;
+  list-style: none;
+}
+.profile__league-summary::-webkit-details-marker { display: none; }
+.profile__league-summary:focus-visible {
+  outline: 2px solid var(--amber);
+  outline-offset: 2px;
+  border-radius: 12px;
+}
+.profile__chevron {
+  color: var(--chalk-dim);
+  font-size: 14px;
+  transition: transform 0.2s ease;
+}
+@media (prefers-reduced-motion: reduce) {
+  .profile__chevron { transition: none; }
+}
+.profile__league[open] .profile__chevron { transform: rotate(180deg); }
+.profile__blurb {
+  color: var(--chalk-dim);
+  font-size: 13px;
+  line-height: 1.45;
+  margin: 0;
+  padding: 0 14px 14px;
 }
 .profile__club { min-width: 0; }
 .profile__league-name {

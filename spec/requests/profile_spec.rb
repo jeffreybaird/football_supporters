@@ -61,6 +61,20 @@ RSpec.describe "Football Profile", type: :request do
       expect(body).to include("/js/share.js")
       expect(body).to include('property="og:title"')
     end
+
+    it "makes each league an expandable disclosure revealing the full blurb" do
+      get "/q/#{record.slug}"
+
+      body = last_response.body
+      # native <details>/<summary> disclosure — no JS, keyboard accessible
+      expect(body).to include('<details class="profile__league"')
+      expect(body).to include("<summary")
+      # the full (multi-sentence) blurb of a winning team is present, not just its first sentence
+      profile = Quiz::ProfileScore.call(answers: Array.new(13, 0), weights: [5, 5, 5, 5])
+      full_blurb = profile.leagues.map { |e| e.pick.blurb }.find { |b| b.include?(". ") }
+      expect(full_blurb).not_to be_nil
+      expect(body).to include(Rack::Utils.escape_html(full_blurb))
+    end
   end
 
   it "still renders a single-league result for a non-profile slug (regression)" do
