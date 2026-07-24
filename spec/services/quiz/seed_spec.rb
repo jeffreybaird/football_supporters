@@ -57,6 +57,24 @@ RSpec.describe Quiz::Seed do
     expect(psg.blurb).to start_with("For a decade PSG")
   end
 
+  it "creates MLS with its thirty clubs and per-league scoring tuning" do
+    league = League.first(slug: "mls")
+
+    expect(league).not_to be_nil
+    expect(league.name).to eq("MLS")
+    expect(league.teams_dataset.count).to eq(30)
+    expect(league.amplify).to eq(1.8)
+    expect(league.chooser_threshold).to eq(0.20)
+  end
+
+  it "seeds MLS scores, a league-scoped crest, and a blurb" do
+    miami = Team.first(league_id: League.first(slug: "mls").id, name: "Inter Miami")
+
+    expect(miami.vector).to eq([10.0, 10.0, 3.0, 5.0])
+    expect(miami.crest).to eq("mls/960720-Inter_Miami_CF.png")
+    expect(miami.blurb).to start_with("The Messi circus")
+  end
+
   it "honours each league's per-league amplify override" do
     expect(League.first(slug: "bundesliga").amplify).to eq(1.4)
     expect(League.first(slug: "premier-league").amplify).to eq(2.5)
