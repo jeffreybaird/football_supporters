@@ -64,11 +64,11 @@ module Quiz
        "The Yellow Wall is 25,000 people standing on one terrace, and Lahm said it eats you up. He wasn't exaggerating much. Dortmund sell the working-class romance hard, “echte Liebe” and cheap standing tickets, and rivals enjoy pointing out the club is a publicly traded company doing all this romance at industrial scale. Fair point. Doesn't make the wall any quieter."],
       ["RB Leipzig", [8, 8, 0, 2], "178475-RB_Leipzig.png",
        "The most hated club in Germany, and it isn't close. A tabloid once refused to print the name and listed them in the table as “Dosenverkauf,” can-sellers. The club has a comically small membership on purpose, which is the whole 50+1 trick. The people who actually go are mostly just Saxons happy to have top football back after decades of nothing, and they've stopped apologizing for it. The rest of the league will never forgive them. Both sides seem fine with the arrangement."],
-      ["Bayer Leverkusen", [5, 7, 2, 2], "8178-Leverkusen.png",
+      ["Bayer Leverkusen", [6, 7, 3, 2], "8178-Leverkusen.png",
        "Neverkusen. Decades of that name, earned the hard way, capped by blowing a treble in 2002. Then Alonso's team went a whole league season unbeaten, the first in Bundesliga history, won the double, and the club started calling itself Neverlusen. Rivals still sneer about the aspirin works team with no real fans. Leverkusen fans used to have nothing to say back. Now they just point at 2024."],
       ["Eintracht Frankfurt", [5, 7, 8, 9], "9810-Frankfurt.png",
        "When Frankfurt played at Camp Nou, about thirty thousand of them got in on a five thousand ticket allocation. Nobody knows exactly how. That's the club: the biggest, rowdiest away following in Europe, pyro everywhere, UEFA charges collected like stickers. The 2022 Europa League win sent the whole city feral. Frankfurt fans don't do quiet seasons, only invasions and crises."],
-      ["VfB Stuttgart", [5, 6, 6, 7], "10269-VfB_Stuttgart.png",
+      ["VfB Stuttgart", [6, 6, 6, 7], "10269-VfB_Stuttgart.png",
        "Stuttgart fans watched their big traditional club get run into the ground twice, relegated twice, and kept showing up sixty thousand at a time. Then came the good part: second place above Bayern in 2024, and the 2025 Pokal, the first real trophy since 2007. The Cannstatter Kurve marches to the ground before every match like it's a ritual, because it is. Swabians don't gush. The full stadium is the gushing."],
       ["Hamburger SV", [5, 6, 5, 9], "9790-Hamburger_SV.png",
        "HSV had a clock in the stadium counting their unbroken decades in the Bundesliga, which became the funniest object in Germany the day they went down. Then seven years in the second division, four fourth-place finishes, playoff heartbreaks, and the special insult of watching St. Pauli go up first. The Volkspark stayed near sixty thousand through all of it. They're back now, promoted under a hometown coach in his mid-thirties, and the pitch invasion looked less like joy than relief."],
@@ -80,15 +80,15 @@ module Quiz
        "Gladbach were the coolest team in Europe for about a decade, and that decade ended fifty years ago. The fans know this. Rivals remind them anyway. What's left is one of Germany's biggest fanbases sustaining itself on Netzer stories and the Rheinderby with Köln, which both clubs insist is the only Rhine derby that counts. The Nordkurve deserves a better team than it usually gets. It has for a while."],
       ["1. FC Köln", [4, 7, 7, 9], "8722-Köln.png",
        "The club with a live goat. Hennes IX attends matches, has a better contract situation than most of the squad, and is treated with total seriousness by everyone involved. Köln fans hold services in the cathedral before big European ties and once put twenty thousand people in London for a group stage game. The team gets relegated, comes straight back up, and the Südkurve forgives it all by carnival season. It's less a football club than a citywide condition."],
-      ["TSG Hoffenheim", [3, 5, 2, 1], "8226-Hoffenheim.png",
+      ["TSG Hoffenheim", [4, 5, 2, 1], "8226-Hoffenheim.png",
        "A village of three thousand people, one billionaire, and a Bundesliga team the rest of Germany treats as a science experiment. The fixture against Leipzig got nicknamed El Plastico, the battle of the unloved, and it stuck. The strange twist is that Hoffenheim's own ultras have turned on Hopp too, over broken promises about giving the club back to its members. When even your own fans are protesting the owner, the plastic jokes almost stop being the problem."],
-      ["SC Freiburg", [2, 4, 9, 5], "8358-Freiburg.png",
+      ["SC Freiburg", [3, 4, 9, 5], "8358-Freiburg.png",
        "Nobody hates Freiburg. A commentator who's covered the league for decades said he's never met anyone who does, and that might be the strangest fact in German football. The coach cycled to work for thirteen years. The club buys players nobody scouted and finishes above teams spending triple. They made a Europa League final in 2025 and even that didn't generate any enemies. It should be insufferable. Somehow it isn't."],
       ["Union Berlin", [2, 2, 10, 10], "8149-Union_Berlin.png",
        "Union fans donated blood to fund the club and rebuilt the stadium with their own hands, over two thousand volunteers, six figures of unpaid hours. So when they talk about it being theirs, it's not a metaphor. The Alte Försterei does Christmas carol singalongs and played host to Real Madrid within the same few years, and neither changed anything about the place. Every other club claims authenticity. Union has receipts."],
-      ["Mainz 05", [2, 5, 7, 6], "9905-Mainz.png",
+      ["Mainz 05", [3, 5, 8, 6], "9905-Mainz.png",
        "The Karnevalsverein, and proud of it. Goals at Mainz are followed by an actual carnival march over the PA, and nobody in the ground is under any illusion about winning the league. This is the club that produced Klopp and Tuchel, which fans mention constantly, though when Klopp took the Red Bull job the city put him on a carnival float clutching a can, wings made of banknotes. Mainz forgives most things. Not that."],
-      ["FC Augsburg", [1, 3, 6, 5], "8406-Augsburg.png",
+      ["FC Augsburg", [1, 3, 5, 5], "8406-Augsburg.png",
        "Every August somebody picks Augsburg to go down, and every May they're still there, having played some of the least memorable football in the division. German media has called them the league's most unspectacular club, and honestly the fans have heard worse. There's no glamour, no famous history, just fifteen straight seasons of survival that better-supported clubs would kill for. Boring is a strategy. It works."],
       ["SV Elversberg", [0, 8, 5, 3], "8232-Elversberg.png",
        "Spiesen-Elversberg has about thirteen thousand residents and now a Bundesliga club, reportedly the smallest town ever to manage it. They lost the promotion playoff in the last minute in 2025, lost their coach and best striker that summer, and came back and scored more goals than anyone in the division anyway. Someone on German TV called them Real Elversberg for the white kits and the passing. A ZDF reporter predicted the stay will be short. Probably right. Nobody in the Saarland cares yet."],
@@ -99,8 +99,8 @@ module Quiz
     # Every shipped league: its metadata plus its clubs, in display order. The
     # first entry (position 0) is the app's default league.
     LEAGUES = [
-      { slug: "premier-league", name: "Premier League", season: "2026-27", teams: PREMIER_LEAGUE_TEAMS },
-      { slug: "bundesliga",     name: "Bundesliga",     season: "2026-27", teams: BUNDESLIGA_TEAMS },
+      { slug: "premier-league", name: "Premier League", season: "2026-27", teams: PREMIER_LEAGUE_TEAMS, amplify: 2.5 },
+      { slug: "bundesliga",     name: "Bundesliga",     season: "2026-27", teams: BUNDESLIGA_TEAMS, amplify: 1.4 },
     ].freeze
 
     # Upsert every league and its teams. Returns the Array of Leagues.
