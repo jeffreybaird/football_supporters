@@ -40,8 +40,12 @@ class App < Sinatra::Base
     end
 
     # First sentence of a blurb — used for alternates and OG descriptions.
+    # Splitting on ". " breaks a "St." abbreviation into its own chunk, so keep
+    # folding chunks in until one doesn't end with a dangling "St".
     def first_sentence(text)
-      "#{text.split(". ").first}."
+      chunks = text.split(". ")
+      sentence = chunks.reduce { |acc, chunk| acc.end_with?("St") ? "#{acc}. #{chunk}" : acc }
+      "#{sentence}."
     end
 
     # Absolute, URL-encoded crest path (nil when the team has no crest on file).
