@@ -7,47 +7,35 @@ RSpec.describe Quiz::Archetype do
   def label(vec) = described_class.call(vec)[:label]
   def sentence(vec) = described_class.call(vec)[:sentence]
 
-  it "returns The All-Rounder with the neutral sentence when every axis is mid" do
-    expect(label([5, 5, 5, 5])).to eq("The All-Rounder")
-    expect(sentence([5, 5, 5, 5])).to eq(described_class::ALL_MID_SENTENCE)
+  it "returns The All-Rounder with the neutral sentence for a nil or malformed vector" do
+    expect(label(nil)).to eq("The All-Rounder")
+    expect(sentence(nil)).to eq(described_class::ALL_MID_SENTENCE)
+    expect(label([1, 2, 3])).to eq("The All-Rounder")
   end
 
-  it "labels by the dominant (furthest-from-5) axis and direction" do
-    expect(label([9, 5, 5, 5])).to eq("The Glory-Hunter")   # Vibe high
-    expect(label([5, 1, 5, 5])).to eq("The Purist")         # Play low
-    expect(label([5, 5, 9, 5])).to eq("The Idealist")       # Ethics high
-    expect(label([5, 5, 5, 10])).to eq("The Ultra")         # Fanbase high (belonging)
-    expect(label([5, 5, 5, 1])).to eq("The Neutral")        # Fanbase low
+  it "selects the archetype whose centroid is nearest the given vector" do
+    expect(label([6.33, 7.14, 6.24, 6.14])).to eq("The Dreamer")   # HHHH exactly
+    expect(label([6.4, 7.2, 6.3, 6.2])).to eq("The Dreamer")       # near HHHH
+    expect(label([4.14, 5.00, 2.00, 4.07])).to eq("The Stoic")     # LLLL exactly
   end
 
-  it "treats the band edges as inclusive (<=3.5 low, >=6.5 high)" do
-    expect(label([3.5, 5, 5, 5])).to eq("The Romantic")      # exactly low
-    expect(label([6.5, 5, 5, 5])).to eq("The Glory-Hunter")  # exactly high
-    expect(label([3.6, 5, 5, 5])).to eq("The All-Rounder")   # just inside mid
+  it "ignores axis weighting and only responds to the raw vector" do
+    ultra = [6.33, 7.14, 2.00, 6.14] # HHLH centroid
+    expect(label(ultra)).to eq("The Ultra")
   end
 
-  it "breaks ties by axis order (Vibe, Play, Ethics, Fanbase)" do
-    # Vibe and Play equally far from 5 (both +3) — Vibe wins.
-    expect(label([8, 8, 5, 5])).to eq("The Glory-Hunter")
-  end
-
-  it "builds the sentence from the two strongest non-mid axes" do
-    s = sentence([9, 5, 5, 1]) # Vibe high + Fanbase low, both |4|
-    expect(s).to start_with("This is the kind of team you want:")
-    expect(s).to include(described_class::FRAGMENTS["Vibe"]["high"])
-    expect(s).to include(described_class::FRAGMENTS["Fanbase"]["low"])
-    expect(s).to end_with(".")
-  end
-
-  it "uses a single fragment when only one axis is non-mid" do
-    s = sentence([9, 5, 5, 5])
-    expect(s).to include(described_class::FRAGMENTS["Vibe"]["high"])
-    expect(s).not_to include(", and ")
+  it "returns the label and sentence for every archetype code" do
+    described_class::ARCHETYPES.each_value do |row|
+      result = described_class.call(row["vec"])
+      expect(result[:label]).to eq(row["label"])
+      expect(result[:sentence]).to eq(row["sentence"])
+    end
   end
 
   it "exposes the client table with all keys the browser algorithm needs" do
     t = described_class.client_table
-    expect(t.keys).to contain_exactly("bands", "labels", "fragments", "allMidLabel", "allMidSentence")
-    expect(t["bands"]).to eq("low" => 3.5, "high" => 6.5)
+    expect(t.keys).to contain_exactly("levels", "archetypes", "allMidLabel", "allMidSentence")
+    expect(t["levels"]).to eq(described_class::LEVELS)
+    expect(t["archetypes"]).to eq(described_class::ARCHETYPES)
   end
 end
