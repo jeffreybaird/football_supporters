@@ -292,7 +292,7 @@ module Quiz
         chooser_threshold: 0.20 },
       { slug: "nwsl",           name: "NWSL",           season: "2026",    teams: NWSL_TEAMS,           amplify: 2.5,
         chooser_threshold: 0.25 },
-      { slug: "la-liga",        name: "La Liga",        season: "2026-27", teams: LA_LIGA_TEAMS,        amplify: 2.5 }
+      { slug: "la-liga",        name: "La Liga",        season: "2026-27", teams: LA_LIGA_TEAMS,        amplify: 1.6 }
     ].freeze
 
     # Upsert every league and its teams. Returns the Array of Leagues.
