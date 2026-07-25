@@ -100,7 +100,7 @@ RSpec.describe Quiz::Seed do
     expect(league.name).to eq("La Liga")
     expect(league.season).to eq("2026-27")
     expect(league.teams_dataset.count).to eq(20)
-    expect(league.amplify).to eq(2.5)
+    expect(league.amplify).to eq(1.6)
     expect(league.position).to eq(5)
   end
 
