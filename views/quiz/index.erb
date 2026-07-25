@@ -197,7 +197,7 @@ function TraitBoard({ vec }) {
 }
 
 // Coach's-view compare table: team ranking under equal weights vs the user's
-// weights. (The question-stage live ranking is ArchetypeRanking below.)
+// weights. Shown in league quizzes; profile mode swaps in ArchetypeRanking.
 function LiveRanking({ vec, weights, onPick }) {
   const rank = rankTeams(vec, weights);
   const eqRank = rankTeams(vec, [5, 5, 5, 5]);
@@ -694,10 +694,12 @@ function App() {
             {coach && (
               <div style={{ marginTop: 24, padding: 14, borderRadius: 10, border: `1px dashed ${C.amberDim}`, background: "rgba(0,0,0,.2)" }}>
                 <div style={{ ...mono, fontSize: 10, letterSpacing: 1, color: C.amberDim, textTransform: "uppercase", marginBottom: 10, display: "flex", justifyContent: "space-between" }}>
-                  <span>Live ranking · archetypes</span>
-                  <span style={{ color: C.chalkDim }}>gap · move vs neutral</span>
+                  <span>{profileMode ? "Live ranking · archetypes" : "Live ranking · teams"}</span>
+                  <span style={{ color: C.chalkDim }}>{profileMode ? "gap · move vs neutral" : "equal vs your weights"}</span>
                 </div>
-                <ArchetypeRanking vec={vec} started={history.length > 0} weights={weights} />
+                {profileMode
+                  ? <ArchetypeRanking vec={vec} started={history.length > 0} weights={weights} />
+                  : <LiveRanking vec={vec} weights={weights} />}
                 <div style={{ ...mono, fontSize: 10, letterSpacing: 1, color: C.amberDim, textTransform: "uppercase", margin: "16px 0 10px" }}>Live trait board</div>
                 <TraitBoard vec={vec} />
               </div>
