@@ -58,7 +58,7 @@ RSpec.describe League do
     end
 
     it "gives new leagues the column defaults" do
-      league = League.create(slug: "la-liga", name: "La Liga")
+      league = League.create(slug: "new-liga", name: "New Liga")
 
       expect(league.chooser_threshold).to eq(0.25)
       expect(league.max_choices).to eq(3)

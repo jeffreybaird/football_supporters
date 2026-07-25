@@ -93,6 +93,25 @@ RSpec.describe Quiz::Seed do
     expect(angel.blurb).to start_with("Founded by Natalie Portman")
   end
 
+  it "creates La Liga with its twenty clubs behind the earlier leagues" do
+    league = League.first(slug: "la-liga")
+
+    expect(league).not_to be_nil
+    expect(league.name).to eq("La Liga")
+    expect(league.season).to eq("2026-27")
+    expect(league.teams_dataset.count).to eq(20)
+    expect(league.amplify).to eq(2.5)
+    expect(league.position).to eq(5)
+  end
+
+  it "seeds La Liga scores from the CSV, with a league-scoped crest and blurb" do
+    madrid = Team.first(league_id: League.first(slug: "la-liga").id, name: "Real Madrid")
+
+    expect(madrid.vector).to eq([10.0, 6.0, 5.0, 6.0])
+    expect(madrid.crest).to eq("la-liga/8633-Real Madrid.png")
+    expect(madrid.blurb).to start_with("The most successful club on earth")
+  end
+
   it "honours each league's per-league amplify override" do
     expect(League.first(slug: "bundesliga").amplify).to eq(1.4)
     expect(League.first(slug: "premier-league").amplify).to eq(2.5)

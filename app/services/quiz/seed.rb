@@ -237,6 +237,49 @@ module Quiz
        "For years the joke wrote itself: never made the playoffs, ninth place four seasons running. Then 2025 happened — a Decision Day clincher, a first-ever win over North Carolina (“the whale is less white now,” per the club's own social feed), and the streak died. The Lavender Legion supported this team through nothing but bad seasons and a genuinely ugly founding scandal. First playoff berths mean more at clubs like this. Louisville's meant everything."]
     ].freeze
 
+    LA_LIGA_TEAMS = [
+      ["Real Madrid", [10, 6, 5, 6], "8633-Real Madrid.png",
+       "The most successful club on earth, member-owned, fifteen European Cups, and a club television channel that airs pre-match videos about the referee. When one official broke down in tears at a press conference describing his kid being called a thief's son at school, that was the moment the rest of Spain had had enough. Madrid fans have taken Laporta's “sociological Madridismo” jab and made it a t-shirt. Winning everything and feeling persecuted anyway is a hell of a combination. It's also undefeated."],
+      ["Barcelona", [9, 9, 4, 7], "8634-Barcelona.png",
+       "Més que un club, currently more than a construction site. Barça preach purity while selling off future TV revenue to register players — “palancas” became a global punchline — and the Negreira case, years of payments to a referee official's company, hangs over everything. Also: three straight titles, Lamine Yamal, and a rebuilt Camp Nou finally reopening. The finances are a farce, the corruption case is ongoing, and the football is the best in Spain. Being a culé means holding all three at once."],
+      ["Atlético Madrid", [7, 5, 4, 9], "9906-Atletico Madrid.png",
+       "“Luck does not wear red and white.” Atleti built an entire identity, Cholismo, out of the conviction that the world is against them and the only response is to suffer better than everyone else. The Metropolitano is magnificent and now named after a Saudi airline, which fans have decided not to think about. Nobody enjoys playing them. That's the whole point. Enjoyment is for the other Madrid."],
+      ["Athletic Club", [6, 6, 9, 10], "8315-Athletic Club.png",
+       "Basque players only, for over a century, and still never relegated. When Athletic won the 2024 Copa, their first major trophy in forty years, a million people lined the river to watch a barge carry the team through Bilbao. Fans will tell you their neighbor's brother built Iñaki Williams' house, and mean it as club philosophy. Every other club in the world says it's a family. San Mamés can prove it."],
+      ["Real Betis", [5, 6, 6, 9], "8603-Real Betis.png",
+       "“¡Viva er Betis manque pierda!” — long live Betis even if they lose — is the most honest motto in football, written by fans who kept forty thousand season tickets through the second division. The Villamarín is a green-and-white carnival regardless of the score. In 2025 they reached their first European final ever, led 1-0, and lost 4-1 to Chelsea, which is about the most Betis outcome available. Manque pierda was never a joke. It's a load-bearing philosophy."],
+      ["Real Sociedad", [5, 7, 6, 7], "8560-Real Sociedad.png",
+       "The classy Basque cousins: Zubieta academy, smart recruitment, San Sebastián sophistication. The derby with Athletic is kinship as much as rivalry — the two captains once walked out together carrying the then-banned Basque flag, which is the most moving thing ever done before a football match. The awkward secret is that La Real isn't member-owned like Athletic, a legal quirk fans prefer not to dwell on. Two titles, both from the early eighties. The self-respect never dipped with the trophies."],
+      ["Valencia", [5, 4, 1, 9], "10267-Valencia.png",
+       "A two-time champion of Spain held hostage by an owner in Singapore. “Lim Go Home” has been the soundtrack at Mestalla for a decade — a Spanish couple honeymooning in Singapore had their passports held after posing with a protest banner outside Lim's building, which tells you how personal this is. Rather than sell, Lim installed his son as president and is finally finishing the new stadium. The fanbase is one of Spain's best. It deserves almost any other owner."],
+      ["Sevilla", [4, 5, 4, 9], "8302-Sevilla.png",
+       "Spain's oldest club, seven Europa Leagues, the best anthem in the game, and the fiercest derby in the country. All of that is real, and all of it is past tense at the moment: boardroom civil war, relegation scraps, and a trophy they used to own on sight now feeling like someone else's competition. The Sánchez-Pizjuán still delivers on derby day. The rest of the calendar has been penance."],
+      ["Villarreal", [4, 6, 7, 4], "10205-Villarreal.png",
+       "A town of fifty thousand people with a Europa League trophy, funded by a local tile magnate who bought the club for less than a modern player's weekly wage. The Yellow Submarine was everyone's favorite overachiever for two decades. Lately it's complicated: the Partey signing split the fanbase, and the club volunteered for La Liga's Miami-game scheme, which made them briefly the face of everything fans hate. Small club, big trophies, newly acquired asterisks."],
+      ["Celta Vigo", [3, 7, 6, 7], "9910-Celta Vigo.png",
+       "Galician to the bone, sky blue at Balaídos, and blessed with Iago Aspas, the local boy who came home and made a career of tormenting the giants. Celtismo is one of those identities that doesn't need trophies to sustain itself, which is convenient, because there haven't been any. The Galician derby is back this season with Depor promoted. Vigo has been waiting eight years to hate A Coruña at full strength again."],
+      ["Rayo Vallecano", [2, 4, 7, 10], "8370-Rayo Vallecano.png",
+       "A 14,000-seat ground in working-class Vallecas where the ultras fly Republican flags, march against fascism, and spend half their energy fighting their own club's owner. Rayo is the neutral leftist's team in a league whose president is a proud right-winger, and the Bukaneros wouldn't have it any other way. The stadium is falling apart. The politics are immaculate. Priorities."],
+      ["Osasuna", [3, 4, 9, 9], "8371-Osasuna.png",
+       "Member-owned, community-saved, and home to the loudest stadium in Spain — El Sadar's rebuild won awards and the decibel record. The club nearly died in 2014 and had to sell its own ground to the regional government to survive, which makes the noise now feel earned rather than performed. Navarrese identity is complicated, half-Basque and arguing about it. The volume is not complicated. Bring earplugs."],
+      ["Espanyol", [3, 5, 3, 6], "8558-Espanyol.png",
+       "The other Barcelona club, defined by the refusal: perico identity is being Catalan without the Catalanism, blue-and-white in a city painted blaugrana. It's an uphill existence and the fans have made peace with the hill. After nine years of Chinese ownership, the club was sold in 2025 to Burnley's American owners, with JJ Watt along as an investor, which is a sentence nobody in Cornellà saw coming. New money, same hill."],
+      ["Deportivo", [5, 5, 6, 8], "9783-Deportivo A Coruña.png",
+       "SuperDépor won the league in 2000, reached a Champions League semifinal, and produced the Centenariazo, one of the great comebacks ever played. Then came eight years of exile, including the third tier, which fans of a former champion endured with Galician stubbornness. The Riazor Blues carry a heavier scar: one of their own was killed in the 2014 ultras fight in Madrid. Depor's return, bank-backed and stable, sets up the first top-flight Galician derby in nearly a decade. A Coruña remembers everything."],
+      ["Alavés", [2, 4, 6, 5], "9866-Deportivo Alaves.png",
+       "El Glorioso, which is a lot of nickname for a club whose peak was losing a UEFA Cup final 5-4 in golden-goal extra time to Liverpool — still one of the great finals, and Alavés fans own that loss like a trophy. Vitoria is the Basque capital nobody outside Spain remembers is the Basque capital. The club yo-yos, survives, and shares a city and an owner with a basketball powerhouse. Quiet dignity, occasional chaos."],
+      ["Levante", [2, 5, 5, 6], "8581-Levante.png",
+       "The Frogs, the older and poorer of Valencia's two clubs, from the dockside Cabanyal. Levante hasn't won at Mestalla in an official match since 1937, a streak so old it predates the dictatorship, and granotes carry it with gallows humor. Once, for a few weeks in 2011, they topped La Liga, and the city's second club got to look down on everyone. The memory still pays dividends."],
+      ["Elche", [2, 4, 2, 6], "10268-Elche.png",
+       "Palm trees, a green sash, and one of the best-supported clubs in Spain never to win anything — 26,000 regulars at the Martínez Valero through endless yo-yo seasons. The complication is ownership: an Argentine super-agent who signs his own clients to the club and was once recorded telling referees they weren't leaving the stadium. The fans deserve the postcard version of Elche. They get the agent's version."],
+      ["Racing Santander", [2, 5, 5, 8], "8696-Racing Santander.png",
+       "Back after fourteen years, and the north is glad. Racing is a founding member of La Liga that fell all the way through institutional collapse and kept El Sardinero loud the entire way down — the “marea verde” by the beach never actually receded. Promotion was celebrated at the stadium and pointedly nowhere else, mid-feud with the city council. Proper old club, proper grudges."],
+      ["Getafe", [1, 2, 3, 3], "8305-Getafe.png",
+       "The league's designated villain, and comfortable with it. Bordalás-ball means fouling, time-wasting, and card counts that read like misprints, performed in a Madrid suburb where eleven thousand people show up to watch it. The owner and the coach spent November publicly feuding about whether the club would sign anyone. Getafe exists to ruin your Saturday. On its own terms, it's very good at its job."],
+      ["Málaga", [2, 5, 1, 7], "9864-Malaga.png",
+       "Once heard the Champions League anthem under Pellegrini; then the Qatari owner bled the club to the third division. Prosecutors are now seeking fourteen years in prison for Al-Thani and each of his sons, and the club has been run by court-appointed administration — a genuinely unmatched ownership rap sheet in this league. Through all of it, La Rosaleda stayed full and furious. Promotion via the playoff felt less like a rise and more like a jailbreak."]
+    ].freeze
+
     # Every shipped league: its metadata plus its clubs, in display order. The
     # first entry (position 0) is the app's default league. chooser_threshold /
     # max_choices / amplify override the Quiz::Data defaults per league.
@@ -248,7 +291,8 @@ module Quiz
       { slug: "mls",            name: "MLS",            season: "2026",    teams: MLS_TEAMS,            amplify: 1.8,
         chooser_threshold: 0.20 },
       { slug: "nwsl",           name: "NWSL",           season: "2026",    teams: NWSL_TEAMS,           amplify: 2.5,
-        chooser_threshold: 0.25 }
+        chooser_threshold: 0.25 },
+      { slug: "la-liga",        name: "La Liga",        season: "2026-27", teams: LA_LIGA_TEAMS,        amplify: 2.5 }
     ].freeze
 
     # Upsert every league and its teams. Returns the Array of Leagues.

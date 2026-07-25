@@ -42,7 +42,7 @@ RSpec.describe "Quiz", type: :request do
     # A second active league (position 1, so it never displaces the default) with
     # one scorable club — enough to serve its page and store a result against it.
     def second_league
-      lg = League.create(slug: "la-liga", name: "La Liga", position: 1)
+      lg = League.create(slug: "test-liga", name: "Test Liga", position: 1)
       Team.create(league_id: lg.id, name: "Barcelona", vibe: 9, play: 9, ethics: 5, fanbase: 9,
                   blurb: "Més que un club.", position: 0)
       lg
@@ -58,10 +58,10 @@ RSpec.describe "Quiz", type: :request do
     it "serves a chosen league's dataset and title via ?league=" do
       second_league
 
-      get "/?league=la-liga"
+      get "/?league=test-liga"
 
       expect(last_response).to be_ok
-      expect(last_response.body).to include("Which La Liga Club Should You Support?")
+      expect(last_response.body).to include("Which Test Liga Club Should You Support?")
       expect(last_response.body).to include("Barcelona")
     end
 
@@ -74,12 +74,12 @@ RSpec.describe "Quiz", type: :request do
     it "serves a league's dataset as JSON so the page can switch without a reload" do
       second_league
 
-      get "/leagues/la-liga"
+      get "/leagues/test-liga"
 
       expect(last_response).to be_ok
       expect(last_response.content_type).to include("application/json")
       body = JSON.parse(last_response.body)
-      expect(body["LEAGUE"]).to eq("slug" => "la-liga", "name" => "La Liga")
+      expect(body["LEAGUE"]).to eq("slug" => "test-liga", "name" => "Test Liga")
       expect(body["TEAMS"].keys).to eq(["Barcelona"])
       expect(body["FLAVOR"]["Barcelona"]).to eq("Més que un club.")
       expect(body["CHOOSER_THRESHOLD"]).to eq(0.25)
@@ -98,7 +98,7 @@ RSpec.describe "Quiz", type: :request do
     it "stores a submitted quiz against the chosen league" do
       lg = second_league
 
-      json_post "/quizzes", { answers: Array.new(13, 0), weights: [5, 5, 5, 5], league: "la-liga" }
+      json_post "/quizzes", { answers: Array.new(13, 0), weights: [5, 5, 5, 5], league: "test-liga" }
 
       expect(last_response.status).to eq(201)
       expect(QuizResult.first.league_id).to eq(lg.id)
