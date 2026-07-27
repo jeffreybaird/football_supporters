@@ -11,7 +11,7 @@ require "net/http"
 require "uri"
 require "fileutils"
 
-LEAGUE_SLUG = "wsl"
+LEAGUE_SLUG = "premiere-ligue-feminine"
 
 CSV_PATH = File.join(__dir__, "#{LEAGUE_SLUG}/team_logos.csv")
 OUTPUT_DIR = File.expand_path("../../public/images/#{LEAGUE_SLUG}", __dir__)

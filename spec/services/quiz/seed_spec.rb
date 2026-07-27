@@ -200,16 +200,52 @@ RSpec.describe Quiz::Seed do
     expect(epl.vector).to eq([4.1, 2.0, 5.0, 8.0])
   end
 
-  # Liga MX and WSL clubs were transcribed from their blurbs.md, so pin the
-  # seeded blurbs to those files — editing one without the other fails here.
-  # A handful of clubs are seeded under a shorter name than the document's
-  # heading (the CSV's name wins), so map those explicitly.
+  it "creates the Première Ligue Féminine with its twelve clubs behind the earlier leagues" do
+    league = League.first(slug: "premiere-ligue-feminine")
+
+    expect(league).not_to be_nil
+    expect(league.name).to eq("Première Ligue Féminine")
+    expect(league.season).to eq("2026")
+    expect(league.teams_dataset.count).to eq(12)
+    # Tuned values, per db/seed-data/league_tunings.csv.
+    expect(league.amplify).to eq(1.2)
+    expect(league.chooser_threshold).to eq(0.27)
+    expect(league.position).to eq(9)
+  end
+
+  it "seeds Première Ligue Féminine scores from the CSV, with a league-scoped crest and blurb" do
+    lyon = Team.first(league_id: League.first(slug: "premiere-ligue-feminine").id, name: "OL Lyonnes")
+
+    expect(lyon.vector).to eq([10.0, 3.0, 7.0, 6.0])
+    expect(lyon.crest).to eq("premiere-ligue-feminine/394119-OL Lyonnes.png")
+    expect(lyon.blurb).to start_with("Nineteen titles in twenty years")
+  end
+
+  # Paris Saint-Germain is seeded in both Ligue 1 and the Première Ligue
+  # Féminine, under the same name but with its own scores, crest, and blurb.
+  it "keeps the Première Ligue Féminine clubs distinct from their Ligue 1 namesakes" do
+    plf = Team.first(league_id: League.first(slug: "premiere-ligue-feminine").id, name: "Paris Saint-Germain")
+    ligue1 = Team.first(league_id: League.first(slug: "ligue-1").id, name: "Paris Saint-Germain")
+
+    expect(plf.id).not_to eq(ligue1.id)
+    expect(plf.vector).to eq([8.0, 6.0, 1.0, 3.0])
+    expect(ligue1.vector).to eq([10.0, 7.0, 0.0, 4.0])
+  end
+
+  # The Liga MX, WSL and Première Ligue Féminine clubs were transcribed from
+  # their blurbs.md, so pin the seeded blurbs to those files — editing one
+  # without the other fails here. A handful of clubs are seeded under a
+  # different name than the document's heading (the CSV's name wins), so map
+  # those explicitly.
   {
     "liga-mx" => [18, { "Club América" => "América", "Guadalajara (Chivas)" => "Guadalajara",
                         "Tijuana (Xolos)" => "Tijuana" }],
     "wsl" => [14, { "Manchester City" => "Man City", "Manchester United" => "Man United",
                     "Tottenham Hotspur" => "Tottenham", "Brighton & Hove Albion" => "Brighton",
-                    "West Ham United" => "West Ham", "Charlton Athletic" => "Charlton" }]
+                    "West Ham United" => "West Ham", "Charlton Athletic" => "Charlton" }],
+    "premiere-ligue-feminine" => [12, { "RC Strasbourg Alsace" => "RC Strasbourg",
+                                        "Toulouse FC (promoted)" => "Toulouse FC",
+                                        "US Saint-Malo (promoted)" => "US Saint-Malo" }]
   }.each do |slug, (count, aliases)|
     it "seeds every #{slug} blurb verbatim from #{slug}/blurbs.md" do
       doc = File.read("db/seed-data/#{slug}/blurbs.md")
@@ -231,7 +267,7 @@ RSpec.describe Quiz::Seed do
     let(:slugs) do
       { "EPL" => "premier-league", "BUNDESLIGA" => "bundesliga", "LIGUE1" => "ligue-1",
         "MLS" => "mls", "NWSL" => "nwsl", "LALIGA" => "la-liga", "SERIEA" => "serie-a",
-        "LIGAMX" => "liga-mx", "WSL" => "wsl" }
+        "LIGAMX" => "liga-mx", "WSL" => "wsl", "PLF" => "premiere-ligue-feminine" }
     end
     let(:tunings) { CSV.read("db/seed-data/league_tunings.csv", headers: true) }
 
