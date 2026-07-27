@@ -143,24 +143,51 @@ function archetypeWeights(weights) {
   return sum > 0 ? weights.map((x) => x / sum) : equal;
 }
 
-// Rank every archetype by weighted Euclidean distance from the RAW user vector
-// — the same operation as Quiz::Archetype.code_for, extended to a full ordering
-// for the coach's view. Weighted (so moving a slider re-ranks) but unamplified:
+// The 81 cell centroids, rebuilt from the shipped levels/cells/scatter — a
+// literal transcription of Quiz::Archetype::CELL_VECS. The centroids themselves
+// are deliberately NOT shipped: both sides derive them from the same three
+// inputs, so the scatter has one definition and can't drift. Built once.
+let CELL_VECS_MEMO = null;
+function cellVecs() {
+  if (CELL_VECS_MEMO) return CELL_VECS_MEMO;
+  const t = D.ARCHETYPE, codeLevel = { L: "low", M: "mid", H: "high" };
+  const mid = AXES.map((ax) => t.levels[ax].mid);
+  const out = {};
+  for (const code of Object.keys(t.cells)) {
+    const g = AXES.map((ax, i) => t.levels[ax][codeLevel[code[i]]]);
+    const s = g.map((v, k) => v - mid[k]);
+    const total = s.reduce((a, b) => a + b, 0);
+    out[code] = g.map((v, k) => Number((v + t.scatter * (total - s[k])).toFixed(4)));
+  }
+  CELL_VECS_MEMO = out;
+  return out;
+}
+
+// Rank the 18 archetypes by weighted Euclidean distance from the RAW user vector
+// — the same operation as Quiz::Archetype.rank. An archetype owns several cells
+// (Student of the Game owns nine), so its distance is the distance to its
+// NEAREST cell, which is why the leader here is exactly what code_for picks.
+// Weighted (so moving a slider re-ranks, and can change the #1) but unamplified:
 // amplify exists to reach the club space, and an archetype is not a club.
 // Ties keep table order (stable sort = Ruby min_by).
 function rankArchetypes(vec, weights) {
   const w = archetypeWeights(weights);
-  return Object.entries(D.ARCHETYPE.archetypes)
-    .map(([code, row]) => {
-      const dist = Math.sqrt(row.vec.reduce((s, x, k) => s + w[k] * (vec[k] - x) * (vec[k] - x), 0));
-      return { code, name: row.label, sentence: row.sentence, dist };
-    })
-    .sort((a, b) => a.dist - b.dist);
+  const t = D.ARCHETYPE, cv = cellVecs(), best = new Map();
+  for (const [code, id] of Object.entries(t.cells)) {
+    const g = cv[code];
+    const dist = w.reduce((s, wk, k) => s + wk * (vec[k] - g[k]) * (vec[k] - g[k]), 0);
+    const prev = best.get(id);
+    if (prev === undefined || dist < prev.dist) best.set(id, { code, dist });
+  }
+  return Array.from(best, ([id, { code, dist }]) => ({
+    code, id, name: t.archetypes[id].label, sentence: t.archetypes[id].sentence, dist: Math.sqrt(dist),
+  })).sort((a, b) => a.dist - b.dist);
 }
 
 // Abstract "kind of team you want" from the user vector — a literal transcription
-// of Quiz::Archetype#call over the shipped ARCHETYPE table (D.ARCHETYPE):
-// nearest archetype centroid wins. Returns { label, sentence }.
+// of Quiz::Archetype#call over the shipped ARCHETYPE table (D.ARCHETYPE): the
+// nearest of the 81 cell centroids wins, and its cell names the archetype.
+// Returns { label, sentence }.
 function archetypeFor(vec, weights) {
   const t = D.ARCHETYPE;
   if (!Array.isArray(vec) || vec.length !== 4 || !vec.every((v) => typeof v === "number")) {
@@ -237,10 +264,13 @@ function LiveRanking({ vec, weights, onPick }) {
   );
 }
 
-// Coach's-view table of the current archetype ranking. Move cues are vs the
-// neutral all-5s vector (the pre-answer starting point), so the coach can see
-// which archetypes each answer pulls the user towards. Ranking respects the
-// slider weights (see rankArchetypes), so it re-orders live as dials move.
+// Coach's-view table of the current archetype ranking — 18 rows, each scored by
+// the distance to that archetype's nearest cell. Move cues are vs the neutral
+// all-5s vector (the pre-answer starting point), so the coach can see which
+// archetypes each answer pulls the user towards. Ranking respects the slider
+// weights (see rankArchetypes), so it re-orders live as dials move — and because
+// the cell centroids are scattered off the lattice, a slider can change the #1,
+// not merely the tail.
 function ArchetypeRanking({ vec, started, weights }) {
   const rank = rankArchetypes(vec, weights);
   const basePos = {};

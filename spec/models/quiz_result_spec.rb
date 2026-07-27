@@ -27,7 +27,7 @@ RSpec.describe QuizResult do
   it "defaults profile to false and marks profile rows" do
     expect(build_result.tap(&:save).profile?).to be(false)
 
-    profile = build_result(slug: "prof1", profile: true, league_id: nil, pick: "The Ultra")
+    profile = build_result(slug: "prof1", profile: true, league_id: nil, pick: "The Glory Hunter")
     expect(profile).to be_valid
     profile.save_changes
     expect(profile.profile?).to be(true)

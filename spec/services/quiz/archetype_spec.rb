@@ -7,38 +7,131 @@ RSpec.describe Quiz::Archetype do
   def label(vec) = described_class.call(vec)[:label]
   def sentence(vec) = described_class.call(vec)[:sentence]
 
+  # The doc's 18 archetype names (db/seed-data/football-fan-archetypes-final-v2.md).
+  let(:doc_labels) do
+    ["The Weekend Giant", "The Big-Club Believer", "The Cathedral Builder",
+     "The Pragmatic Winner", "The Glory Hunter", "The Trophy Collector",
+     "The Student of the Game", "The Club Idealist", "The Terrace Dreamer",
+     "The Everyfan", "The Principled Fan", "The Easygoing Supporter",
+     "The Free Agent", "The Parish Purist", "The Hometown Diehard",
+     "The Local Enthusiast", "The Family Day", "The Local Casual"]
+  end
+
+  # Weightings used to prove selection is robust (self-resolution) and live
+  # (leader moves). Deliberately includes near-degenerate ones.
+  let(:lopsided) do
+    [[5, 5, 5, 5], [10, 1, 1, 10], [1, 10, 10, 1], [9, 3, 3, 3],
+     [3, 3, 3, 9], [10, 1, 1, 1], [1, 1, 1, 10]]
+  end
+
   it "returns The All-Rounder with the neutral sentence for a nil or malformed vector" do
     expect(label(nil)).to eq("The All-Rounder")
     expect(sentence(nil)).to eq(described_class::ALL_MID_SENTENCE)
     expect(label([1, 2, 3])).to eq("The All-Rounder")
   end
 
-  def centroid(code) = described_class::ARCHETYPES.fetch(code)["vec"]
+  def centroid(code) = described_class::CELL_VECS.fetch(code)
 
-  it "selects the archetype whose centroid is nearest the given vector" do
-    expect(label(centroid("HHHH"))).to eq("The Dreamer")
-    expect(label(centroid("LLLL"))).to eq("The Stoic")
-    # A vector nudged a hair off a centroid still resolves to that archetype.
-    near = centroid("HHHH").map { |x| x + 0.05 }
-    expect(label(near)).to eq("The Dreamer")
-  end
+  describe "the cell table" do
+    it "covers all 81 H/M/L codes exactly once" do
+      expect(described_class::CELLS.keys.sort)
+        .to eq(%w[H M L].repeated_permutation(4).map(&:join).sort)
+    end
 
-  it "maps every archetype's own centroid to itself even under lopsided weighting" do
-    described_class::ARCHETYPES.each_value do |row|
-      expect(described_class.call(row["vec"], weights: [10, 1, 1, 10])[:label]).to eq(row["label"])
+    it "maps every cell to a known archetype" do
+      expect(described_class::CELLS.values.uniq).to all(satisfy { |id| described_class::ARCHETYPES.key?(id) })
+    end
+
+    it "has exactly the 18 archetypes named in the source doc" do
+      labels = described_class::ARCHETYPES.each_value.map { |row| row["label"] }
+      expect(labels).to match_array(doc_labels)
+    end
+
+    # This is the check that caught the source doc's HHHH contradiction: an
+    # archetype no cell points at is unreachable copy.
+    it "leaves no archetype orphaned — every one is reachable from some cell" do
+      expect(described_class::ARCHETYPES.keys - described_class::CELLS.values.uniq).to be_empty
     end
   end
 
-  # The centroids are scattered off the per-axis lattice (see Archetype's header
-  # comment), so — exactly like club selection — reweighting an axis can change
-  # the #1 archetype, not merely re-sort the tail. This pins that the leader
-  # actually moves with the sliders.
+  describe "selection" do
+    it "selects the archetype whose cell centroid is nearest the given vector" do
+      expect(label(centroid("HHHH"))).to eq("The Club Idealist")
+      expect(label(centroid("LLLL"))).to eq("The Local Casual")
+      # A vector nudged a hair off a centroid still resolves to that archetype.
+      expect(label(centroid("HHHH").map { |x| x + 0.05 })).to eq("The Club Idealist")
+    end
+
+    # Spot checks from the source doc's verification list.
+    {
+      "HHHH" => "The Club Idealist", "HLMH" => "The Glory Hunter",
+      "MMLH" => "The Terrace Dreamer", "MLMM" => "The Everyfan",
+      "LLLL" => "The Local Casual"
+    }.each do |code, expected|
+      it "maps #{code} to #{expected}" do
+        expect(label(centroid(code))).to eq(expected)
+      end
+    end
+
+    # The upper bound on SCATTER: scatter the lattice too hard and a cell's own
+    # centroid falls nearer a neighbour's, silently corrupting every lookup.
+    it "resolves every one of the 81 cells to its own code, even under lopsided weighting" do
+      described_class::CELL_VECS.each do |code, vec|
+        lopsided.each do |w|
+          expect(described_class.code_for(vec, weights: w))
+            .to eq(code), "cell #{code} resolved elsewhere under weights #{w.inspect}"
+        end
+      end
+    end
+
+    it "puts an on-anchor vector in the cell built from those same anchors" do
+      # L on Vibe, H on Play, M on Ethics, H on Fanbase.
+      vec = [described_class::LEVELS["Vibe"]["low"], described_class::LEVELS["Play"]["high"],
+             described_class::LEVELS["Ethics"]["mid"], described_class::LEVELS["Fanbase"]["high"]]
+      expect(described_class.code_for(vec)).to eq("LHMH")
+    end
+  end
+
+  # The reason the cell centroids are scattered off the lattice at all. On a pure
+  # lattice, nearest-cell factorises per axis, so no positive weighting could ever
+  # change the winner — an axis dial that cannot move the answer is a lie. Asserted
+  # as a measured property over a probe grid rather than one hand-picked vector, so
+  # it keeps biting if LEVELS or SCATTER are retuned. Measured share at SCATTER
+  # 0.12 is 31%; 0% is what an unscattered lattice would give.
   it "lets slider weights change the winning archetype, like club selection" do
-    vec = [4.5, 5.5, 3.0, 5.0]
-    winners = [[5, 5, 5, 5], [9, 3, 3, 3], [3, 3, 9, 3], [3, 3, 3, 9]].map do |w|
-      described_class.call(vec, weights: w)[:label]
+    probes = [3.5, 4.5, 5.5, 6.5].product([4.0, 5.5, 6.5, 7.5], [2.0, 3.5, 5.0, 6.5], [3.5, 4.5, 5.5, 6.5])
+    weightings = [[5, 5, 5, 5], [9, 3, 3, 3], [3, 9, 3, 3], [3, 3, 9, 3], [3, 3, 3, 9]]
+    moved = probes.count { |vec| weightings.map { |w| described_class.call(vec, weights: w)[:label] }.uniq.size > 1 }
+    expect(moved).to be > (probes.size * 0.15)
+  end
+
+  describe ".rank" do
+    it "orders all 18 archetypes by distance, nearest first" do
+      rows = described_class.rank([5.0, 5.0, 5.0, 5.0])
+      expect(rows.size).to eq(18)
+      expect(rows.map { |r| r[:dist] }).to eq(rows.map { |r| r[:dist] }.sort)
+      expect(rows.map { |r| r[:label] }).to match_array(doc_labels)
     end
-    expect(winners.uniq.size).to be > 1
+
+    # The coach's table and the result screen must never disagree about who won.
+    it "agrees with .call on the leader, under any weighting" do
+      vec = [4.5, 5.5, 3.0, 5.0]
+      lopsided.each do |w|
+        expect(described_class.rank(vec, weights: w).first[:label]).to eq(described_class.call(vec, weights: w)[:label])
+      end
+    end
+
+    it "returns an empty ordering for a malformed vector" do
+      expect(described_class.rank(nil)).to eq([])
+    end
+  end
+
+  describe ".band" do
+    it "returns the nearest level on each axis" do
+      described_class::LEVELS.each do |axis, levels|
+        levels.each { |name, value| expect(described_class.band(value, axis)).to eq(name) }
+      end
+    end
   end
 
   describe ".weight_vector" do
@@ -56,18 +149,32 @@ RSpec.describe Quiz::Archetype do
     end
   end
 
-  it "returns the label and sentence for every archetype code" do
+  it "returns a non-empty label and sentence for every archetype" do
     described_class::ARCHETYPES.each_value do |row|
-      result = described_class.call(row["vec"])
-      expect(result[:label]).to eq(row["label"])
-      expect(result[:sentence]).to eq(row["sentence"])
+      expect(row["label"]).to be_a(String).and(satisfy { |s| !s.empty? })
+      expect(row["sentence"]).to be_a(String).and(satisfy { |s| !s.empty? })
+    end
+  end
+
+  it "returns the label and sentence of the archetype owning the nearest cell" do
+    described_class::CELL_VECS.each do |code, vec|
+      row = described_class::ARCHETYPES.fetch(described_class::CELLS.fetch(code))
+      expect(described_class.call(vec)).to eq({ label: row["label"], sentence: row["sentence"] })
     end
   end
 
   it "exposes the client table with all keys the browser algorithm needs" do
     t = described_class.client_table
-    expect(t.keys).to contain_exactly("levels", "archetypes", "allMidLabel", "allMidSentence")
+    expect(t.keys).to contain_exactly("levels", "cells", "archetypes", "scatter", "allMidLabel", "allMidSentence")
     expect(t["levels"]).to eq(described_class::LEVELS)
+    expect(t["cells"]).to eq(described_class::CELLS)
     expect(t["archetypes"]).to eq(described_class::ARCHETYPES)
+    expect(t["scatter"]).to eq(described_class::SCATTER)
+  end
+
+  # Every axis needs all three anchors or CELL_VECS can't be built.
+  it "defines low, mid and high on every axis" do
+    expect(described_class::LEVELS.keys).to eq(Quiz::Data::AXES)
+    described_class::LEVELS.each_value { |levels| expect(levels.keys).to contain_exactly("low", "mid", "high") }
   end
 end

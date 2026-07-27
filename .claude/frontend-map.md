@@ -150,7 +150,11 @@ The real frontend is a single client-rendered React (in-browser Babel) quiz in
 | `GET /q/:slug`       | single-league `Quiz::Score` **or** `Quiz::ProfileScore` (on `record.profile?`) | `views/quiz/result.erb` / `views/quiz/profile_result.erb` | Server-rendered shared result |
 
 Archetype text (`Quiz::Archetype`) ships as a data table in `GET /leagues` so the client
-`archetypeFor` and the server `profile_result` render identical labels/sentences.
+`archetypeFor` and the server `profile_result` render identical labels/sentences. The table is
+`levels` + `cells` (81 H/M/L codes → one of 18 archetypes) + `scatter`; the cell centroids are
+**not** shipped — `cellVecs()` in `views/quiz/index.erb` rebuilds them from those three so the
+scatter has a single definition. Keep `rankArchetypes`/`archetypeFor` a literal transcription of
+`Quiz::Archetype.rank`/`#call`.
 
 ---
 
