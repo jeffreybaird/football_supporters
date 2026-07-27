@@ -8,6 +8,12 @@ require "erb"
 # The application. Routes stay thin: parse params, call a service object, render.
 # Business rules and SQL live in app/services and app/models — never here.
 class App < Sinatra::Base
+  # The ?league= value standing for the cross-league Football Profile rather than
+  # a league slug. Football Profile is the DEFAULT: a bare "/" starts in it, and
+  # this value only appears in the URL once the client has switched modes. Must
+  # match PROFILE_SLUG in views/quiz/index.erb.
+  PROFILE_PARAM = "profile"
+
   configure do
     set :root, __dir__
     set :erb, escape_html: true
@@ -160,11 +166,29 @@ class App < Sinatra::Base
   def render_quiz(coach:)
     @league = resolve_league(params["league"])
     @leagues = League.active.ordered.all
-    @page_title = "Which #{@league.name} Club Should You Support?" if @league
+    # Football Profile is the default landing experience: a bare "/" (or an
+    # explicit ?league=profile) starts there. Ask for a league by slug to get
+    # that league's single-club quiz instead.
+    @profile_start = params["league"].nil? || params["league"] == PROFILE_PARAM
+    @page_title = quiz_page_title
+    # The single-league dataset is embedded either way: it seeds the client's
+    # league globals, so leaving profile mode needs no fetch.
     @quiz_data_json = json_for_script(Quiz::ClientData.call(@league))
+    # Embedded rather than left to the GET /leagues fetch, which in the default
+    # mode would sit on every landing's critical path.
+    @profile_json = @profile_start ? json_for_script(Quiz::ProfileData.call) : "null"
     @leagues_json = json_for_script(@leagues.map { |l| { "slug" => l.slug, "name" => l.name } })
     @coach = coach
     erb :"quiz/index"
+  end
+
+  # Reads @profile_start / @league, so call it after both are set. Nil when there
+  # is no league at all to name — the layout falls back to its own default.
+  def quiz_page_title
+    return "Your Football Profile" if @profile_start
+    return unless @league
+
+    "Which #{@league.name} Club Should You Support?"
   end
 
   # The active league matching slug, falling back to the default league. Used by

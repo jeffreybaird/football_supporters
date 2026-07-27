@@ -14,6 +14,10 @@
   window.QUIZ_DATA = <%== @quiz_data_json %>;
   window.QUIZ_LEAGUES = <%== @leagues_json %>;
   window.QUIZ_COACH = <%== @coach ? "true" : "false" %>;
+  // Football Profile is the default mode. When it is, its all-leagues bundle is
+  // embedded here so the page never has to fetch GET /leagues before starting.
+  window.QUIZ_START_PROFILE = <%== @profile_start ? "true" : "false" %>;
+  window.QUIZ_PROFILE = <%== @profile_json %>;
 </script>
 
 <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
@@ -60,11 +64,15 @@ function shuffle(arr) {
 // during render, so components never see a half-switched dataset.
 let LEAGUE, TEAMS, TEAM_NAMES, FLAVOR, BADGE, CHOOSER_THRESHOLD, MAX_CHOICES, AMPLIFY, CENTROID;
 
-// Football Profile mode scores against every league at once. Its dataset (all
-// leagues + the archetype table) is fetched lazily from GET /leagues the first
-// time the user picks Profile (see enterProfile) and cached here.
+// Football Profile mode scores against every league at once, and is the DEFAULT
+// mode (see App#render_quiz). Its dataset (all leagues + the archetype table)
+// arrives embedded when the page starts in profile mode; otherwise it is fetched
+// lazily from GET /leagues the first time the user picks Profile (enterProfile)
+// and cached here. PROFILE_SLUG is the picker's option value; the server's
+// App::PROFILE_PARAM is the matching ?league= value.
 const PROFILE_SLUG = "__profile__";
-let PROFILE_DATA = null;
+const START_PROFILE = !!window.QUIZ_START_PROFILE;
+let PROFILE_DATA = window.QUIZ_PROFILE || null;
 
 // Centre of a team cloud — the point the user's vector is amplified away from
 // (see Quiz::Score#centroid_of). One implementation shared by applyLeague and
@@ -442,7 +450,10 @@ function App() {
   const [leagueSlug, setLeagueSlug] = useState(LEAGUE ? LEAGUE.slug : "");
   const [leagueBusy, setLeagueBusy] = useState(false);
   const [leagueErr, setLeagueErr] = useState(false);
-  const [profileMode, setProfileMode] = useState(false);
+  // Starts true on a bare "/" — the server has already embedded PROFILE_DATA and
+  // set the title, so there is nothing to install on mount. Deliberately no
+  // setLeagueParam here: landing shouldn't rewrite a clean URL to ?league=profile.
+  const [profileMode, setProfileMode] = useState(START_PROFILE);
   const [profileBusy, setProfileBusy] = useState(false);
   const [profileErr, setProfileErr] = useState(false);
   const [profileResult, setProfileResult] = useState(null);

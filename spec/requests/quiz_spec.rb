@@ -22,6 +22,52 @@ RSpec.describe "Quiz", type: :request do
     end
   end
 
+  describe "Football Profile as the default mode" do
+    it "starts a bare / in profile mode, with the all-leagues bundle embedded" do
+      get "/"
+
+      expect(last_response).to be_ok
+      expect(last_response.body).to include("window.QUIZ_START_PROFILE = true")
+      expect(last_response.body).to include("<title>Your Football Profile</title>")
+      # Embedded, not left to a GET /leagues fetch on the critical path.
+      expect(last_response.body).to include("window.QUIZ_PROFILE = {")
+      expect(last_response.body).not_to include("window.QUIZ_PROFILE = null")
+    end
+
+    it "starts in profile mode for an explicit ?league=profile" do
+      get "/?league=profile"
+
+      expect(last_response.body).to include("window.QUIZ_START_PROFILE = true")
+      expect(last_response.body).to include("<title>Your Football Profile</title>")
+    end
+
+    it "starts /coach in profile mode too" do
+      get "/coach"
+
+      expect(last_response.body).to include("window.QUIZ_START_PROFILE = true")
+      expect(last_response.body).to include("window.QUIZ_COACH = true")
+    end
+
+    it "starts in single-league mode when a league slug is asked for" do
+      get "/?league=#{League.default.slug}"
+
+      expect(last_response.body).to include("window.QUIZ_START_PROFILE = false")
+      expect(last_response.body).to include("window.QUIZ_PROFILE = null")
+      # Asserted on <title> — "Your Football Profile" also appears as a literal
+      # in the client script (installProfile), so a bare include would pass here.
+      expect(last_response.body).to include("<title>Which Premier League Club Should You Support?</title>")
+    end
+
+    # The league globals seed the client either way, so leaving profile mode
+    # needs no fetch.
+    it "embeds the single-league dataset even when starting in profile mode" do
+      get "/"
+
+      expect(last_response.body).to include("window.QUIZ_DATA")
+      expect(last_response.body).to include("Man United")
+    end
+  end
+
   describe "coach view gating" do
     it "keeps coach view off on the standard page" do
       get "/"
