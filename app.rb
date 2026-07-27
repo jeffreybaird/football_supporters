@@ -14,6 +14,14 @@ class App < Sinatra::Base
   # match PROFILE_SLUG in views/quiz/index.erb.
   PROFILE_PARAM = "profile"
 
+  # Where team crests are served from. Crests live on a CDN (DigitalOcean
+  # Spaces) in production; leaving CREST_BASE_URL unset falls back to the copies
+  # still committed under public/images, so dev and the test suite need no
+  # network. A stored crest is a "<league-slug>/<file>" path and the object keys
+  # on the CDN mirror that layout, so only the prefix differs between the two.
+  # Any trailing slash is stripped so the joins below can't produce "//".
+  CREST_BASE_URL = ENV.fetch("CREST_BASE_URL", "/images").chomp("/")
+
   configure do
     set :root, __dir__
     set :erb, escape_html: true
@@ -54,13 +62,35 @@ class App < Sinatra::Base
       "#{sentence}."
     end
 
-    # Absolute, URL-encoded crest path (nil when the team has no crest on file).
+    # Absolute, URL-encoded crest URL (nil when the team has no crest on file).
     # A crest is a "<league-slug>/<file>" path, so encode each segment and keep
     # the separators — url_encode on the whole string would escape the slash.
+    #
+    # An absolute CREST_BASE_URL (the CDN) is already a full origin and is
+    # returned as-is; the local "/images" fallback still goes through url() so
+    # OG tags and shared pages get an absolute URL for this host.
+    #
+    # The CDN's object keys are Unicode-DECOMPOSED (NFD) for the three accented
+    # crest names — the upload normalized them — while the copies on disk and
+    # the names in Quiz::Seed are composed (NFC). Object keys match byte for
+    # byte, so "Köln" in the wrong form is a 403; convert on the way out. This
+    # is a no-op for the other 183 crests, whose names are pure ASCII, and is
+    # deliberately NOT applied to the local fallback, where the files are NFC.
     def crest_url(file)
       return unless file
 
-      url("/images/#{file.split("/").map { |seg| ERB::Util.url_encode(seg) }.join("/")}")
+      segments = file.split("/").map do |seg|
+        ERB::Util.url_encode(remote_crests? ? seg.unicode_normalize(:nfd) : seg)
+      end
+      path = "#{CREST_BASE_URL}/#{segments.join("/")}"
+      remote_crests? ? path : url(path)
+    end
+
+    # True when crests come from the CDN rather than public/images. The two
+    # stores differ in more than their prefix (see the NFD note above), so the
+    # distinction is named rather than re-derived at each use.
+    def remote_crests?
+      CREST_BASE_URL.start_with?("http://", "https://")
     end
   end
 
@@ -178,6 +208,9 @@ class App < Sinatra::Base
     # mode would sit on every landing's critical path.
     @profile_json = @profile_start ? json_for_script(Quiz::ProfileData.call) : "null"
     @leagues_json = json_for_script(@leagues.map { |l| { "slug" => l.slug, "name" => l.name } })
+    # The client builds its own <img> src from the same base the server uses for
+    # OG tags, so a CDN switch moves both at once.
+    @crest_base_json = json_for_script(CREST_BASE_URL)
     @coach = coach
     erb :"quiz/index"
   end

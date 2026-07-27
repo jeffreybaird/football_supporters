@@ -14,6 +14,8 @@
   window.QUIZ_DATA = <%== @quiz_data_json %>;
   window.QUIZ_LEAGUES = <%== @leagues_json %>;
   window.QUIZ_COACH = <%== @coach ? "true" : "false" %>;
+  // Crest host — the CDN in production, "/images" when CREST_BASE_URL is unset.
+  window.QUIZ_CREST_BASE = <%== @crest_base_json %>;
   // Football Profile is the default mode. When it is, its all-leagues bundle is
   // embedded here so the page never has to fetch GET /leagues before starting.
   window.QUIZ_START_PROFILE = <%== @profile_start ? "true" : "false" %>;
@@ -309,6 +311,24 @@ function ArchetypeRanking({ vec, started, weights }) {
   );
 }
 
+// Crest host, injected by the server from App::CREST_BASE_URL so client <img>
+// tags and server-rendered OG tags always point at the same place. Falls back
+// to the committed public/images copies if the page predates the injection.
+const CREST_BASE = (window.QUIZ_CREST_BASE || "/images").replace(/\/$/, "");
+
+const REMOTE_CRESTS = /^https?:\/\//.test(CREST_BASE);
+
+// Mirrors App#crest_url: a crest is a "<league-slug>/<file>" path, so encode
+// each segment and keep the separators. The CDN's keys are Unicode-DECOMPOSED
+// for the three accented crest names while the local copies are composed, so
+// normalize on the way out — a no-op for the ASCII names, and skipped entirely
+// for the public/images fallback. Keep in step with App#crest_url.
+function crestUrl(file) {
+  return `${CREST_BASE}/${file.split("/")
+    .map((seg) => encodeURIComponent(REMOTE_CRESTS ? seg.normalize("NFD") : seg))
+    .join("/")}`;
+}
+
 function Badge({ name, size = 92, file }) {
   // Single-league callers omit `file` and read the global BADGE map; profile
   // cards pass file explicitly since BADGE isn't the right league's map there.
@@ -322,7 +342,7 @@ function Badge({ name, size = 92, file }) {
       boxShadow: `inset 0 1px 0 rgba(255,255,255,.04), 0 8px 24px ${C.shadow}`,
     }}>
       {file ? (
-        <img src={`/images/${file.split("/").map(encodeURIComponent).join("/")}`} alt={name}
+        <img src={crestUrl(file)} alt={name}
           style={{ width: size * 0.74, height: size * 0.74, objectFit: "contain" }}
           onError={(e) => {
             e.target.style.display = "none";

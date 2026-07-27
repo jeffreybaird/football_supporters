@@ -131,6 +131,7 @@ jobs:
           IMAGE=${IMAGE}
           DOMAIN=${{ vars.DOMAIN }}
           LEGACY_DOMAIN=${{ vars.LEGACY_DOMAIN }}
+          CREST_BASE_URL=${{ vars.CREST_BASE_URL }}
           SECRET_KEY_BASE=${{ secrets.SECRET_KEY_BASE }}
           DATABASE_PATH=${{ vars.DATABASE_PATH }}
           LITESTREAM_ACCESS_KEY_ID=${{ secrets.LITESTREAM_ACCESS_KEY_ID }}
