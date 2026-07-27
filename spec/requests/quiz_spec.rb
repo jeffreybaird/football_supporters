@@ -100,6 +100,26 @@ RSpec.describe "Quiz", type: :request do
     end
   end
 
+  # A 6px-tall range input is nearly impossible to drag with a thumb. The input's
+  # own box is the drag target, so it has to be tall enough to hit (44px, the WCAG
+  # touch-target minimum) with the visible track painted by ::track instead. The
+  # client script is inert text here, so assert the rules ship.
+  describe "slider drag target on touch devices" do
+    it "gives the range input a 44px drag target with the track drawn separately" do
+      get "/"
+
+      expect(last_response.body).to match(/input\[type=range\]\{[^}]*height:44px/m)
+      expect(last_response.body).to include("input[type=range]::-webkit-slider-runnable-track")
+      expect(last_response.body).to include("input[type=range]::-moz-range-track")
+    end
+
+    it "lets a vertical swipe over the slider still scroll the page" do
+      get "/"
+
+      expect(last_response.body).to match(/input\[type=range\]\{[^}]*touch-action:pan-y/m)
+    end
+  end
+
   describe "coach view gating" do
     it "keeps coach view off on the standard page" do
       get "/"

@@ -704,13 +704,22 @@ function App() {
         .qbtn:focus-visible{ outline:2px solid ${C.lime}; outline-offset:2px; }
         .simrow{ cursor:pointer; }
         .simrow:focus-visible{ outline:2px solid ${C.lime}; outline-offset:1px; }
-        input[type=range]{ -webkit-appearance:none; appearance:none; height:6px; border-radius:999px;
-          background:${C.line}; outline:none; }
-        input[type=range]::-webkit-slider-thumb{ -webkit-appearance:none; appearance:none; width:20px; height:20px;
-          border-radius:50%; background:${C.amber}; border:2px solid #1a1305; cursor:pointer; }
-        input[type=range]::-moz-range-thumb{ width:20px; height:20px; border-radius:50%; background:${C.amber};
+        /* The drag target is the whole 44px-tall box, not the 6px track: on touch a
+           6px-tall input is nearly impossible to grab. The track is painted by the
+           ::track pseudo-element instead of the input background, and the extra
+           height is pulled back out with a negative margin so the layout around it
+           is unchanged. touch-action:pan-y keeps a vertical swipe over the band
+           scrolling the page while a horizontal drag still moves the thumb. */
+        input[type=range]{ -webkit-appearance:none; appearance:none; display:block; width:100%;
+          height:44px; margin:-12px 0; padding:0; background:transparent; outline:none;
+          touch-action:pan-y; cursor:pointer; }
+        input[type=range]::-webkit-slider-runnable-track{ height:6px; border-radius:999px; background:${C.line}; }
+        input[type=range]::-moz-range-track{ height:6px; border-radius:999px; background:${C.line}; }
+        input[type=range]::-webkit-slider-thumb{ -webkit-appearance:none; appearance:none; width:24px; height:24px;
+          margin-top:-9px; border-radius:50%; background:${C.amber}; border:2px solid #1a1305; cursor:pointer; }
+        input[type=range]::-moz-range-thumb{ width:24px; height:24px; border-radius:50%; background:${C.amber};
           border:2px solid #1a1305; cursor:pointer; }
-        input[type=range]:focus-visible{ outline:2px solid ${C.lime}; outline-offset:4px; }
+        input[type=range]:focus-visible{ outline:2px solid ${C.lime}; outline-offset:-8px; border-radius:999px; }
       `}</style>
 
       <div style={{ maxWidth: 620, margin: "0 auto" }}>
