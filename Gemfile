@@ -17,6 +17,7 @@ gem "sinatra", "~> 4.1", require: "sinatra/base" # modular app, no classic DSL
 gem "sqlite3", "~> 2.6" # the only DB backend
 
 group :development, :test do
+  gem "csv", "~> 3.3" # seed-tuning specs read db/seed-data/*.csv; not a default gem from Ruby 3.4
   gem "dotenv", "~> 3.1"
   gem "factory_bot", "~> 6.5"
   gem "rack-test", "~> 2.2", require: "rack/test"

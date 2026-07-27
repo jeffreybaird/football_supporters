@@ -330,7 +330,8 @@ module Quiz
     # tuned values come from db/seed-data/league_tunings.csv.
     LEAGUES = [
       { slug: "premier-league", name: "Premier League", season: "2026-27", teams: PREMIER_LEAGUE_TEAMS, amplify: 2.5 },
-      { slug: "bundesliga",     name: "Bundesliga",     season: "2026-27", teams: BUNDESLIGA_TEAMS,     amplify: 1.4 },
+      { slug: "bundesliga",     name: "Bundesliga",     season: "2026-27", teams: BUNDESLIGA_TEAMS,     amplify: 1.4,
+        chooser_threshold: 0.20 },
       { slug: "ligue-1",        name: "Ligue 1",        season: "2026-27", teams: LIGUE_1_TEAMS,        amplify: 1.7,
         chooser_threshold: 0.25 },
       { slug: "mls",            name: "MLS",            season: "2026",    teams: MLS_TEAMS,            amplify: 1.8,

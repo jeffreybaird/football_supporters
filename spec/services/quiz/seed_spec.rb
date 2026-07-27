@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require "spec_helper"
+require "csv"
 
 RSpec.describe Quiz::Seed do
   # The suite seeds once in spec_helper; these assert the outcome and idempotency.
@@ -144,6 +145,32 @@ RSpec.describe Quiz::Seed do
     expect(doc.size).to eq(20)
     expect(teams.map(&:name)).to match_array(doc.keys)
     teams.each { |team| expect(team.blurb).to eq(doc[team.name]), "blurb drift for #{team.name}" }
+  end
+
+  # db/seed-data/league_tunings.csv is where amplify / chooser_threshold /
+  # max_choices are derived; Seed::LEAGUES is what actually ships. Pin every
+  # league to the CSV so a retuned value can't be left out of the seed (which is
+  # exactly how Bundesliga's chooser_threshold drifted to the default).
+  describe "parity with db/seed-data/league_tunings.csv" do
+    let(:slugs) do
+      { "EPL" => "premier-league", "BUNDESLIGA" => "bundesliga", "LIGUE1" => "ligue-1",
+        "MLS" => "mls", "NWSL" => "nwsl", "LALIGA" => "la-liga", "SERIEA" => "serie-a" }
+    end
+    let(:tunings) { CSV.read("db/seed-data/league_tunings.csv", headers: true) }
+
+    it "covers every seeded league exactly once" do
+      expect(tunings.map { |r| slugs.fetch(r["league"]) }).to match_array(League.all.map(&:slug))
+    end
+
+    it "seeds the tuned amplify, chooser_threshold and max_choices for every league" do
+      tunings.each do |row|
+        league = League.first(slug: slugs.fetch(row["league"]))
+        expect(league.amplify).to eq(row["amplify"].to_f), "amplify drift for #{league.slug}"
+        expect(league.chooser_threshold).to eq(row["chooser_threshold"].to_f),
+                                            "chooser_threshold drift for #{league.slug}"
+        expect(league.max_choices).to eq(row["max_choices"].to_i), "max_choices drift for #{league.slug}"
+      end
+    end
   end
 
   it "honours each league's per-league amplify override" do
