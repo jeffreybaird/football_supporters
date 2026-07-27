@@ -57,5 +57,3 @@ SuperDépor won the league in 2000, reached a Champions League semifinal, and pr
 
 Málaga
 Once heard the Champions League anthem under Pellegrini; then the Qatari owner bled the club to the third division. Prosecutors are now seeking fourteen years in prison for Al-Thani and each of his sons, and the club has been run by court-appointed administration — a genuinely unmatched ownership rap sheet in this league. Through all of it, La Rosaleda stayed full and furious. Promotion via the playoff felt less like a rise and more like a jailbreak.
-
-Notes before you score: no Girona, Mallorca, or Oviedo — all three went down, so the CFG storyline is out of this league's Ethics conversation entirely. The research flags the Betis board percentages and several ultra-group statuses as fuzzy; I kept those vague deliberately. And the Málaga prosecution and Espanyol sale details are recent enough to re-verify before publishing.
