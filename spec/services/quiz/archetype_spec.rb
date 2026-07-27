@@ -163,6 +163,47 @@ RSpec.describe Quiz::Archetype do
     end
   end
 
+  # db/seed-data/ARCHETYPES.md is where the copy is reviewed; ARCHETYPES is what
+  # actually ships. They are two copies of the same 18 sentences, so pin them to
+  # each other — editing either one alone fails here rather than drifting quietly.
+  describe "parity with db/seed-data/ARCHETYPES.md" do
+    let(:doc_path) { File.expand_path("../../../db/seed-data/ARCHETYPES.md", __dir__) }
+
+    # "## <Label>", then the id in backticks, then the sentence paragraph.
+    let(:doc_entries) do
+      File.read(doc_path).scan(/^## (.+?)\n\n`(\w+)`\n\n(.+?)(?=\n\n##|\z)/m).map do |label, id, sentence|
+        { id: id.to_sym, label: label.strip, sentence: normalise(sentence.strip) }
+      end
+    end
+
+    # The doc is written with typographic apostrophes; every seeded blurb and the
+    # shipped constant use straight ones. Normalise before comparing, and pin the
+    # convention separately below.
+    def normalise(text) = text.gsub(/[’‘]/, "'")
+
+    it "exists and parses" do
+      expect(File).to exist(doc_path)
+      expect(doc_entries.size).to eq(18)
+    end
+
+    it "documents every archetype, in the order they ship" do
+      expect(doc_entries.map { |e| e[:id] }).to eq(described_class::ARCHETYPES.keys)
+    end
+
+    it "matches the shipped label and sentence for every archetype" do
+      doc_entries.each do |entry|
+        row = described_class::ARCHETYPES.fetch(entry[:id])
+        expect(row["label"]).to eq(entry[:label]), "label drift for #{entry[:id]}"
+        expect(row["sentence"]).to eq(entry[:sentence]), "sentence drift for #{entry[:id]}"
+      end
+    end
+
+    it "ships straight apostrophes, not typographic ones" do
+      offenders = described_class::ARCHETYPES.select { |_id, row| row["sentence"].match?(/[’‘]/) }
+      expect(offenders.keys).to be_empty
+    end
+  end
+
   it "exposes the client table with all keys the browser algorithm needs" do
     t = described_class.client_table
     expect(t.keys).to contain_exactly("levels", "cells", "archetypes", "scatter", "allMidLabel", "allMidSentence")
