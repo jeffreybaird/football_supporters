@@ -117,6 +117,10 @@ services:
       - "443:443"
     environment:
       DOMAIN: ${DOMAIN}
+      # Pre-rename hostname, 301'd to DOMAIN by the Caddyfile. It falls back to
+      # a default there, so an unset var degrades to the old host rather than
+      # breaking the config.
+      LEGACY_DOMAIN: ${LEGACY_DOMAIN}
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile:ro
       # Persist issued certs + ACME account across restarts/redeploys.

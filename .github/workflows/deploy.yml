@@ -130,6 +130,7 @@ jobs:
           cat > .env <<EOF
           IMAGE=${IMAGE}
           DOMAIN=${{ vars.DOMAIN }}
+          LEGACY_DOMAIN=${{ vars.LEGACY_DOMAIN }}
           SECRET_KEY_BASE=${{ secrets.SECRET_KEY_BASE }}
           DATABASE_PATH=${{ vars.DATABASE_PATH }}
           LITESTREAM_ACCESS_KEY_ID=${{ secrets.LITESTREAM_ACCESS_KEY_ID }}
