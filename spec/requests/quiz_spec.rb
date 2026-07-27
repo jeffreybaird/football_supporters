@@ -83,6 +83,23 @@ RSpec.describe "Quiz", type: :request do
     end
   end
 
+  # On touch devices a tap leaves a lingering :hover on the tapped element. The
+  # answer buttons are keyed by position and reused across questions, so a stale
+  # hover would light up the same slot on the next question before it is chosen.
+  # Gating the hover affordance behind `@media (hover: hover)` keeps it to real
+  # pointer devices. The client script is inert text here, so assert the qbtn
+  # hover rule ships inside that media query.
+  describe "answer-button hover on touch devices" do
+    it "gates the option hover highlight behind a hover-capable media query" do
+      get "/"
+
+      expect(last_response.body).to include("@media (hover: hover)")
+      # No `}` may appear between the media query's opening brace and the qbtn
+      # hover rule — that proves the rule sits inside the query, not after it.
+      expect(last_response.body).to match(/@media \(hover: hover\)\s*\{[^}]*\.qbtn:hover/m)
+    end
+  end
+
   describe "coach view gating" do
     it "keeps coach view off on the standard page" do
       get "/"
