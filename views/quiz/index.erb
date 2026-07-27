@@ -410,6 +410,20 @@ function ShareCard({ url, err, pick }) {
   );
 }
 
+// The quiet "have any feedback?" line under the final screen's actions. A plain
+// link to the server-rendered form — the owner's address lives only on the
+// server, so nothing here exposes it. `from` carries where the visitor was.
+function FeedbackLink({ url }) {
+  const from = encodeURIComponent(url || window.location.href);
+  return (
+    <p style={{ ...mono, fontSize: 12, marginTop: 22, marginBottom: 0 }}>
+      <a href={`/feedback?from=${from}`} style={{ color: C.chalkDim, textDecoration: "underline" }}>
+        Have any feedback?
+      </a>
+    </p>
+  );
+}
+
 // League switcher under the hero headline. The headline shows the current
 // league's name; this compact pill changes it. With a single league there is
 // nothing to choose, so it renders nothing. Switching swaps the dataset in
@@ -899,6 +913,8 @@ function App() {
                 }}>Play again ↺</button>
               </div>
 
+              <FeedbackLink url={shareUrl} />
+
               {coach && (
                 <div style={{ marginTop: 30, padding: 16, borderRadius: 12, border: `1px dashed ${C.amberDim}`, background: "rgba(0,0,0,.22)" }}>
                   <div style={{ ...mono, fontSize: 10, letterSpacing: 1, color: C.amberDim, textTransform: "uppercase", marginBottom: 12 }}>
@@ -971,6 +987,8 @@ function App() {
                 background: "transparent", color: C.amber, border: `1px solid ${C.amber}`, borderRadius: 10, padding: "12px 24px",
               }}>Play again ↺</button>
             </div>
+
+            <FeedbackLink url={shareUrl} />
 
             {coach && (
               <div style={{ marginTop: 30, padding: 16, borderRadius: 12, border: `1px dashed ${C.amberDim}`, background: "rgba(0,0,0,.22)" }}>

@@ -43,6 +43,10 @@
   <div class="result__actions">
     <a class="btn btn--primary" href="/" data-testid="take-quiz">Take the quiz →</a>
   </div>
+
+  <p class="feedback-link">
+    <a href="/feedback?from=<%= ERB::Util.url_encode(@share_url) %>" data-testid="feedback-link">Have any feedback?</a>
+  </p>
 </div>
 
 <script src="/js/share.js" defer></script>

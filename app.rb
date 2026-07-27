@@ -178,6 +178,37 @@ class App < Sinatra::Base
     erb :"quiz/result"
   end
 
+  # The feedback form. `from` carries the page the visitor clicked through from,
+  # so a submission arrives with context; it is stored, never rendered back into
+  # a link, so it can't be used to bounce anyone elsewhere.
+  get "/feedback" do
+    @page_title = "Send feedback"
+    @from = params["from"]
+    @values = {}
+    @errors = {}
+    erb :"feedback/new"
+  end
+
+  # Record feedback and email it onward. A plain form POST — no JavaScript, and
+  # the destination address never reaches the client (see Feedbacks::Notify).
+  post "/feedback" do
+    result = Feedbacks::Create.call(attrs: params)
+    if result.success? || result.failure.first == :spam
+      # A honeypot hit gets the same page a person gets: telling a bot it was
+      # detected only teaches it to try again differently.
+      @page_title = "Thanks"
+      status 201 if result.success?
+      erb :"feedback/thanks"
+    else
+      status 422
+      @page_title = "Send feedback"
+      @from = params["page"]
+      @values = { message: params["message"], email: params["email"] }
+      @errors = result.failure.first == :validation ? result.failure.last : { message: "Something went wrong." }
+      erb :"feedback/new"
+    end
+  end
+
   private
 
   # Server-rendered shared Football Profile: re-score every league and render the

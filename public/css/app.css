@@ -228,6 +228,173 @@ button, .btn { cursor: pointer; font-family: inherit; }
 .profile__match-num { font-family: var(--disp); font-weight: 900; font-size: 24px; color: var(--amber); }
 .profile__match-unit { font-family: var(--mono); font-size: 9.5px; letter-spacing: 0.5px; text-transform: uppercase; color: var(--chalk-dim); display: block; }
 
+/* ---- "have any feedback?" line under a finished result ---- */
+.feedback-link {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  margin: 26px 0 0;
+  padding-top: 16px;
+  border-top: 1px solid var(--line);
+}
+.feedback-link a {
+  color: var(--chalk-dim);
+  text-decoration: none;
+  border-bottom: 1px solid var(--line);
+  padding-bottom: 2px;
+}
+.feedback-link a:hover { color: var(--amber); border-bottom-color: var(--amber); }
+
+/* ---- feedback form (/feedback) ---- */
+.feedback {
+  max-width: 620px;
+  margin: 0 auto;
+  padding: 40px 18px 64px;
+}
+.feedback__eyebrow {
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--amber);
+  margin: 0 0 14px;
+}
+.feedback__eyebrow--lime { color: var(--lime); }
+.feedback__title {
+  font-family: var(--disp);
+  font-weight: 900;
+  font-size: clamp(38px, 11vw, 52px);
+  line-height: 0.95;
+  letter-spacing: -1px;
+  text-transform: uppercase;
+  margin: 0 0 16px;
+}
+.feedback__accent { color: var(--amber); }
+.feedback__lede {
+  color: var(--chalk-dim);
+  font-size: 16px;
+  line-height: 1.5;
+  max-width: 470px;
+  margin: 0 0 28px;
+}
+
+/* The panel the fields sit in — same material as the share block. */
+.card {
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: rgba(0, 0, 0, .2);
+  padding: 18px;
+  margin-bottom: 20px;
+}
+
+.field { margin-bottom: 20px; }
+.field--last { margin-bottom: 0; }
+.field__label {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--amber-dim);
+  margin-bottom: 9px;
+}
+/* Required/optional as a chip, so the distinction isn't carried by colour alone. */
+.pill {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--chalk-dim);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 2px 8px;
+}
+.pill--req { color: var(--amber); border-color: var(--amber-dim); }
+
+.field__input {
+  width: 100%;
+  font-family: var(--body);
+  font-size: 15.5px;
+  line-height: 1.4;
+  color: var(--chalk);
+  background: var(--pitch);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 13px 14px;
+  min-height: 44px;
+  transition: border-color .15s;
+}
+.field__input::placeholder { color: #4d6455; }
+.field__input:hover { border-color: var(--amber-dim); }
+.field__input:focus { border-color: var(--amber); }
+.field__input:focus-visible { outline: 2px solid var(--lime); outline-offset: 2px; }
+.field__input--area { min-height: 156px; resize: vertical; }
+.field__input[aria-invalid="true"] { border-color: #E06B6B; }
+
+.field__hint {
+  font-family: var(--mono);
+  font-size: 11px;
+  line-height: 1.4;
+  color: var(--chalk-dim);
+  margin: 8px 0 0;
+}
+.field__error {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  font-family: var(--mono);
+  font-size: 12px;
+  line-height: 1.4;
+  color: #E06B6B;
+  margin: 9px 0 0;
+}
+.field__error-tag {
+  flex: 0 0 auto;
+  font-size: 9px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  border: 1px solid #E06B6B;
+  border-radius: 999px;
+  padding: 2px 8px;
+}
+
+.feedback__actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+/* A third button weight: reads as a way back, not a second call to action. */
+.btn--quiet { border-color: transparent; color: var(--chalk-dim); padding-left: 4px; padding-right: 4px; }
+.btn--quiet:hover { color: var(--amber); }
+
+.feedback__note {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--amber-dim);
+  margin: 24px 0 0;
+  padding-top: 14px;
+  border-top: 1px solid var(--line);
+}
+
+/* Off-screen rather than display:none — some bots skip hidden inputs. */
+.honeypot {
+  position: absolute;
+  left: -9999px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .field__input { transition: none; }
+}
+
 /* ---- 404 ---- */
 .notfound { max-width: 620px; margin: 0 auto; padding: 64px 18px; text-align: center; }
 .notfound h1 { font-family: var(--disp); font-weight: 900; font-size: 40px; margin: 0 0 12px; }
