@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
-# Downloads La Liga crest images listed in laliga_icons.csv (Team Name, Logo URL)
-# and saves them to public/images/laliga/<fotmob-id>-<Team Name>.png, matching the
+# Downloads crest images listed in team_logos.csv (Team Name, Logo URL)
+# and saves them to public/images/#{LEAGUE_SLUG}/<fotmob-id>-<Team Name>.png, matching the
 # crest filename convention used by app/services/quiz/seed.rb for the other leagues.
 #
 # Usage: ruby db/seed-data/download_icons.rb
@@ -11,9 +11,9 @@ require "net/http"
 require "uri"
 require "fileutils"
 
-LEAGUE_SLUG = "serie-a"
+LEAGUE_SLUG = "wsl"
 
-CSV_PATH = File.join(__dir__, "team_logos.csv")
+CSV_PATH = File.join(__dir__, "#{LEAGUE_SLUG}/team_logos.csv")
 OUTPUT_DIR = File.expand_path("../../public/images/#{LEAGUE_SLUG}", __dir__)
 MAX_REDIRECTS = 5
 

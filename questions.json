@@ -1,0 +1,626 @@
+[
+  {
+    "id": "V2",
+    "t": "A game's on with no team of yours involved. You want",
+    "load": [
+      0.9,
+      0.5,
+      0,
+      0.0
+    ],
+    "a": [
+      {
+        "l": "the better team to win comfortably",
+        "v": [
+          10,
+          4,
+          null,
+          null
+        ]
+      },
+      {
+        "l": "a close, exciting game either way",
+        "v": [
+          5,
+          9,
+          null,
+          null
+        ]
+      },
+      {
+        "l": "the weaker team to cause an upset",
+        "v": [
+          1,
+          6,
+          null,
+          null
+        ]
+      },
+      {
+        "l": "I only watch the teams I support",
+        "v": [
+          4,
+          3,
+          null,
+          null
+        ]
+      }
+    ]
+  },
+  {
+    "id": "V4",
+    "t": "A team you love has a great year. When it's going well, you",
+    "load": [
+      0.1,
+      0,
+      0,
+      0.8
+    ],
+    "a": [
+      {
+        "l": "make sure people know about it",
+        "v": [
+          10,
+          null,
+          null,
+          2
+        ]
+      },
+      {
+        "l": "enjoy it privately",
+        "v": [
+          5,
+          null,
+          null,
+          5
+        ]
+      },
+      {
+        "l": "celebrate with other fans of my team",
+        "v": [
+          5,
+          null,
+          null,
+          8
+        ]
+      },
+      {
+        "l": "dislike being the one everyone wants to beat",
+        "v": [
+          0,
+          null,
+          null,
+          4
+        ]
+      }
+    ]
+  },
+  {
+    "id": "V10",
+    "t": "Someone is clearly wrong in a comment section. You",
+    "load": [
+      0.25,
+      0,
+      0,
+      0.6
+    ],
+    "a": [
+      {
+        "l": "reply and argue it out",
+        "v": [
+          10,
+          null,
+          null,
+          3
+        ]
+      },
+      {
+        "l": "write the perfect response in your head but don't post",
+        "v": [
+          5,
+          null,
+          null,
+          4
+        ]
+      },
+      {
+        "l": "scroll past it",
+        "v": [
+          3,
+          null,
+          null,
+          5
+        ]
+      },
+      {
+        "l": "follow the internet's golden rule, never read the comments",
+        "v": [
+          2,
+          null,
+          null,
+          8
+        ]
+      }
+    ]
+  },
+  {
+    "id": "P1",
+    "t": "Your ideal way to win",
+    "load": [
+      0.1,
+      0.9,
+      0,
+      0
+    ],
+    "a": [
+      {
+        "l": "in control the whole way, 2-0",
+        "v": [
+          6,
+          3,
+          null,
+          null
+        ]
+      },
+      {
+        "l": "a wild high-scoring game, 4-2",
+        "v": [
+          5,
+          10,
+          null,
+          null
+        ]
+      },
+      {
+        "l": "defending a narrow lead, 1-0",
+        "v": [
+          3,
+          2,
+          null,
+          null
+        ]
+      },
+      {
+        "l": "a chaotic game that ends in a draw with a last-minute equaliser",
+        "v": [
+          4,
+          6,
+          null,
+          null
+        ]
+      }
+    ]
+  },
+  {
+    "id": "P3",
+    "t": "Away from sport, how you tend to operate",
+    "load": [
+      0,
+      0.7,
+      0,
+      0
+    ],
+    "a": [
+      {
+        "l": "work to a clear plan",
+        "v": [
+          null,
+          5,
+          null,
+          null
+        ]
+      },
+      {
+        "l": "keep a loose framework and adapt",
+        "v": [
+          null,
+          7,
+          null,
+          null
+        ]
+      },
+      {
+        "l": "go on instinct",
+        "v": [
+          null,
+          9,
+          null,
+          null
+        ]
+      },
+      {
+        "l": "deal with things as they come",
+        "v": [
+          null,
+          6,
+          null,
+          null
+        ]
+      }
+    ]
+  },
+  {
+    "id": "P5",
+    "t": "The kind of person you'd want in charge",
+    "load": [
+      0.2,
+      0.8,
+      0,
+      0.15
+    ],
+    "a": [
+      {
+        "l": "meticulous, has drilled every detail",
+        "v": [
+          6,
+          6,
+          null,
+          4
+        ]
+      },
+      {
+        "l": "an idealist who wants to do it well",
+        "v": [
+          5,
+          7,
+          null,
+          3
+        ]
+      },
+      {
+        "l": "a pragmatist focused on results",
+        "v": [
+          4,
+          3,
+          null,
+          7
+        ]
+      },
+      {
+        "l": "a motivator who lets people off the leash",
+        "v": [
+          5,
+          10,
+          null,
+          5
+        ]
+      }
+    ]
+  },
+  {
+    "id": "P8",
+    "t": "You'd rather watch a team that",
+    "load": [
+      0,
+      0.8,
+      0,
+      0.0
+    ],
+    "a": [
+      {
+        "l": "controls the game and grinds it out",
+        "v": [
+          null,
+          5,
+          null,
+          null
+        ]
+      },
+      {
+        "l": "attacks relentlessly and takes risks",
+        "v": [
+          null,
+          10,
+          null,
+          null
+        ]
+      },
+      {
+        "l": "defends deep and counters",
+        "v": [
+          null,
+          2,
+          null,
+          null
+        ]
+      },
+      {
+        "l": "competes hard regardless of style",
+        "v": [
+          null,
+          8,
+          null,
+          null
+        ]
+      }
+    ]
+  },
+  {
+    "id": "E2",
+    "t": "Has anything a club did ever changed how you felt about supporting them?",
+    "load": [
+      0,
+      0,
+      0.8,
+      0.4
+    ],
+    "a": [
+      {
+        "l": "Yes — enough that I stopped, or never started",
+        "v": [
+          null,
+          null,
+          10,
+          4
+        ]
+      },
+      {
+        "l": "Yes — it changed things, but I stayed",
+        "v": [
+          null,
+          null,
+          7,
+          7
+        ]
+      },
+      {
+        "l": "Not really — I've never had to think about it",
+        "v": [
+          null,
+          null,
+          4,
+          6
+        ]
+      },
+      {
+        "l": "No — what happens off the pitch isn't the club to me",
+        "v": [
+          null,
+          null,
+          1,
+          8
+        ]
+      }
+    ]
+  },
+  {
+    "id": "E3",
+    "t": "Your favorite spot, the one you actually look forward to, gets bought by someone you'd cross the street to avoid. Nothing else about it changes.",
+    "load": [
+      0,
+      0,
+      0.9,
+      0
+    ],
+    "a": [
+      {
+        "l": "I'd stop going for good",
+        "v": [
+          null,
+          null,
+          10,
+          null
+        ]
+      },
+      {
+        "l": "I'd go less, and it'd feel off every time",
+        "v": [
+          null,
+          null,
+          6,
+          null
+        ]
+      },
+      {
+        "l": "I'd keep going and try not to think about it",
+        "v": [
+          null,
+          null,
+          3,
+          null
+        ]
+      },
+      {
+        "l": "I'd keep going, it's the same place",
+        "v": [
+          null,
+          null,
+          1,
+          null
+        ]
+      }
+    ]
+  },
+  {
+    "id": "F3",
+    "t": "The type of city or town you'd prefer to live",
+    "load": [
+      0.4,
+      0,
+      0,
+      0.8
+    ],
+    "a": [
+      {
+        "l": "my hometown",
+        "v": [
+          2,
+          null,
+          null,
+          10
+        ]
+      },
+      {
+        "l": "somewhere unpretentious with character",
+        "v": [
+          3,
+          null,
+          null,
+          8
+        ]
+      },
+      {
+        "l": "a big city with everything available",
+        "v": [
+          9,
+          null,
+          null,
+          3
+        ]
+      },
+      {
+        "l": "wherever the best opportunities are",
+        "v": [
+          7,
+          null,
+          null,
+          2
+        ]
+      }
+    ]
+  },
+  {
+    "id": "F4",
+    "t": "How do you engage with the fandoms you're part of?",
+    "load": [
+      0,
+      0,
+      0,
+      0.9
+    ],
+    "a": [
+      {
+        "l": "All in — I follow everything and I'm part of the community",
+        "v": [
+          null,
+          null,
+          null,
+          10
+        ]
+      },
+      {
+        "l": "I consume all of it, but from home",
+        "v": [
+          null,
+          null,
+          null,
+          7
+        ]
+      },
+      {
+        "l": "I follow it casually",
+        "v": [
+          null,
+          null,
+          null,
+          4
+        ]
+      },
+      {
+        "l": "I only show up for the big moments",
+        "v": [
+          null,
+          null,
+          null,
+          1
+        ]
+      }
+    ]
+  },
+  {
+    "id": "F5",
+    "t": "The crowd you'd rather be part of",
+    "load": [
+      0.3,
+      0,
+      0,
+      0.8
+    ],
+    "a": [
+      {
+        "l": "loud and intense",
+        "v": [
+          3,
+          null,
+          null,
+          10
+        ]
+      },
+      {
+        "l": "passionate but well-behaved",
+        "v": [
+          4,
+          null,
+          null,
+          6
+        ]
+      },
+      {
+        "l": "relaxed and comfortable",
+        "v": [
+          5,
+          null,
+          null,
+          3
+        ]
+      },
+      {
+        "l": "quiet, with good facilities",
+        "v": [
+          9,
+          null,
+          null,
+          1
+        ]
+      }
+    ]
+  },
+  {
+    "id": "F7",
+    "t": "The kind of place you'd choose to live",
+    "load": [
+      0.4,
+      0,
+      0,
+      0.8
+    ],
+    "a": [
+      {
+        "l": "close-knit, families there for generations",
+        "v": [
+          2,
+          null,
+          null,
+          10
+        ]
+      },
+      {
+        "l": "mixed and up-and-coming",
+        "v": [
+          6,
+          null,
+          null,
+          5
+        ]
+      },
+      {
+        "l": "newly built and convenient",
+        "v": [
+          7,
+          null,
+          null,
+          3
+        ]
+      },
+      {
+        "l": "the most desirable area you can afford",
+        "v": [
+          9,
+          null,
+          null,
+          1
+        ]
+      }
+    ]
+  }
+]

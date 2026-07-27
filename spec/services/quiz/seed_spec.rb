@@ -15,7 +15,7 @@ RSpec.describe Quiz::Seed do
   end
 
   it "seeds each club's scores, blurb, and crest" do
-    everton = Team.first(name: "Everton")
+    everton = Team.first(league_id: League.first(slug: "premier-league").id, name: "Everton")
 
     expect(everton.vector).to eq([4.1, 2.0, 5.0, 8.0])
     expect(everton.crest).to eq("premier-league/8668-Everton.png")
@@ -147,6 +147,82 @@ RSpec.describe Quiz::Seed do
     teams.each { |team| expect(team.blurb).to eq(doc[team.name]), "blurb drift for #{team.name}" }
   end
 
+  it "creates Liga MX with its eighteen clubs behind the earlier leagues" do
+    league = League.first(slug: "liga-mx")
+
+    expect(league).not_to be_nil
+    expect(league.name).to eq("Liga MX")
+    expect(league.season).to eq("Apertura 2026")
+    expect(league.teams_dataset.count).to eq(18)
+    # Tuned values, per db/seed-data/league_tunings.csv.
+    expect(league.amplify).to eq(2.1)
+    expect(league.chooser_threshold).to eq(0.23)
+    expect(league.position).to eq(7)
+  end
+
+  it "seeds Liga MX scores from the CSV, with a league-scoped crest and blurb" do
+    america = Team.first(league_id: League.first(slug: "liga-mx").id, name: "América")
+
+    expect(america.vector).to eq([10.0, 7.0, 2.0, 8.0])
+    expect(america.crest).to eq("liga-mx/6576-CF America.png")
+    expect(america.blurb).to start_with('"Ódiame más." Hate me more.')
+  end
+
+  it "creates the WSL with its fourteen clubs behind the earlier leagues" do
+    league = League.first(slug: "wsl")
+
+    expect(league).not_to be_nil
+    expect(league.name).to eq("WSL")
+    expect(league.season).to eq("2026-27")
+    expect(league.teams_dataset.count).to eq(14)
+    # Tuned values, per db/seed-data/league_tunings.csv.
+    expect(league.amplify).to eq(1.1)
+    expect(league.chooser_threshold).to eq(0.20)
+    expect(league.position).to eq(8)
+  end
+
+  it "seeds WSL scores from the CSV, with a league-scoped crest and blurb" do
+    arsenal = Team.first(league_id: League.first(slug: "wsl").id, name: "Arsenal")
+
+    expect(arsenal.vector).to eq([9.0, 4.0, 8.0, 9.0])
+    expect(arsenal.crest).to eq("wsl/258657-Arsenal.png")
+    expect(arsenal.blurb).to start_with("Arsenal beat Barcelona 1-0 in Lisbon")
+  end
+
+  # The WSL shares club names with the Premier League (Arsenal, Everton, ...).
+  # They are separate rows scoped to their own league, with their own scores.
+  it "keeps the WSL clubs distinct from their Premier League namesakes" do
+    wsl = Team.first(league_id: League.first(slug: "wsl").id, name: "Everton")
+    epl = Team.first(league_id: League.first(slug: "premier-league").id, name: "Everton")
+
+    expect(wsl.id).not_to eq(epl.id)
+    expect(wsl.vector).to eq([4.0, 4.0, 9.0, 7.0])
+    expect(epl.vector).to eq([4.1, 2.0, 5.0, 8.0])
+  end
+
+  # Liga MX and WSL clubs were transcribed from their blurbs.md, so pin the
+  # seeded blurbs to those files — editing one without the other fails here.
+  # A handful of clubs are seeded under a shorter name than the document's
+  # heading (the CSV's name wins), so map those explicitly.
+  {
+    "liga-mx" => [18, { "Club América" => "América", "Guadalajara (Chivas)" => "Guadalajara",
+                        "Tijuana (Xolos)" => "Tijuana" }],
+    "wsl" => [14, { "Manchester City" => "Man City", "Manchester United" => "Man United",
+                    "Tottenham Hotspur" => "Tottenham", "Brighton & Hove Albion" => "Brighton",
+                    "West Ham United" => "West Ham", "Charlton Athletic" => "Charlton" }]
+  }.each do |slug, (count, aliases)|
+    it "seeds every #{slug} blurb verbatim from #{slug}/blurbs.md" do
+      doc = File.read("db/seed-data/#{slug}/blurbs.md")
+                .scan(/^### (.+?)\n(.+?)(?=\n\n### |\n*\z)/m)
+                .to_h { |name, text| [aliases.fetch(name.strip, name.strip), text.strip] }
+      teams = League.first(slug:).teams_dataset.all
+
+      expect(doc.size).to eq(count)
+      expect(teams.map(&:name)).to match_array(doc.keys)
+      teams.each { |team| expect(team.blurb).to eq(doc[team.name]), "blurb drift for #{team.name}" }
+    end
+  end
+
   # db/seed-data/league_tunings.csv is where amplify / chooser_threshold /
   # max_choices are derived; Seed::LEAGUES is what actually ships. Pin every
   # league to the CSV so a retuned value can't be left out of the seed (which is
@@ -154,7 +230,8 @@ RSpec.describe Quiz::Seed do
   describe "parity with db/seed-data/league_tunings.csv" do
     let(:slugs) do
       { "EPL" => "premier-league", "BUNDESLIGA" => "bundesliga", "LIGUE1" => "ligue-1",
-        "MLS" => "mls", "NWSL" => "nwsl", "LALIGA" => "la-liga", "SERIEA" => "serie-a" }
+        "MLS" => "mls", "NWSL" => "nwsl", "LALIGA" => "la-liga", "SERIEA" => "serie-a",
+        "LIGAMX" => "liga-mx", "WSL" => "wsl" }
     end
     let(:tunings) { CSV.read("db/seed-data/league_tunings.csv", headers: true) }
 
@@ -191,12 +268,12 @@ RSpec.describe Quiz::Seed do
   end
 
   it "upserts changed data back to the seed values" do
-    everton = Team.first(name: "Everton")
+    everton = Team.first(league_id: League.first(slug: "premier-league").id, name: "Everton")
     everton.update(blurb: "tampered")
 
     described_class.call
 
     expect(everton.refresh.blurb).to start_with("The People's Club")
-    expect(Team.where(name: "Everton").count).to eq(1)
+    expect(Team.where(league_id: League.first(slug: "premier-league").id, name: "Everton").count).to eq(1)
   end
 end
