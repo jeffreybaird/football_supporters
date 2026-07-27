@@ -112,6 +112,40 @@ RSpec.describe Quiz::Seed do
     expect(madrid.blurb).to start_with("The most successful club on earth")
   end
 
+  it "creates Serie A with its twenty clubs behind the earlier leagues" do
+    league = League.first(slug: "serie-a")
+
+    expect(league).not_to be_nil
+    expect(league.name).to eq("Serie A")
+    expect(league.season).to eq("2026-27")
+    expect(league.teams_dataset.count).to eq(20)
+    # Tuned values, per db/seed-data/league_tunings.csv.
+    expect(league.amplify).to eq(1.4)
+    expect(league.chooser_threshold).to eq(0.20)
+    expect(league.position).to eq(6)
+  end
+
+  it "seeds Serie A scores from the CSV, with a league-scoped crest and blurb" do
+    inter = Team.first(league_id: League.first(slug: "serie-a").id, name: "Inter")
+
+    expect(inter.vector).to eq([9.0, 6.0, 2.0, 7.0])
+    expect(inter.crest).to eq("serie-a/8636-Inter.png")
+    expect(inter.blurb).to start_with("Reigning champions, twenty-one titles")
+  end
+
+  # The clubs were transcribed from db/seed-data/serie-a/blurbs.md, so pin the
+  # seeded blurbs to it — editing one without the other fails here.
+  it "seeds every Serie A blurb verbatim from serie-a/blurbs.md" do
+    doc = File.read("db/seed-data/serie-a/blurbs.md")
+              .scan(/^\*\*(.+?)\*\*\n(.+?)(?=\n\n\*\*|\z)/m)
+              .to_h { |name, text| [name.strip, text.strip] }
+    teams = League.first(slug: "serie-a").teams_dataset.all
+
+    expect(doc.size).to eq(20)
+    expect(teams.map(&:name)).to match_array(doc.keys)
+    teams.each { |team| expect(team.blurb).to eq(doc[team.name]), "blurb drift for #{team.name}" }
+  end
+
   it "honours each league's per-league amplify override" do
     expect(League.first(slug: "bundesliga").amplify).to eq(1.4)
     expect(League.first(slug: "premier-league").amplify).to eq(2.5)
