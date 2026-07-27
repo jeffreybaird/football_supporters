@@ -91,6 +91,9 @@ jobs:
           DOMAIN=${{ vars.DOMAIN }}
           SECRET_KEY_BASE=${{ secrets.SECRET_KEY_BASE }}
           DATABASE_PATH=${{ vars.DATABASE_PATH }}
+          RESEND_API_KEY=${{ secrets.RESEND_API_KEY }}
+          FEEDBACK_FROM_EMAIL=${{ vars.FEEDBACK_FROM_EMAIL }}
+          FEEDBACK_TO_EMAIL=${{ secrets.FEEDBACK_TO_EMAIL }}
           LITESTREAM_ACCESS_KEY_ID=${{ secrets.LITESTREAM_ACCESS_KEY_ID }}
           LITESTREAM_SECRET_ACCESS_KEY=${{ secrets.LITESTREAM_SECRET_ACCESS_KEY }}
           BACKUP_BUCKET=${{ vars.BACKUP_BUCKET }}

@@ -9,6 +9,12 @@
 #   secret DIGITALOCEAN_ACCESS_TOKEN  - DO API token (registry + droplet)
 #   var    DOCR_REGISTRY              - DO Container Registry name
 #   var    FIREWALL_ID                - droplet firewall (temporary SSH hole-punch)
+#
+# Optional (feedback form email — unset just means feedback is stored, not sent):
+#   secret RESEND_API_KEY             - Resend API key
+#   secret FEEDBACK_TO_EMAIL          - inbox feedback is forwarded to (a secret
+#                                       so it is masked in logs, never public)
+#   var    FEEDBACK_FROM_EMAIL        - sender on a Resend-verified domain
 name: deploy
 
 on:
@@ -134,6 +140,9 @@ jobs:
           CREST_BASE_URL=${{ vars.CREST_BASE_URL }}
           SECRET_KEY_BASE=${{ secrets.SECRET_KEY_BASE }}
           DATABASE_PATH=${{ vars.DATABASE_PATH }}
+          RESEND_API_KEY=${{ secrets.RESEND_API_KEY }}
+          FEEDBACK_FROM_EMAIL=${{ vars.FEEDBACK_FROM_EMAIL }}
+          FEEDBACK_TO_EMAIL=${{ secrets.FEEDBACK_TO_EMAIL }}
           LITESTREAM_ACCESS_KEY_ID=${{ secrets.LITESTREAM_ACCESS_KEY_ID }}
           LITESTREAM_SECRET_ACCESS_KEY=${{ secrets.LITESTREAM_SECRET_ACCESS_KEY }}
           BACKUP_BUCKET=${{ vars.BACKUP_BUCKET }}
