@@ -68,6 +68,21 @@ RSpec.describe "Quiz", type: :request do
     end
   end
 
+  # The intro asterisk is only meaningful if the note it points at ships with it.
+  # The client script is served as inert text and transpiled in the browser, so a
+  # request spec can only assert both halves are present and wired to the same
+  # anchor — that is enough to catch one being edited away without the other.
+  describe "the local-club footnote" do
+    it "ships the footnote text and the anchor its marker links to" do
+      get "/"
+
+      expect(last_response.body).to include("If you have a local club, support them!")
+      expect(last_response.body).to include('const FOOTNOTE_ID = "local-club-note"')
+      expect(last_response.body).to include("<FootnoteMark />")
+      expect(last_response.body).to include("<LocalClubNote />")
+    end
+  end
+
   describe "coach view gating" do
     it "keeps coach view off on the standard page" do
       get "/"

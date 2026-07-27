@@ -431,6 +431,39 @@ function LeaguePicker({ value, busy, error, onChange }) {
   );
 }
 
+// The two halves of the intro's footnote, kept adjacent so the marker and the
+// note it points at can't drift apart. FOOTNOTE_ID is the anchor target: the
+// marker is a real in-page link, so the note is reachable by keyboard and by
+// screen readers rather than being a decorative asterisk.
+const FOOTNOTE_ID = "local-club-note";
+const FOOTNOTE_TEXT = "If you have a local club, support them!";
+
+// A "*" carries no meaning on its own, so the link gets an explicit accessible
+// name; sighted users get the conventional superscript asterisk.
+function FootnoteMark() {
+  return (
+    <sup>
+      <a href={`#${FOOTNOTE_ID}`} aria-label={`Footnote: ${FOOTNOTE_TEXT}`}
+         style={{ ...mono, color: C.amber, textDecoration: "none", fontSize: 13, padding: "0 1px" }}>*</a>
+    </sup>
+  );
+}
+
+// Rendered only alongside the copy that carries the marker (profile mode), so
+// the page never shows a footnote nothing refers to. The asterisk here is
+// aria-hidden: it repeats the marker visually, and the note's text already
+// reads on its own.
+function LocalClubNote() {
+  return (
+    <p id={FOOTNOTE_ID} style={{
+      ...mono, fontSize: 12, lineHeight: 1.5, color: C.chalkDim, maxWidth: 470,
+      margin: "34px 0 0", paddingTop: 14, borderTop: `1px solid ${C.line}`,
+    }}>
+      <span aria-hidden="true" style={{ color: C.amber }}>* </span>{FOOTNOTE_TEXT}
+    </p>
+  );
+}
+
 function App() {
   const [stage, setStage] = useState("intro");
   const [qi, setQi] = useState(0);
@@ -670,13 +703,14 @@ function App() {
             <LeaguePicker value={profileMode ? PROFILE_SLUG : leagueSlug} busy={leagueBusy || profileBusy} error={leagueErr || profileErr} onChange={onLeagueChange} />
             <p style={{ color: C.chalkDim, fontSize: 16, lineHeight: 1.5, maxWidth: 470, margin: "0 0 26px" }}>
               {profileMode
-                ? "Answer the same questions once and we'll match you against every league at once — your best-fit club in each, plus the kind of team you're really after."
+                ? <React.Fragment>Did you watch the World Cup and fall in love with the beautiful game? If you’re still wondering which club deserves your loyalty<FootnoteMark />, answer a few questions, and we’ll help you find a team in each league we cover.</React.Fragment>
                 : <React.Fragment>Still searching for your team? Take a few minutes to answer questions about your daily life, your values, and the little things that get under your skin. Tell us what matters most, and we'll find the {LEAGUE ? LEAGUE.name : ""} club that fits you—flaws and all.</React.Fragment>}
             </p>
             <button onClick={() => setStage("quiz")} style={{
               ...disp, fontWeight: 800, fontSize: 17, letterSpacing: 0.5, textTransform: "uppercase",
               background: C.amber, color: "#1a1305", border: "none", borderRadius: 10, padding: "14px 30px", boxShadow: `0 8px 24px ${C.shadow}`,
             }}>Kick off →</button>
+            {profileMode && <LocalClubNote />}
           </div>
         )}
 
