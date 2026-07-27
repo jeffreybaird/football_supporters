@@ -692,11 +692,17 @@ function App() {
         * { box-sizing: border-box; }
         button { cursor: pointer; font-family: inherit; }
         @media (prefers-reduced-motion: reduce){ * { transition:none !important; animation:none !important; } }
-        .qbtn:hover{ border-color:${C.amber} !important; transform:translateY(-1px); }
+        /* Hover affordances only on true pointer devices. On touch, a tap leaves a
+           lingering :hover on the tapped node; because the answer buttons are keyed
+           by position and reused across questions, that stale hover would light up
+           the same slot on the next question before it is chosen. */
+        @media (hover: hover){
+          .qbtn:hover{ border-color:${C.amber} !important; transform:translateY(-1px); }
+          .altchip:hover{ border-color:${C.amber} !important; }
+          .simrow:hover{ outline:1px solid rgba(240,178,62,.5); }
+        }
         .qbtn:focus-visible{ outline:2px solid ${C.lime}; outline-offset:2px; }
-        .altchip:hover{ border-color:${C.amber} !important; }
         .simrow{ cursor:pointer; }
-        .simrow:hover{ outline:1px solid rgba(240,178,62,.5); }
         .simrow:focus-visible{ outline:2px solid ${C.lime}; outline-offset:1px; }
         input[type=range]{ -webkit-appearance:none; appearance:none; height:6px; border-radius:999px;
           background:${C.line}; outline:none; }
