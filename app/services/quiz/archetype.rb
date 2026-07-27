@@ -96,75 +96,75 @@ module Quiz
     ARCHETYPES = {
       club_idealist: {
         "label" => "The Club Idealist",
-        "sentence" => "You want a club that's run well and still means something—one that competes without pretending the league table is the only thing that matters. You believe a place can be ambitious, decent, and full of real feeling all at once, and you're not willing to give up any of the three."
+        "sentence" => "You're looking for a club that stands for something, not just a name on a fixture list. It matters to you that the people in charge care about more than the next result, and that ambition doesn't come at the cost of decency. You want to walk into the ground and feel that what happens here means something, to you and to everyone else who shows up."
       },
       weekend_giant: {
         "label" => "The Weekend Giant",
-        "sentence" => "You want a big club that goes forward and wins the right way. You'll follow it closely and care deeply, but you don't need to build your week around it—and you'd rather not celebrate a trophy that was bought with money nobody wants to talk about."
+        "sentence" => "You want a club that fills the stands and plays to win, but you're not interested in shortcuts or secrets. You'll watch every match, cheer every goal, but you won't trade your conscience for a cup. The victories have to feel earned, or they don't feel like victories at all."
       },
       big_club_believer: {
         "label" => "The Big-Club Believer",
-        "sentence" => "You want a big club that plays on the front foot and gives you something to look forward to. You're here for what happens on the pitch—the boardroom and the balance sheet are somebody else's argument."
+        "sentence" => "You want a club that attacks, that gives you a reason to count down the days until kickoff. What happens on the pitch is what matters to you. The rest—the boardroom, the finances—you leave to someone else."
       },
       cathedral_builder: {
         "label" => "The Cathedral Builder",
-        "sentence" => "You want a great club that keeps the ball and knows exactly what it's doing, run by people you'd be proud to be associated with. And you want to watch it from a packed stand, with everyone around you feeling the same thing."
+        "sentence" => "You want to see a team that moves the ball with purpose, led by people you'd trust with your own name. You want to stand shoulder to shoulder with a crowd that feels every pass and every goal as much as you do."
       },
       pragmatic_winner: {
         "label" => "The Pragmatic Winner",
-        "sentence" => "You want a club that finds a way to win, however it has to be done—pretty or ugly, the result is the point. You'll take almost any route to the trophy, but not one paid for with money that should never have been in the game."
+        "sentence" => "You want a club that gets the job done, no matter how it looks. A win is a win, as long as it's honest. You'll take the scrappy goals and the hard-fought points, but you won't celebrate a title that was bought instead of earned."
       },
       glory_hunter: {
         "label" => "The Glory Hunter",
-        "sentence" => "You want a giant, and you want to give it everything—the shirt, the songs, the whole of your Saturday. However they play and whoever signs the cheques, you're all in and you're not asking questions."
+        "sentence" => "You want a club that fills your Saturdays, the kind you'd wear on your back and sing for until your voice is gone. However they play, whoever's in charge, you're there for every minute, no questions asked."
       },
       trophy_collector: {
         "label" => "The Trophy Collector",
-        "sentence" => "You want a club that wins things, and you're not going to apologise for it. The style, the story, the ownership—none of it changes what's in the cabinet, and the cabinet is what you'll be pointing at."
+        "sentence" => "You want a club that brings home trophies, and you won't say sorry for wanting silverware. The rest—how they play, who owns them—doesn't matter as much as what's in the cabinet. That's what you'll remember, and that's what you'll show off."
       },
       student_of_the_game: {
         "label" => "The Student of the Game",
-        "sentence" => "You love football itself—the shapes, the players, the passages of play you'll still be thinking about on Tuesday. You'll happily follow a club, but on your own terms; the badge was never really the point."
+        "sentence" => "You love the game for its own sake—the way a move unfolds, the players who make you sit up and take notice, the moments you replay in your mind days later. You'll follow a club, but only if it fits your love of football. The badge is just a detail."
       },
       terrace_dreamer: {
         "label" => "The Terrace Dreamer",
-        "sentence" => "You want a club that feels like family and a stand that feels like home, where you know the songs and the people singing them. You'd like the owners to be decent, and you'll take their word for it rather than go looking."
+        "sentence" => "You want a club where the faces are familiar and the songs feel like your own. The stand is a second home, and the people around you are more than strangers. You hope the owners are decent, and you trust what you're told."
       },
       everyfan: {
         "label" => "The Everyfan",
-        "sentence" => "You want a club that competes, owners you can live with, and a place in your life that's real without taking the whole thing over. However they choose to play, you'll be glad it's yours."
+        "sentence" => "You want a club that holds its own, with owners you can accept, and a place in your week that feels real but doesn't take over your life. However they play, you're just glad to call it yours."
       },
       principled_fan: {
         "label" => "The Principled Fan",
-        "sentence" => "You want a club you can back without holding your nose—who owns it and how they behave comes first, and everything else follows. The football matters, and belonging matters, but not enough to look the other way."
+        "sentence" => "You want a club you can support without second thoughts. Who owns it and how they act comes first. The football and the sense of belonging matter, but not enough to ignore what's wrong."
       },
       easygoing_supporter: {
         "label" => "The Easygoing Supporter",
-        "sentence" => "You want a club you can enjoy without doing the homework. Football is meant to be a good afternoon, not a second job, and you're not going to spoil it by reading about the accounts."
+        "sentence" => "You want a club you can enjoy without needing to study up. Football is supposed to be a good afternoon out, not another job. You're not going to ruin it by worrying about the finances."
       },
       free_agent: {
         "label" => "The Free Agent",
-        "sentence" => "You want football on your own terms—wherever the good games are, whoever happens to be playing. No badge has a claim on you, and you've never once felt guilty about it."
+        "sentence" => "You want to watch football your way—wherever the best match is, whoever's on the pitch. No club owns your loyalty, and you don't feel bad about it for a second."
       },
       parish_purist: {
         "label" => "The Parish Purist",
-        "sentence" => "You want your local club, run honestly, and you want to be in the ground singing for it. However they play is fine by you—this is about the town having something of its own and looking after it properly."
+        "sentence" => "You want your local club, run the right way, and you want to be in the stands singing for them. However they play, it's about the town having something to call its own and making sure it's cared for."
       },
       hometown_diehard: {
         "label" => "The Hometown Diehard",
-        "sentence" => "You want the club down the road, and you want all of it—every home game, every away day, every song until your voice goes. It's family, and you don't audit family."
+        "sentence" => "You want the club just down the road, and you want every bit of it—every home match, every away trip, every song until your voice is gone. It's family, and you don't keep score with family."
       },
       local_enthusiast: {
         "label" => "The Local Enthusiast",
-        "sentence" => "You want the town team, whatever shape their football takes, and you're happy for it to be one good thing in your week rather than the only one. But you won't stand behind owners who treat the place badly."
+        "sentence" => "You want the team that belongs to your town, whatever kind of football they play. It's one good thing in your week, not the only thing. But if the owners don't respect the place, you won't stand with them."
       },
       family_day: {
         "label" => "The Family Day",
-        "sentence" => "You want the local ground, the kids alongside you, and an ice cream on the way home whatever the score. You'd like the club to be in decent hands, and beyond that you're here for the afternoon."
+        "sentence" => "You want to spend the afternoon at the local ground, kids by your side, maybe an ice cream on the way home no matter the result. You hope the club is in good hands, but mostly you're here for the day out."
       },
       local_casual: {
         "label" => "The Local Casual",
-        "sentence" => "You want football to stay where it is—nearby, and entirely optional. If someone hands you a ticket you'll have a good time, and if they don't, that's fine too."
+        "sentence" => "You want football to stay close to home, something you can take or leave. If a ticket comes your way, you'll enjoy it. If not, you're just as happy."
       }
     }.freeze
 
