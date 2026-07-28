@@ -1,12 +1,12 @@
 <div class="profile" data-testid="profile-result">
-  <p class="result__eyebrow">Full time · your football profile</p>
+  <p class="result__eyebrow"><%= t("profile_result.eyebrow") %></p>
 
   <div class="profile__archetype" data-testid="profile-archetype">
     <h1 class="result__name" data-testid="profile-label"><%= @profile.archetype[:label] %></h1>
     <p class="profile__sentence"><%= @profile.archetype[:sentence] %></p>
   </div>
 
-  <section class="profile__leagues" aria-label="Your club in each league">
+  <section class="profile__leagues" aria-label="<%= t("profile_result.clubs_aria") %>">
     <% @profile.leagues.each do |entry| %>
       <details class="profile__league" data-testid="profile-league-<%= entry.league.slug %>">
         <summary class="profile__league-summary">
@@ -18,7 +18,7 @@
           </span>
           <span class="profile__match">
             <span class="profile__match-num" data-testid="profile-match-<%= entry.league.slug %>"><%= entry.match_pct %></span>
-            <span class="profile__match-unit">% match</span>
+            <span class="profile__match-unit"><%= t("profile_result.match_unit") %></span>
           </span>
           <span class="profile__chevron" aria-hidden="true">▾</span>
         </summary>
@@ -28,24 +28,24 @@
   </section>
 
   <section class="share" data-testid="share" aria-labelledby="share-label">
-    <p class="share__label" id="share-label">Share your profile</p>
+    <p class="share__label" id="share-label"><%= t("profile_result.share_label") %></p>
     <div class="share__row">
       <input class="share__url" data-testid="share-url" readonly
              value="<%= @share_url %>"
-             data-share-text="My football profile: <%= @profile.archetype[:label] %>."
-             aria-label="Shareable link to your profile">
-      <button type="button" class="btn btn--ghost" data-testid="share-copy">Copy link</button>
-      <button type="button" class="btn btn--primary" data-testid="share-native">Share ↗</button>
+             data-share-text="<%= t("profile_result.share_text", label: @profile.archetype[:label]) %>"
+             aria-label="<%= t("result.share_url_aria") %>">
+      <button type="button" class="btn btn--ghost" data-testid="share-copy"><%= t("result.share_copy") %></button>
+      <button type="button" class="btn btn--primary" data-testid="share-native"><%= t("result.share_native") %></button>
     </div>
     <p class="share__status" data-testid="share-status" role="status" aria-live="polite"></p>
   </section>
 
   <div class="result__actions">
-    <a class="btn btn--primary" href="/" data-testid="take-quiz">Take the quiz →</a>
+    <a class="btn btn--primary" href="/" data-testid="take-quiz"><%= t("result.take_quiz") %></a>
   </div>
 
   <p class="feedback-link">
-    <a href="/feedback?from=<%= ERB::Util.url_encode(@share_url) %>" data-testid="feedback-link">Have any feedback?</a>
+    <a href="/feedback?from=<%= ERB::Util.url_encode(@share_url) %>" data-testid="feedback-link"><%= t("result.feedback_link") %></a>
   </p>
 </div>
 

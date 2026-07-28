@@ -215,12 +215,21 @@ module Quiz
     # club space; the archetype describes the person as they actually answered.
     # weights: the raw 1..10 slider values, or nil for equal weighting.
     # Returns { label:, sentence: } (unchanged interface).
-    def call(vec, weights: nil)
+    def call(vec, weights: nil, locale: Translations::DEFAULT)
+      overrides = Translations.content(locale)["archetypes"] || {}
       code = code_for(vec, weights:)
-      return { label: ALL_MID_LABEL, sentence: ALL_MID_SENTENCE } if code.nil?
+      return localized_row(:all_mid, ALL_MID_LABEL, ALL_MID_SENTENCE, overrides) if code.nil?
 
-      row = ARCHETYPES.fetch(CELLS.fetch(code))
-      { label: row["label"], sentence: row["sentence"] }
+      id = CELLS.fetch(code)
+      row = ARCHETYPES.fetch(id)
+      localized_row(id, row["label"], row["sentence"], overrides)
+    end
+
+    # Merge a translation override (if any) over the canonical English label and
+    # sentence. `key` is the archetype id (or :all_mid for the fallback row).
+    def localized_row(key, label, sentence, overrides)
+      override = overrides[key.to_s] || {}
+      { label: override["label"] || label, sentence: override["sentence"] || sentence }
     end
 
     # Nearest cell centroid by weighted Euclidean distance, using the same
@@ -291,16 +300,28 @@ module Quiz
 
     # The table shipped to the browser so its archetypeFor matches #call exactly.
     # CELL_VECS is deliberately absent: the client rebuilds it from these, so the
-    # scatter has one definition rather than two that can drift.
-    def client_table
+    # scatter has one definition rather than two that can drift. `locale` swaps in
+    # the translated labels/sentences (numeric levels/cells/scatter are unchanged,
+    # so client and server still build identical centroids).
+    def client_table(locale = Translations::DEFAULT)
+      overrides = Translations.content(locale)["archetypes"] || {}
+      all_mid = overrides["all_mid"] || {}
       {
         "levels" => LEVELS,
         "cells" => CELLS,
-        "archetypes" => ARCHETYPES,
+        "archetypes" => localized_archetypes(overrides),
         "scatter" => SCATTER,
-        "allMidLabel" => ALL_MID_LABEL,
-        "allMidSentence" => ALL_MID_SENTENCE
+        "allMidLabel" => all_mid["label"] || ALL_MID_LABEL,
+        "allMidSentence" => all_mid["sentence"] || ALL_MID_SENTENCE
       }
+    end
+
+    # The ARCHETYPES table with each row's label/sentence overlaid by the locale's
+    # translation where present (numeric model is not part of this table).
+    def localized_archetypes(overrides)
+      ARCHETYPES.to_h do |id, row|
+        [id, row.merge((overrides[id.to_s] || {}).slice("label", "sentence").compact)]
+      end
     end
   end
 end

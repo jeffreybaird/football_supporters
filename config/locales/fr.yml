@@ -1,0 +1,353 @@
+# Français. UI strings mirror the keys in en.yml; the `content:` section overrides
+# the quiz questions, sliders and archetype copy (English stays canonical in Ruby,
+# see Quiz::Data / Quiz::Archetype). Any key omitted here falls back to English.
+# Tone is informal ("tu"), matching the English copy.
+fr:
+  language_name: "Français"
+
+  html_lang: "fr"
+
+  titles:
+    default: "Quel club devrais-tu supporter ?"
+    profile: "Ton Profil Football"
+    league: "Quel club de %{name} devrais-tu supporter ?"
+    club_result: "Je devrais supporter %{name} — Quel club de %{league} devrais-tu supporter ?"
+    profile_result: "Mon Profil Football — %{label}"
+
+  drawer:
+    trigger: "Langue"
+    heading: "Langue"
+    subheading: "Choisis la langue du site."
+    close: "Fermer"
+    current: "Actuel"
+
+  result:
+    eyebrow_single: "Fin du match · ton club"
+    eyebrow_close: "Fin du match · un choix serré"
+    share_label: "Partage ton résultat"
+    share_url_aria: "Lien partageable vers ton résultat"
+    share_copy: "Copier le lien"
+    share_native: "Partager ↗"
+    share_text: "Je devrais supporter %{name}."
+    alts_label: "Ou peut-être plutôt…"
+    take_quiz: "Faire le quiz →"
+    feedback_link: "Un retour ?"
+    badge_alt: "blason de %{name}"
+
+  profile_result:
+    eyebrow: "Fin du match · ton profil football"
+    clubs_aria: "Ton club dans chaque ligue"
+    share_label: "Partage ton profil"
+    share_text: "Mon profil football : %{label}."
+    match_unit: "% d'affinité"
+
+  not_found:
+    heading: "Aucun résultat ici"
+    body: "Ce lien de résultat n'existe pas — il a peut-être été mal saisi ou supprimé."
+    take_quiz: "Faire le quiz →"
+
+  feedback:
+    page_title: "Envoyer un retour"
+    thanks_page_title: "Merci"
+    eyebrow: "Prolongations · à toi de jouer"
+    title_line1: "Un petit"
+    title_accent: "retour ?"
+    lede: "Mauvais club ? Une ligue manquante ? Un texte mal tourné, un blason qui ne charge pas, une question incompréhensible ? Dis-le-moi !"
+    message_label: "Ton retour"
+    required: "Obligatoire"
+    optional: "Facultatif"
+    message_placeholder: "Dis-moi ce qui ne va pas — ou ce qui a marché."
+    email_label: "Ton e-mail"
+    email_placeholder: "toi@exemple.com"
+    email_hint: "Uniquement pour pouvoir te répondre. Laisse-le vide et ton message reste anonyme."
+    error_tag: "Erreur"
+    honeypot_label: "Laisse ce champ vide"
+    submit: "Envoyer →"
+    cancel: "← Retour au quiz"
+    note: "Pas de newsletter. Pas de traçage. Une seule personne les lit."
+    generic_error: "Quelque chose s'est mal passé."
+    thanks_eyebrow: "Fin du match · coup de sifflet final"
+    thanks_title_line1: "C'est noté."
+    thanks_title_accent: "Merci."
+    thanks_lede: "Ton message est en route vers moi. Si tu as laissé un e-mail, je te répondrai dès que possible — et sinon, il est quand même lu."
+    thanks_back: "Retour au quiz →"
+
+  # ---- React client strings ----
+  client:
+    boot:
+      loading: "Chargement…"
+      error_title: "Une erreur est survenue lors du chargement du quiz."
+      error_body: "Cette page a besoin d'une connexion internet (elle charge React depuis un CDN). Si tu es connecté et que tu vois toujours ceci, essaie un rafraîchissement forcé."
+      libs_error: "Les bibliothèques ne se sont pas chargées (React/ReactDOM/Babel). Vérifie ta connexion ou réessaie."
+
+    axes:
+      Vibe: "Ambiance"
+      Play: "Jeu"
+      Ethics: "Éthique"
+      Fanbase: "Public"
+
+    nav:
+      restart: "↺ Recommencer"
+      restart_title: "Recommencer depuis la première question"
+      coach_view: "Vue coach"
+
+    titles:
+      profile: "Ton Profil Football"
+      league: "Quel club de %{name} devrais-tu supporter ?"
+
+    picker:
+      label: "Ligue"
+      loading: "Chargement des clubs…"
+      error: "Échec du chargement. Réessaie."
+      all_leagues: "Comparaison avec toutes les ligues."
+      one_league: "Comparaison avec les clubs de %{name}."
+      optgroup_leagues: "Ligues"
+      optgroup_all: "Toutes ligues confondues"
+      profile_option: "⚽ Profil Football"
+
+    intro:
+      headline_profile:
+        - ["CONSTRUIS TON", 0]
+        - ["PROFIL", 1]
+        - ["FOOTBALL.", 0]
+      headline_league:
+        - ["TROUVE LE CLUB DE", 0]
+        - ["%{league}", 1]
+        - ["QUE TU DEVRAIS", 0]
+        - ["SUPPORTER.", 1]
+      para_profile_pre: "Tu as regardé la Coupe du monde et tu es tombé amoureux du beau jeu ? Si tu te demandes encore quel club mérite ta loyauté"
+      para_profile_post: ", réponds à quelques questions et on t'aidera à trouver une équipe dans chaque ligue qu'on couvre."
+      para_league: "Toujours à la recherche de ton équipe ? Prends quelques minutes pour répondre à des questions sur ton quotidien, tes valeurs et les petites choses qui t'agacent. Dis-nous ce qui compte le plus, et on trouvera le club de %{league} qui te correspond — défauts compris."
+      kickoff: "Coup d'envoi →"
+      footnote: "Si tu as un club local, soutiens-le !"
+      footnote_aria: "Note : %{text}"
+
+    quiz:
+      back: "← Retour"
+      played: "%{pct}% joué"
+      loadings: "Chargements :"
+
+    coach:
+      live_ranking_archetypes: "Classement en direct · archétypes"
+      live_ranking_teams: "Classement en direct · équipes"
+      gap_move_neutral: "écart · évolution vs neutre"
+      equal_vs_yours: "égal vs tes priorités"
+      live_trait_board: "Profil en direct"
+      col_team: "équipe"
+      col_equal: "égal"
+      col_yours: "toi"
+      leader: "en tête"
+      four_attributes: "Tes quatre attributs"
+      ranking_archetypes: "Classement · archétypes"
+      ranking_teams: "Classement · égal vs tes priorités"
+      move_vs_equal: "▲▼ évolution vs égal"
+      sim_table: "Table de similarité · écart top-2 %{gap} · %{count} candidat%{plural} à moins de %{threshold} · touche une équipe pour lire sa description"
+      vector_weights: "Ton vecteur · priorités [%{weights}]"
+      per_league_fit: "Affinité par ligue · % de correspondance"
+      read_blurb: "Lire la description de ce club"
+
+    sliders:
+      eyebrow: "Dernière étape · ce qui compte pour toi"
+      heading: "Quel poids pour chaque critère ?"
+      intro: "Ce sont des priorités relatives — tout mettre au maximum revient à tout laisser au milieu. Seul l'équilibre entre elles change ton résultat."
+      show_club: "Voir mon club →"
+
+    result:
+      eyebrow_close: "Fin du match · c'est serré, à toi de choisir"
+      eyebrow_single: "Fin du match · ton club"
+      alts: "Ou peut-être plutôt…"
+      adjust: "← Ajuster les curseurs"
+      play_again: "Rejouer ↺"
+      share_text: "Je devrais supporter %{pick}."
+
+    profile:
+      eyebrow: "Fin du match · ton profil football"
+      clubs_heading: "Ton club dans chaque ligue"
+      match_unit: "% d'affinité"
+      play_again: "Rejouer ↺"
+      share_text: "Mon profil football : %{label}."
+
+    share:
+      label: "Partage ton résultat"
+      error: "Impossible d'enregistrer un lien de partage. Tu peux quand même faire une capture d'écran de ton résultat."
+      saving: "Enregistrement de ton résultat…"
+      copy: "Copier le lien"
+      native: "Partager ↗"
+      aria_label: "Lien partageable vers ton résultat"
+      copied: "Lien copié"
+      copy_failed: "Échec de la copie — sélectionne le lien et copie-le"
+      select_manual: "Sélectionne le lien et copie-le"
+
+    feedback_link: "Un retour ?"
+
+  # ---- quiz content overrides (English is canonical in Quiz::Data / Quiz::Archetype) ----
+  content:
+    questions:
+      V2:
+        t: "Un match sans aucune de tes équipes. Tu veux"
+        a:
+          - "que la meilleure équipe gagne tranquillement"
+          - "un match serré et palpitant, peu importe qui gagne"
+          - "que le petit crée la surprise"
+          - "je ne regarde que les équipes que je soutiens"
+      V4:
+        t: "Une équipe que tu adores fait une grande saison. Quand ça va bien, tu"
+        a:
+          - "fais en sorte que tout le monde le sache"
+          - "en profites dans ton coin"
+          - "célèbres avec les autres supporters de mon équipe"
+          - "n'aimes pas être celui que tout le monde veut battre"
+      V10:
+        t: "Quelqu'un a clairement tort dans les commentaires. Tu"
+        a:
+          - "réponds et argumentes"
+          - "écris la réponse parfaite dans ta tête mais ne postes rien"
+          - "passes ton chemin"
+          - "appliques la règle d'or d'internet : ne jamais lire les commentaires"
+      P1:
+        t: "Ta façon idéale de gagner"
+        a:
+          - "en maîtrise du début à la fin, 2-0"
+          - "un match fou et prolifique, 4-2"
+          - "en défendant une courte avance, 1-0"
+          - "un match chaotique qui finit sur un nul avec une égalisation à la dernière minute"
+      P3:
+        t: "En dehors du sport, comment tu fonctionnes plutôt"
+        a:
+          - "en suivant un plan précis"
+          - "avec un cadre souple, en t'adaptant"
+          - "à l'instinct"
+          - "en gérant les choses au fur et à mesure"
+      P5:
+        t: "Le genre de personne que tu voudrais aux commandes"
+        a:
+          - "méticuleux, qui a peaufiné chaque détail"
+          - "un idéaliste qui veut bien faire"
+          - "un pragmatique concentré sur les résultats"
+          - "un meneur qui lâche la bride à ses joueurs"
+      P8:
+        t: "Tu préfères regarder une équipe qui"
+        a:
+          - "contrôle le jeu et gère jusqu'au bout"
+          - "attaque sans relâche et prend des risques"
+          - "défend bas et contre-attaque"
+          - "se bat dur, quel que soit le style"
+      E2:
+        t: "Est-ce qu'une action d'un club a déjà changé ton envie de le soutenir ?"
+        a:
+          - "Oui — au point d'arrêter, ou de ne jamais commencer"
+          - "Oui — ça a changé les choses, mais je suis resté"
+          - "Pas vraiment — je n'ai jamais eu à y penser"
+          - "Non — ce qui se passe en dehors du terrain, ce n'est pas le club pour moi"
+      E3:
+        t: "Ton endroit préféré, celui que tu attends vraiment avec impatience, est racheté par quelqu'un que tu éviterais en changeant de trottoir. Rien d'autre ne change."
+        a:
+          - "J'arrêterais d'y aller, définitivement"
+          - "J'irais moins, et ça me gênerait à chaque fois"
+          - "Je continuerais d'y aller en essayant de ne pas y penser"
+          - "Je continuerais d'y aller, c'est le même endroit"
+      F3:
+        t: "Le type de ville où tu préférerais vivre"
+        a:
+          - "ma ville natale"
+          - "un endroit sans prétention, avec du caractère"
+          - "une grande ville où tout est accessible"
+          - "là où sont les meilleures opportunités"
+      F4:
+        t: "Comment tu t'investis dans les communautés dont tu fais partie ?"
+        a:
+          - "À fond — je suis tout et je fais partie de la communauté"
+          - "Je consomme tout, mais depuis chez moi"
+          - "Je suis ça de loin"
+          - "Je ne suis là que pour les grands moments"
+      F5:
+        t: "Le public dont tu préférerais faire partie"
+        a:
+          - "bruyant et intense"
+          - "passionné mais bien élevé"
+          - "détendu et confortable"
+          - "calme, avec de bonnes installations"
+      F7:
+        t: "Le genre de quartier où tu choisirais de vivre"
+        a:
+          - "soudé, avec des familles installées depuis des générations"
+          - "mixte et en plein essor"
+          - "récent et pratique"
+          - "le quartier le plus prisé que tu peux te permettre"
+
+    sliders:
+      Vibe:
+        q: "Quelle importance a la taille et le statut du club ?"
+        lo: "Aucune importance"
+        hi: "Beaucoup d'importance"
+      Play:
+        q: "Quelle importance a le style de jeu ?"
+        lo: "Aucune importance"
+        hi: "Beaucoup d'importance"
+      Ethics:
+        q: "Quelle importance ont les propriétaires du club et leur comportement ?"
+        lo: "Aucune importance"
+        hi: "Beaucoup d'importance"
+      Fanbase:
+        q: "Quelle importance a le fait de te sentir à ta place parmi les supporters ?"
+        lo: "Aucune importance"
+        hi: "Beaucoup d'importance"
+
+    archetypes:
+      club_idealist:
+        label: "L'Idéaliste du club"
+        sentence: "Tu cherches un club qui défend quelque chose, pas juste un nom sur un calendrier de matchs. Il t'importe que les dirigeants se soucient de plus que du prochain résultat, et que l'ambition ne se fasse pas au prix de la décence. Tu veux entrer dans le stade et sentir que ce qui s'y passe a du sens, pour toi comme pour tous ceux qui sont là."
+      weekend_giant:
+        label: "Le Géant du week-end"
+        sentence: "Tu veux un club qui remplit les tribunes et joue pour gagner, mais les raccourcis et les secrets ne t'intéressent pas. Tu regarderas chaque match, tu célébreras chaque but, mais tu n'échangeras pas ta conscience contre une coupe. Les victoires doivent se mériter, sinon ce ne sont pas vraiment des victoires."
+      big_club_believer:
+        label: "L'Adepte des grands clubs"
+        sentence: "Tu veux un club qui attaque, qui te donne une raison de compter les jours jusqu'au coup d'envoi. Ce qui compte pour toi, c'est ce qui se passe sur le terrain. Le reste — les bureaux, les finances — tu le laisses à d'autres."
+      cathedral_builder:
+        label: "Le Bâtisseur de cathédrale"
+        sentence: "Tu veux voir une équipe qui fait circuler le ballon avec intention, menée par des gens à qui tu confierais ton propre nom. Tu veux te tenir épaule contre épaule avec un public qui ressent chaque passe et chaque but autant que toi."
+      pragmatic_winner:
+        label: "Le Gagnant pragmatique"
+        sentence: "Tu veux un club qui fait le travail, peu importe la manière. Une victoire est une victoire, tant qu'elle est honnête. Tu prendras les buts brouillons et les points arrachés, mais tu ne célébreras pas un titre acheté plutôt que mérité."
+      glory_hunter:
+        label: "Le Chasseur de gloire"
+        sentence: "Tu veux un club qui remplit tes samedis, celui que tu porterais sur ton dos et pour qui tu chanterais jusqu'à en perdre la voix. Peu importe le jeu, peu importe les dirigeants, tu es là à chaque minute, sans discuter."
+      trophy_collector:
+        label: "Le Collectionneur de trophées"
+        sentence: "Tu veux un club qui ramène des trophées, et tu ne t'excuseras pas de vouloir des titres. Le reste — le jeu, les propriétaires — compte moins que ce qu'il y a dans la vitrine. C'est ce dont tu te souviendras, et c'est ce que tu montreras."
+      student_of_the_game:
+        label: "L'Amoureux du jeu"
+        sentence: "Tu aimes le jeu pour lui-même — la façon dont une action se déploie, les joueurs qui te font relever la tête, les moments que tu rejoues dans ta tête des jours plus tard. Tu suivras un club, mais seulement s'il colle à ton amour du football. Le blason n'est qu'un détail."
+      terrace_dreamer:
+        label: "Le Rêveur des tribunes"
+        sentence: "Tu veux un club où les visages sont familiers et où les chants sonnent comme les tiens. La tribune est un deuxième chez-toi, et les gens autour de toi sont plus que des inconnus. Tu espères que les propriétaires sont corrects, et tu fais confiance à ce qu'on te dit."
+      everyfan:
+        label: "Le Supporter ordinaire"
+        sentence: "Tu veux un club qui tient son rang, avec des propriétaires que tu peux accepter, et une place dans ta semaine qui compte vraiment sans envahir ta vie. Peu importe le jeu, tu es simplement content de pouvoir dire que c'est le tien."
+      principled_fan:
+        label: "Le Supporter de principes"
+        sentence: "Tu veux un club que tu peux soutenir sans arrière-pensée. Qui le possède et comment ils se comportent passe avant tout. Le football et le sentiment d'appartenance comptent, mais pas assez pour fermer les yeux sur ce qui ne va pas."
+      easygoing_supporter:
+        label: "Le Supporter décontracté"
+        sentence: "Tu veux un club dont tu peux profiter sans avoir à réviser. Le football est censé être un bon après-midi de sortie, pas un travail de plus. Tu ne vas pas gâcher ça en te souciant des finances."
+      free_agent:
+        label: "L'Électron libre"
+        sentence: "Tu veux regarder le football à ta façon — là où se joue le meilleur match, peu importe qui est sur le terrain. Aucun club ne possède ta loyauté, et tu ne culpabilises pas une seconde pour ça."
+      parish_purist:
+        label: "Le Puriste du coin"
+        sentence: "Tu veux ton club local, géré comme il faut, et tu veux être dans les tribunes à chanter pour lui. Peu importe le jeu, l'essentiel est que la ville ait quelque chose à elle et qu'on en prenne soin."
+      hometown_diehard:
+        label: "Le Fidèle du pays"
+        sentence: "Tu veux le club du bout de la rue, et tu en veux chaque morceau — chaque match à domicile, chaque déplacement, chaque chant jusqu'à en perdre la voix. C'est la famille, et avec la famille on ne compte pas."
+      local_enthusiast:
+        label: "Le Passionné local"
+        sentence: "Tu veux l'équipe qui appartient à ta ville, quel que soit le football qu'elle pratique. C'est une bonne chose dans ta semaine, pas la seule. Mais si les propriétaires ne respectent pas l'endroit, tu ne les suivras pas."
+      family_day:
+        label: "La Sortie en famille"
+        sentence: "Tu veux passer l'après-midi au stade du coin, les enfants à tes côtés, peut-être une glace sur le chemin du retour quel que soit le résultat. Tu espères que le club est entre de bonnes mains, mais tu es surtout là pour la sortie."
+      local_casual:
+        label: "Le Suiveur occasionnel"
+        sentence: "Tu veux que le football reste près de chez toi, quelque chose que tu prends ou que tu laisses. Si un billet se présente, tu en profiteras. Sinon, tu es tout aussi content."
+      all_mid:
+        label: "Le Polyvalent"
+        sentence: "Voici le genre de club que tu veux : rien ne domine en particulier — tu prendras un bon club sous presque n'importe quelle forme."

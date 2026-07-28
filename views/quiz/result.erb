@@ -2,7 +2,7 @@
 <% others = @score.candidates.drop(1) %>
 <div class="result" data-testid="result">
   <p class="result__eyebrow">
-    <%= others.empty? ? "Full time · your club" : "Full time · a close call" %>
+    <%= others.empty? ? t("result.eyebrow_single") : t("result.eyebrow_close") %>
   </p>
 
   <div class="result__head">
@@ -13,21 +13,21 @@
   <p class="result__flavor"><%= pick.blurb %></p>
 
   <section class="share" data-testid="share" aria-labelledby="share-label">
-    <p class="share__label" id="share-label">Share your result</p>
+    <p class="share__label" id="share-label"><%= t("result.share_label") %></p>
     <div class="share__row">
       <input class="share__url" data-testid="share-url" readonly
              value="<%= @share_url %>"
-             data-share-text="I should support <%= pick.name %>."
-             aria-label="Shareable link to your result">
-      <button type="button" class="btn btn--ghost" data-testid="share-copy">Copy link</button>
-      <button type="button" class="btn btn--primary" data-testid="share-native">Share ↗</button>
+             data-share-text="<%= t("result.share_text", name: pick.name) %>"
+             aria-label="<%= t("result.share_url_aria") %>">
+      <button type="button" class="btn btn--ghost" data-testid="share-copy"><%= t("result.share_copy") %></button>
+      <button type="button" class="btn btn--primary" data-testid="share-native"><%= t("result.share_native") %></button>
     </div>
     <p class="share__status" data-testid="share-status" role="status" aria-live="polite"></p>
   </section>
 
   <% unless others.empty? %>
     <section class="alts" data-testid="alts">
-      <p class="alts__label">Or maybe you're more…</p>
+      <p class="alts__label"><%= t("result.alts_label") %></p>
       <% others.each do |team| %>
         <div class="alt" data-testid="alt-<%= team.name.downcase.gsub(/[^a-z0-9]+/, "-") %>">
           <%== erb :"quiz/_badge", locals: { team:, sm: true } %>
@@ -41,11 +41,11 @@
   <% end %>
 
   <div class="result__actions">
-    <a class="btn btn--primary" href="/" data-testid="take-quiz">Take the quiz →</a>
+    <a class="btn btn--primary" href="/" data-testid="take-quiz"><%= t("result.take_quiz") %></a>
   </div>
 
   <p class="feedback-link">
-    <a href="/feedback?from=<%= ERB::Util.url_encode(@share_url) %>" data-testid="feedback-link">Have any feedback?</a>
+    <a href="/feedback?from=<%= ERB::Util.url_encode(@share_url) %>" data-testid="feedback-link"><%= t("result.feedback_link") %></a>
   </p>
 </div>
 

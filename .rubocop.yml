@@ -34,11 +34,13 @@ Layout/LineLength:
 Metrics/ModuleLength:
   Exclude:
     - "app/services/quiz/archetype.rb" # data table, not logic
+    - "app/services/quiz/data.rb"      # questionnaire data table, not logic
     - "app/services/quiz/seed.rb"
 
 Metrics/BlockLength:
   Exclude:
     - "spec/**/*"
+    - "app.rb" # cohesive Sinatra app: the `helpers do` block groups tiny helpers
 
 # Grandfathered: cohesive, well-tested `call` methods (or dense recommender
 # maths in score.rb) that would only get worse — more indirection to trace —
@@ -55,6 +57,7 @@ Metrics/AbcSize:
 
 Metrics/MethodLength:
   Exclude:
+    - "app.rb" # cohesive Sinatra app file (see AbcSize/ClassLength grandfathering)
     - "app/services/quiz/client_data.rb"
     - "app/services/quiz/create.rb"
     - "app/services/quiz/create_profile.rb"

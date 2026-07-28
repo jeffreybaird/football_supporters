@@ -114,5 +114,39 @@ module Quiz
       { "ax" => "Fanbase", "q" => "How much does fitting in with the fanbase matter?",
         "lo" => "Doesn't matter", "hi" => "Matters a lot" }
     ].freeze
+
+    module_function
+
+    # The questionnaire localized for `locale`. English (Q) is canonical; a
+    # translated locale supplies text-only overrides (Translations content) keyed
+    # by question id, leaving the numeric loadings/values untouched so the client
+    # and server still score against identical numbers. Returns a fresh array.
+    def questions(locale = Translations::DEFAULT)
+      overrides = Translations.content(locale)["questions"] || {}
+      Q.map { |question| localize_question(question, overrides[question["id"]]) }
+    end
+
+    # Text-only overlay of one question: swaps the prompt and answer labels when a
+    # translation exists, always keeping the numeric loadings and option values.
+    def localize_question(question, override)
+      return question unless override
+
+      localized = question.merge("t" => override["t"] || question["t"])
+      return localized unless override["a"]
+
+      localized.merge("a" => question["a"].each_with_index.map do |option, i|
+        override["a"][i] ? option.merge("l" => override["a"][i]) : option
+      end)
+    end
+
+    # The weight sliders localized for `locale` — text-only (q/lo/hi) overrides
+    # keyed by axis; the axis key itself is language-independent.
+    def sliders(locale = Translations::DEFAULT)
+      overrides = Translations.content(locale)["sliders"] || {}
+      SLIDERS.map do |slider|
+        override = overrides[slider["ax"]]
+        override ? slider.merge(override.slice("q", "lo", "hi").compact) : slider
+      end
+    end
   end
 end

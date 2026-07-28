@@ -1,14 +1,13 @@
 <div class="feedback feedback--thanks" data-testid="feedback-thanks">
-  <p class="feedback__eyebrow feedback__eyebrow--lime">Full time · whistle gone</p>
+  <p class="feedback__eyebrow feedback__eyebrow--lime"><%= t("feedback.thanks_eyebrow") %></p>
 
-  <h1 class="feedback__title">Got it.<br><span class="feedback__accent">Thank you.</span></h1>
+  <h1 class="feedback__title"><%= t("feedback.thanks_title_line1") %><br><span class="feedback__accent"><%= t("feedback.thanks_title_accent") %></span></h1>
 
   <p class="feedback__lede">
-    Your note is on its way to me. If you left an email I'll write back when I can —
-    and if you didn't, it's still read.
+    <%= t("feedback.thanks_lede") %>
   </p>
 
   <div class="feedback__actions">
-    <a class="btn btn--primary" href="/" data-testid="take-quiz">Back to the quiz →</a>
+    <a class="btn btn--primary" href="/" data-testid="take-quiz"><%= t("feedback.thanks_back") %></a>
   </div>
 </div>

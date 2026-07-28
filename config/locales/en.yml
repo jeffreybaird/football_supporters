@@ -1,0 +1,183 @@
+# English — the source language. These strings mirror the literals in the ERB
+# views and the React client so `t` always has an English fallback. The quiz
+# CONTENT (questions, sliders, archetypes) stays canonical in Ruby, so this file
+# has no `content:` section; only translated locales (see fr.yml) carry one.
+en:
+  language_name: "English"
+
+  # <html lang> and <title> fallback
+  html_lang: "en"
+
+  titles:
+    default: "Which Club Should You Support?"
+    profile: "Your Football Profile"
+    league: "Which %{name} Club Should You Support?"
+    club_result: "I should support %{name} — Which %{league} Club Should You Support?"
+    profile_result: "My Football Profile — %{label}"
+
+  # The language switcher drawer (server-rendered in the layout, on every page).
+  drawer:
+    trigger: "Language"
+    heading: "Language"
+    subheading: "Choose how this site reads."
+    close: "Close"
+    current: "Current"
+
+  result:
+    eyebrow_single: "Full time · your club"
+    eyebrow_close: "Full time · a close call"
+    share_label: "Share your result"
+    share_url_aria: "Shareable link to your result"
+    share_copy: "Copy link"
+    share_native: "Share ↗"
+    share_text: "I should support %{name}."
+    alts_label: "Or maybe you're more…"
+    take_quiz: "Take the quiz →"
+    feedback_link: "Have any feedback?"
+    badge_alt: "%{name} crest"
+
+  profile_result:
+    eyebrow: "Full time · your football profile"
+    clubs_aria: "Your club in each league"
+    share_label: "Share your profile"
+    share_text: "My football profile: %{label}."
+    match_unit: "% match"
+
+  not_found:
+    heading: "No match here"
+    body: "That result link doesn't exist — it may have been mistyped or removed."
+    take_quiz: "Take the quiz →"
+
+  feedback:
+    page_title: "Send feedback"
+    thanks_page_title: "Thanks"
+    eyebrow: "Extra time · over to you"
+    title_line1: "Have any"
+    title_accent: "feedback?"
+    lede: "Wrong club? A league missing? Copy that reads badly, a crest that won't load, a question that made no sense? Let me know!"
+    message_label: "Your feedback"
+    required: "Required"
+    optional: "Optional"
+    message_placeholder: "Tell me what's wrong — or what worked."
+    email_label: "Your email"
+    email_placeholder: "you@example.com"
+    email_hint: "Only so I can reply. Leave it blank and your note stays anonymous."
+    error_tag: "Error"
+    honeypot_label: "Leave this field empty"
+    submit: "Send it →"
+    cancel: "← Back to the quiz"
+    note: "No newsletter. No tracking. One person reads these."
+    generic_error: "Something went wrong."
+    thanks_eyebrow: "Full time · whistle gone"
+    thanks_title_line1: "Got it."
+    thanks_title_accent: "Thank you."
+    thanks_lede: "Your note is on its way to me. If you left an email I'll write back when I can — and if you didn't, it's still read."
+    thanks_back: "Back to the quiz →"
+
+  # ---- React client strings (embedded as window.QUIZ_I18N) ----
+  client:
+    boot:
+      loading: "Loading…"
+      error_title: "Something went wrong loading the quiz."
+      error_body: "This page needs an internet connection (it loads React from a CDN). If you are online and still see this, try a hard refresh."
+      libs_error: "Libraries did not load (React/ReactDOM/Babel). Check your connection or try again."
+
+    axes:
+      Vibe: "Vibe"
+      Play: "Play"
+      Ethics: "Ethics"
+      Fanbase: "Fanbase"
+
+    nav:
+      restart: "↺ Restart"
+      restart_title: "Restart from the first question"
+      coach_view: "Coach's view"
+
+    titles:
+      profile: "Your Football Profile"
+      league: "Which %{name} Club Should You Support?"
+
+    picker:
+      label: "League"
+      loading: "Loading clubs…"
+      error: "Couldn't load that. Try again."
+      all_leagues: "Matching against every league."
+      one_league: "Matching against %{name} clubs."
+      optgroup_leagues: "Leagues"
+      optgroup_all: "Across all leagues"
+      profile_option: "⚽ Football Profile"
+
+    intro:
+      headline_profile:
+        - ["BUILD YOUR", 0]
+        - ["FOOTBALL", 1]
+        - ["PROFILE.", 0]
+      headline_league:
+        - ["FIND THE", 0]
+        - ["%{league}", 1]
+        - ["CLUB YOU SHOULD", 0]
+        - ["SUPPORT.", 1]
+      para_profile_pre: "Did you watch the World Cup and fall in love with the beautiful game? If you’re still wondering which club deserves your loyalty"
+      para_profile_post: ", answer a few questions, and we’ll help you find a team in each league we cover."
+      para_league: "Still searching for your team? Take a few minutes to answer questions about your daily life, your values, and the little things that get under your skin. Tell us what matters most, and we'll find the %{league} club that fits you—flaws and all."
+      kickoff: "Kick off →"
+      footnote: "If you have a local club, support them!"
+      footnote_aria: "Footnote: %{text}"
+
+    quiz:
+      back: "← Back"
+      played: "%{pct}% played"
+      loadings: "Loadings:"
+
+    coach:
+      live_ranking_archetypes: "Live ranking · archetypes"
+      live_ranking_teams: "Live ranking · teams"
+      gap_move_neutral: "gap · move vs neutral"
+      equal_vs_yours: "equal vs your weights"
+      live_trait_board: "Live trait board"
+      col_team: "team"
+      col_equal: "equal"
+      col_yours: "yours"
+      leader: "leader"
+      four_attributes: "Your four attributes"
+      ranking_archetypes: "Ranking · archetypes"
+      ranking_teams: "Ranking · equal vs your weights"
+      move_vs_equal: "▲▼ move vs equal"
+      sim_table: "Similarity table · top-2 gap %{gap} · %{count} candidate%{plural} within %{threshold} · tap a team to read its blurb"
+      vector_weights: "Your vector · weights [%{weights}]"
+      per_league_fit: "Per-league fit · match %"
+      read_blurb: "Read this club's blurb"
+
+    sliders:
+      eyebrow: "Last bit · what matters to you"
+      heading: "How much does each thing count?"
+      intro: "These are relative priorities — sliding everything to the top is the same as leaving everything in the middle. Only the balance between them changes your match."
+      show_club: "Show my club →"
+
+    result:
+      eyebrow_close: "Full time · it's close — take your pick"
+      eyebrow_single: "Full time · your club"
+      alts: "Or maybe you're more…"
+      adjust: "← Adjust dials"
+      play_again: "Play again ↺"
+      share_text: "I should support %{pick}."
+
+    profile:
+      eyebrow: "Full time · your football profile"
+      clubs_heading: "Your club in every league"
+      match_unit: "% match"
+      play_again: "Play again ↺"
+      share_text: "My football profile: %{label}."
+
+    share:
+      label: "Share your result"
+      error: "Couldn't save a share link. You can still screenshot your result."
+      saving: "Saving your result…"
+      copy: "Copy link"
+      native: "Share ↗"
+      aria_label: "Shareable link to your result"
+      copied: "Link copied"
+      copy_failed: "Copy failed — select the link and copy"
+      select_manual: "Select the link and copy"
+
+    feedback_link: "Have any feedback?"
