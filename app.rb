@@ -20,7 +20,19 @@ class App < Sinatra::Base
   # network. A stored crest is a "<league-slug>/<file>" path and the object keys
   # on the CDN mirror that layout, so only the prefix differs between the two.
   # Any trailing slash is stripped so the joins below can't produce "//".
-  CREST_BASE_URL = ENV.fetch("CREST_BASE_URL", "/images").chomp("/")
+  #
+  # Blank counts as unset. ENV.fetch's default only fires when the variable is
+  # absent, but the deploy writes every config line into .env unconditionally,
+  # so a CI variable that was never given a value arrives as "CREST_BASE_URL="
+  # — present and empty. Left as "", crest_url emits "/<league>/<file>.png" and
+  # every server-rendered crest 404s. (The client script masked this with its
+  # own `|| "/images"`, so only the shared result pages broke.)
+  def self.crest_base_url(env = ENV)
+    value = env["CREST_BASE_URL"].to_s.strip
+    (value.empty? ? "/images" : value).chomp("/")
+  end
+
+  CREST_BASE_URL = crest_base_url
 
   configure do
     set :root, __dir__

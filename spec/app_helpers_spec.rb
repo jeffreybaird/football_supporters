@@ -27,6 +27,34 @@ RSpec.describe App do
     end
   end
 
+  # The deploy writes every config line into .env whether or not the CI variable
+  # behind it has a value, so an unconfigured CDN reaches the process as an empty
+  # string rather than an absent variable. That is not a base URL: it made every
+  # crest on the server-rendered share pages resolve to "/<league>/<file>.png".
+  describe ".crest_base_url" do
+    it "falls back to public/images when the variable is absent" do
+      expect(App.crest_base_url({})).to eq("/images")
+    end
+
+    it "falls back to public/images when the variable is set but empty" do
+      expect(App.crest_base_url({ "CREST_BASE_URL" => "" })).to eq("/images")
+    end
+
+    it "falls back to public/images when the variable is only whitespace" do
+      expect(App.crest_base_url({ "CREST_BASE_URL" => "  " })).to eq("/images")
+    end
+
+    it "uses a configured CDN origin" do
+      expect(App.crest_base_url({ "CREST_BASE_URL" => "https://cdn.example.com/crests" }))
+        .to eq("https://cdn.example.com/crests")
+    end
+
+    it "strips a trailing slash so the joins can't produce a double separator" do
+      expect(App.crest_base_url({ "CREST_BASE_URL" => "https://cdn.example.com/crests/" }))
+        .to eq("https://cdn.example.com/crests")
+    end
+  end
+
   describe "#crest_url" do
     # url() needs a request to build an absolute URL against; the CDN branch
     # never calls it, so only the fallback examples set one up.

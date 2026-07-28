@@ -244,6 +244,37 @@ RSpec.describe "Quiz", type: :request do
       expect(last_response.body).to include('property="og:title"')
     end
 
+    # The deploy hands the process CREST_BASE_URL="" whenever the CDN variable is
+    # unconfigured, and the shared pages are the only crest path with no client-
+    # side `|| "/images"` to absorb it. Drive the real derivation for that env so
+    # these fail if the fallback ever stops covering blank: a bare "" base emits
+    # src="/premier-league/....png", which 404s on the host.
+    it "renders crests from public/images when the CDN base is blank" do
+      stub_const("App::CREST_BASE_URL", App.crest_base_url({ "CREST_BASE_URL" => "" }))
+      record = create_record(slug: "united02", pick: "Man United")
+
+      get "/q/#{record.slug}"
+
+      expect(last_response).to be_ok
+      expect(last_response.body).to include('src="http://example.org/images/premier-league/')
+      expect(last_response.body).not_to match(%r{src="/?premier-league/})
+      # The OG image is built by the same helper and is what unfurls in a share.
+      expect(last_response.body).to include('content="http://example.org/images/premier-league/')
+    end
+
+    it "renders a shared profile's crests from public/images when the CDN base is blank" do
+      stub_const("App::CREST_BASE_URL", App.crest_base_url({ "CREST_BASE_URL" => "" }))
+      QuizResult.create(slug: "prof01", answers: Array.new(13, 0), weights: [5, 5, 5, 5],
+                        pick: "The Purist", profile: true)
+
+      get "/q/prof01"
+
+      expect(last_response).to be_ok
+      expect(last_response.body).to include('data-testid="profile-result"')
+      expect(last_response.body).to include('src="http://example.org/images/')
+      expect(last_response.body).not_to match(%r{src="/?[a-z-]+/\d+-[^"]*\.png"})
+    end
+
     it "returns 404 for an unknown slug" do
       get "/q/does-not-exist"
 
