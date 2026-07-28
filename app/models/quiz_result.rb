@@ -13,6 +13,9 @@ class QuizResult < Sequel::Model
   plugin :serialization, :json, :answers, :weights
 
   many_to_one :league
+  # The clubs this result returned to the taker (winner + offered alternates, or
+  # every league's winner for a profile), via the quiz_result_teams join table.
+  many_to_many :teams, join_table: :quiz_result_teams, right_key: :team_id, left_key: :quiz_result_id
 
   def profile? = !!profile
 

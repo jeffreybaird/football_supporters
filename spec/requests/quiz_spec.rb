@@ -223,6 +223,30 @@ RSpec.describe "Quiz", type: :request do
       expect(JSON.parse(last_response.body)["error"]).to eq("validation")
       expect(QuizResult.count).to eq(0)
     end
+
+    it "fingerprints the taker from their ip and browser so takers can be grouped" do
+      header "User-Agent", "Mozilla/5.0 (Test)"
+      json_post "/quizzes", { answers: Array.new(13, 0), weights: [5, 5, 5, 5] }
+
+      expect(last_response.status).to eq(201)
+      expect(QuizResult.first.fingerprint).to match(/\A[0-9a-f]{64}\z/)
+    end
+
+    it "gives two submissions from the same ip + browser the same fingerprint" do
+      header "User-Agent", "Mozilla/5.0 (Test)"
+      json_post "/quizzes", { answers: Array.new(13, 0), weights: [5, 5, 5, 5] }
+      json_post "/quizzes", { answers: Array.new(13, 0), weights: [5, 5, 5, 5] }
+
+      fingerprints = QuizResult.all.map(&:fingerprint)
+      expect(fingerprints.uniq.length).to eq(1)
+    end
+
+    it "links the returned clubs to the stored result" do
+      json_post "/quizzes", { answers: Array.new(13, 0), weights: [5, 5, 5, 5] }
+
+      record = QuizResult.first
+      expect(record.teams.map(&:name)).to include(record.pick)
+    end
   end
 
   describe "GET /q/:slug" do

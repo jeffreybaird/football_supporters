@@ -45,6 +45,16 @@ RSpec.describe QuizResult do
     expect(dupe).not_to be_valid
   end
 
+  it "links the clubs it returned through the join table" do
+    record = build_result(slug: "linked").tap(&:save)
+    team = League.default.scored_teams.first
+
+    record.add_team(team)
+
+    expect(QuizResult.first(id: record.id).teams.map(&:id)).to eq([team.id])
+    expect(team.quiz_results.map(&:id)).to include(record.id)
+  end
+
   describe ".kept" do
     it "excludes soft-deleted rows" do
       live = build_result(slug: "live").tap(&:save)

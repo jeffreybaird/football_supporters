@@ -20,9 +20,36 @@ RSpec.describe Quiz::Create do
     expect(record.league_id).to eq(league.id)
     expect(record.slug).to be_a(String)
     expect(record.slug).not_to be_empty
-    expect(record.answers).to eq(valid_answers)
+    # Stored as a question-id -> option-index map, not a positional array, so a
+    # stored answer stays bound to its question regardless of display order.
+    expect(record.answers).to eq(Quiz::Data::Q.to_h { |q| [q["id"], 0] })
     expect(record.weights).to eq(valid_weights)
     expect(QuizResult.count).to eq(1)
+  end
+
+  it "accepts answers as a question-id -> option map and scores them the same" do
+    as_map = Quiz::Data::Q.to_h { |q| [q["id"], 0] }
+    from_map = create("answers" => as_map, "weights" => valid_weights).value!
+    from_array = create("answers" => valid_answers, "weights" => valid_weights).value!
+
+    expect(from_map.answers).to eq(as_map)
+    expect(from_map.pick).to eq(from_array.pick)
+  end
+
+  it "stores the caller's fingerprint" do
+    record = described_class.call(league:, attrs: { "answers" => valid_answers, "weights" => valid_weights },
+                                  fingerprint: "fp-abc123").value!
+
+    expect(record.fingerprint).to eq("fp-abc123")
+  end
+
+  it "links the returned club(s) through the join table" do
+    record = create("answers" => valid_answers, "weights" => valid_weights).value!
+
+    names = record.teams.map(&:name)
+    expect(names).to include(record.pick)     # the winner is always linked
+    expect(record.teams).to all(be_a(Team))
+    expect(names).to eq(names.uniq)           # no duplicate links
   end
 
   it "mints a distinct slug per completed quiz" do

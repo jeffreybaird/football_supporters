@@ -5,6 +5,9 @@
 # result view reads #name / #blurb / #crest.
 class Team < Sequel::Model
   many_to_one :league
+  # The quiz results that returned this club, via the quiz_result_teams join
+  # table — "which takers were pointed at this club?".
+  many_to_many :quiz_results, join_table: :quiz_result_teams, right_key: :quiz_result_id, left_key: :team_id
 
   # Columns holding the scoring coordinates, in Quiz::Data::AXES order.
   AXIS_COLUMNS = %i[vibe play ethics fanbase].freeze

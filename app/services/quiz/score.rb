@@ -49,14 +49,18 @@ module Quiz
       Result.new(vec:, rank:, candidates:, pick: rank[0].team, gap:)
     end
 
-    # loadings-weighted mean per axis; axes with no evidence default to 5.0
+    # loadings-weighted mean per axis; axes with no evidence default to 5.0.
+    # answers is the stored id->option map ({ "V2" => 1, ... }); a legacy
+    # positional array is normalized to that shape first (answers_by_id) so old
+    # rows still score identically.
     def score_axes(answers)
+      by_id = answers_by_id(answers)
       num = [0.0, 0.0, 0.0, 0.0]
       den = [0.0, 0.0, 0.0, 0.0]
-      answers.each_with_index do |oi, q_idx|
+      Data::Q.each do |q|
+        oi = by_id[q["id"]]
         next if oi.nil?
 
-        q = Data::Q[q_idx]
         opt = q["a"][oi]
         4.times do |k|
           load_k = q["load"][k]
@@ -68,6 +72,14 @@ module Quiz
         end
       end
       num.each_index.map { |k| den[k].positive? ? num[k] / den[k] : 5.0 }
+    end
+
+    # Normalize stored answers to a { question_id => option_index } map. A Hash is
+    # already in that shape; a legacy positional array is aligned to Data::Q order.
+    def answers_by_id(answers)
+      return answers if answers.is_a?(Hash)
+
+      Data::Q.each_index.to_h { |i| [Data::Q[i]["id"], answers[i]] }
     end
 
     # slider-weighted distance matching (nearest team). The user's vector is first

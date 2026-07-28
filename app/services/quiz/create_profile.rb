@@ -16,17 +16,18 @@ module Quiz
 
     def self.call(...) = new.call(...)
 
-    def call(attrs:)
+    def call(attrs:, fingerprint: nil)
       answers = coerce_answers(attrs["answers"])
       weights = coerce_weights(attrs["weights"])
       errors = validate_answers_and_weights(answers, weights)
       return Failure([:validation, errors]) unless errors.empty?
 
-      no_scorable_leagues = League.active.ordered.all.none? { |l| l.scored_teams.any? }
-      return Failure([:validation, { leagues: "none available" }]) if no_scorable_leagues
+      profile = ProfileScore.call(answers:, weights:)
+      return Failure([:validation, { leagues: "none available" }]) if profile.leagues.empty?
 
-      label = Archetype.call(Score.score_axes(answers), weights:)[:label]
-      record = insert_with_slug(answers:, weights:, pick: label)
+      record = insert_with_slug(answers:, weights:, pick: profile.archetype[:label], fingerprint:)
+      # A profile has no single club; link every league's winner it returned.
+      profile.leagues.each { |entry| record.add_team(entry.pick) }
       Success(record)
     rescue Sequel::UniqueConstraintViolation
       Failure([:conflict])
@@ -36,12 +37,12 @@ module Quiz
 
     private
 
-    def insert_with_slug(answers:, weights:, pick:)
+    def insert_with_slug(answers:, weights:, pick:, fingerprint:)
       attempts = 0
       begin
         attempts += 1
         QuizResult.create(slug: SecureRandom.urlsafe_base64(8), profile: true, league_id: nil,
-                          answers:, weights:, pick:)
+                          answers:, weights:, pick:, fingerprint:)
       rescue Sequel::UniqueConstraintViolation
         retry if attempts < MAX_SLUG_ATTEMPTS
         raise

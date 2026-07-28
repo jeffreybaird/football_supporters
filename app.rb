@@ -150,10 +150,11 @@ class App < Sinatra::Base
   post "/quizzes" do
     content_type :json
     attrs = parse_json_body
+    fingerprint = Quiz::Fingerprint.call(request)
     result = if attrs["profile"]
-               Quiz::CreateProfile.call(attrs:)
+               Quiz::CreateProfile.call(attrs:, fingerprint:)
              else
-               Quiz::Create.call(league: resolve_league(attrs["league"]), attrs:)
+               Quiz::Create.call(league: resolve_league(attrs["league"]), attrs:, fingerprint:)
              end
     if result.success?
       record = result.value!

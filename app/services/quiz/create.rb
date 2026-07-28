@@ -16,7 +16,7 @@ module Quiz
 
     def self.call(...) = new.call(...)
 
-    def call(league:, attrs:)
+    def call(league:, attrs:, fingerprint: nil)
       return Failure([:not_found]) if league.nil?
 
       answers = coerce_answers(attrs["answers"])
@@ -27,8 +27,11 @@ module Quiz
       teams = league.scored_teams
       return Failure([:validation, { league: "has no teams" }]) if teams.empty?
 
-      pick = Score.call(teams:, answers:, weights:, **league.scoring_params).pick
-      record = insert_with_slug(league:, answers:, weights:, pick: pick.name)
+      scored = Score.call(teams:, answers:, weights:, **league.scoring_params)
+      record = insert_with_slug(league:, answers:, weights:, pick: scored.pick.name, fingerprint:)
+      # Link the clubs the taker was actually shown: the winner and any close
+      # alternates the chooser offered.
+      scored.candidates.each { |team| record.add_team(team) }
       Success(record)
     rescue Sequel::UniqueConstraintViolation
       Failure([:conflict])
@@ -40,11 +43,12 @@ module Quiz
 
     # Persist, retrying on the astronomically unlikely slug collision. The unique
     # index is the real guard; SQLite's single writer serializes the insert.
-    def insert_with_slug(league:, answers:, weights:, pick:)
+    def insert_with_slug(league:, answers:, weights:, pick:, fingerprint:)
       attempts = 0
       begin
         attempts += 1
-        QuizResult.create(slug: SecureRandom.urlsafe_base64(8), league_id: league.id, answers:, weights:, pick:)
+        QuizResult.create(slug: SecureRandom.urlsafe_base64(8), league_id: league.id,
+                          answers:, weights:, pick:, fingerprint:)
       rescue Sequel::UniqueConstraintViolation
         retry if attempts < MAX_SLUG_ATTEMPTS
         raise
