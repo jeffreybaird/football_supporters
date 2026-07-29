@@ -1,0 +1,10 @@
+# Scoring skeleton for question F3 - language-neutral (no text).
+# load and each option vector are in AXES order: [Vibe, Play, Ethics, Fanbase];
+# the wording lives in config/locales/*.yml under content.questions.F3.
+id: F3
+load: [0.4, 0, 0, 0.8]
+options:
+  - [2, null, null, 10]
+  - [3, null, null, 8]
+  - [9, null, null, 3]
+  - [7, null, null, 2]

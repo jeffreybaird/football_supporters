@@ -1,7 +1,9 @@
 # English — the source language. These strings mirror the literals in the ERB
-# views and the React client so `t` always has an English fallback. The quiz
-# CONTENT (questions, sliders, archetypes) stays canonical in Ruby, so this file
-# has no `content:` section; only translated locales (see fr.yml) carry one.
+# views and the React client so `t` always has an English fallback. The `content:`
+# section at the bottom holds the questionnaire WORDING (question and slider text);
+# the language-neutral scoring numbers live in config/quiz/questions/*.yml. Every
+# translated locale (see fr.yml) mirrors the same keys. Archetype copy still lives
+# in Ruby (Quiz::Archetype) with translations under fr.yml's content.archetypes.
 en:
   language_name: "English"
 
@@ -181,3 +183,118 @@ en:
       select_manual: "Select the link and copy"
 
     feedback_link: "Have any feedback?"
+
+  # ---- quiz content: English text for the questionnaire ----
+  # The numeric scoring skeleton (loadings/option values) is language-neutral
+  # and lives in config/quiz/questions/*.yml; this is only the wording. fr.yml
+  # mirrors these keys. Assembled by Quiz::Data.questions / .sliders.
+  content:
+    questions:
+      V2:
+        t: "A game's on with no team of yours involved. You want"
+        a:
+          - "the better team to win comfortably"
+          - "a close, exciting game either way"
+          - "the weaker team to cause an upset"
+          - "I only watch the teams I support"
+      V4:
+        t: "A team you love has a great year. When it's going well, you"
+        a:
+          - "make sure people know about it"
+          - "enjoy it privately"
+          - "celebrate with other fans of my team"
+          - "dislike being the one everyone wants to beat"
+      V10:
+        t: "Someone is clearly wrong in a comment section. You"
+        a:
+          - "reply and argue it out"
+          - "write the perfect response in your head but don't post"
+          - "scroll past it"
+          - "follow the internet's golden rule, never read the comments"
+      P1:
+        t: "Your ideal way to win"
+        a:
+          - "in control the whole way, 2-0"
+          - "a wild high-scoring game, 4-2"
+          - "defending a narrow lead, 1-0"
+          - "a chaotic game that ends in a draw with a last-minute equaliser"
+      P3:
+        t: "Away from sport, how you tend to operate"
+        a:
+          - "work to a clear plan"
+          - "keep a loose framework and adapt"
+          - "go on instinct"
+          - "deal with things as they come"
+      P5:
+        t: "The kind of person you'd want in charge"
+        a:
+          - "meticulous, has drilled every detail"
+          - "an idealist who wants to do it well"
+          - "a pragmatist focused on results"
+          - "a motivator who lets people off the leash"
+      P8:
+        t: "You'd rather watch a team that"
+        a:
+          - "controls the game and grinds it out"
+          - "attacks relentlessly and takes risks"
+          - "defends deep and counters"
+          - "competes hard regardless of style"
+      E2:
+        t: "Has anything a club did ever changed how you felt about supporting them?"
+        a:
+          - "Yes — enough that I stopped, or never started"
+          - "Yes — it changed things, but I stayed"
+          - "Not really — I've never had to think about it"
+          - "No — what happens off the pitch isn't the club to me"
+      E3:
+        t: "Your favorite spot, the one you actually look forward to, gets bought by someone you'd cross the street to avoid. Nothing else about it changes."
+        a:
+          - "I'd stop going for good"
+          - "I'd go less, and it'd feel off every time"
+          - "I'd keep going and try not to think about it"
+          - "I'd keep going, it's the same place"
+      F3:
+        t: "The type of city or town you'd prefer to live"
+        a:
+          - "my hometown"
+          - "somewhere unpretentious with character"
+          - "a big city with everything available"
+          - "wherever the best opportunities are"
+      F4:
+        t: "How do you engage with the fandoms you're part of?"
+        a:
+          - "All in — I follow everything and I'm part of the community"
+          - "I consume all of it, but from home"
+          - "I follow it casually"
+          - "I only show up for the big moments"
+      F5:
+        t: "The crowd you'd rather be part of"
+        a:
+          - "loud and intense"
+          - "passionate but well-behaved"
+          - "relaxed and comfortable"
+          - "quiet, with good facilities"
+      F7:
+        t: "The kind of place you'd choose to live"
+        a:
+          - "close-knit, families there for generations"
+          - "mixed and up-and-coming"
+          - "newly built and convenient"
+          - "the most desirable area you can afford"
+    sliders:
+      Vibe:
+        q: "How much does the club's size and status matter?"
+        lo: "Doesn't matter"
+        hi: "Matters a lot"
+      Play:
+        q: "How much does the style of football matter?"
+        lo: "Doesn't matter"
+        hi: "Matters a lot"
+      Ethics:
+        q: "How much does who owns the club, and how they behave, matter?"
+        lo: "Doesn't matter"
+        hi: "Matters a lot"
+      Fanbase:
+        q: "How much does fitting in with the fanbase matter?"
+        lo: "Doesn't matter"
+        hi: "Matters a lot"

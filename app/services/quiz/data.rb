@@ -1,12 +1,23 @@
 # frozen_string_literal: true
 
+require "yaml"
+
 module Quiz
   # The questionnaire and scoring model — league-agnostic. Team scores and blurbs
-  # now live in the database (the League/Team models); this holds only the fixed
-  # bits shared across every league: the four axes, the questions and their
-  # loadings, the weight sliders, and the matching constants.
+  # live in the database (the League/Team models); this holds the fixed bits
+  # shared across every league: the four axes, the questions and their loadings,
+  # the weight sliders, and the matching constants.
   #
   # 4-coordinate model per answer/team: [Vibe, Play, Ethics, Fanbase].
+  #
+  # The questionnaire is split by concern. The language-neutral SCORING skeleton
+  # (per-question loadings and per-option values) is one YAML file per question
+  # under config/quiz/questions/; the WORDING (question and slider text) lives in
+  # the locale files (config/locales/*.yml -> content.questions / content.sliders).
+  # `questions` / `sliders` merge a locale's wording onto the shared skeleton, so
+  # English and every translation score against the very same numbers and can't
+  # drift. Q / SLIDERS are the assembled English forms, kept as constants because
+  # the scorer and answer validation index them by id/position.
   module Data
     AXES = %w[Vibe Play Ethics Fanbase].freeze
 
@@ -23,130 +34,64 @@ module Quiz
     MAX_CHOICES = 3
     AMPLIFY = 2.5
 
-    Q = [
-      { "id" => "V2", "t" => "A game's on with no team of yours involved. You want", "load" => [0.9, 0.5, 0, 0.0], "a" => [
-        { "l" => "the better team to win comfortably", "v" => [10, 4, nil, nil] },
-        { "l" => "a close, exciting game either way", "v" => [5, 9, nil, nil] },
-        { "l" => "the weaker team to cause an upset", "v" => [1, 6, nil, nil] },
-        { "l" => "I only watch the teams I support", "v" => [4, 3, nil, nil] }
-      ] },
-      { "id" => "V4", "t" => "A team you love has a great year. When it's going well, you", "load" => [0.1, 0, 0, 0.8], "a" => [
-        { "l" => "make sure people know about it", "v" => [10, nil, nil, 2] },
-        { "l" => "enjoy it privately", "v" => [5, nil, nil, 5] },
-        { "l" => "celebrate with other fans of my team", "v" => [5, nil, nil, 8] },
-        { "l" => "dislike being the one everyone wants to beat", "v" => [0, nil, nil, 4] }
-      ] },
-      { "id" => "V10", "t" => "Someone is clearly wrong in a comment section. You", "load" => [0.25, 0, 0, 0.6], "a" => [
-        { "l" => "reply and argue it out", "v" => [10, nil, nil, 3] },
-        { "l" => "write the perfect response in your head but don't post", "v" => [5, nil, nil, 4] },
-        { "l" => "scroll past it", "v" => [3, nil, nil, 5] },
-        { "l" => "follow the internet's golden rule, never read the comments", "v" => [2, nil, nil, 8] }
-      ] },
-      { "id" => "P1", "t" => "Your ideal way to win", "load" => [0.1, 0.9, 0, 0], "a" => [
-        { "l" => "in control the whole way, 2-0", "v" => [6, 3, nil, nil] },
-        { "l" => "a wild high-scoring game, 4-2", "v" => [5, 10, nil, nil] },
-        { "l" => "defending a narrow lead, 1-0", "v" => [3, 2, nil, nil] },
-        { "l" => "a chaotic game that ends in a draw with a last-minute equaliser", "v" => [4, 6, nil, nil] }
-      ] },
-      { "id" => "P3", "t" => "Away from sport, how you tend to operate", "load" => [0, 0.7, 0, 0], "a" => [
-        { "l" => "work to a clear plan", "v" => [nil, 5, nil, nil] },
-        { "l" => "keep a loose framework and adapt", "v" => [nil, 7, nil, nil] },
-        { "l" => "go on instinct", "v" => [nil, 9, nil, nil] },
-        { "l" => "deal with things as they come", "v" => [nil, 6, nil, nil] }
-      ] },
-      { "id" => "P5", "t" => "The kind of person you'd want in charge", "load" => [0.2, 0.8, 0, 0.15], "a" => [
-        { "l" => "meticulous, has drilled every detail", "v" => [6, 6, nil, 4] },
-        { "l" => "an idealist who wants to do it well", "v" => [5, 7, nil, 3] },
-        { "l" => "a pragmatist focused on results", "v" => [4, 3, nil, 7] },
-        { "l" => "a motivator who lets people off the leash", "v" => [5, 10, nil, 5] }
-      ] },
-      { "id" => "P8", "t" => "You'd rather watch a team that", "load" => [0, 0.8, 0, 0.0], "a" => [
-        { "l" => "controls the game and grinds it out", "v" => [nil, 5, nil, nil] },
-        { "l" => "attacks relentlessly and takes risks", "v" => [nil, 10, nil, nil] },
-        { "l" => "defends deep and counters", "v" => [nil, 2, nil, nil] },
-        { "l" => "competes hard regardless of style", "v" => [nil, 8, nil, nil] }
-      ] },
-      { "id" => "E2", "t" => "Has anything a club did ever changed how you felt about supporting them?", "load" => [0, 0, 0.8, 0.4], "a" => [
-        { "l" => "Yes — enough that I stopped, or never started", "v" => [nil, nil, 10, 4] },
-        { "l" => "Yes — it changed things, but I stayed", "v" => [nil, nil, 7, 7] },
-        { "l" => "Not really — I've never had to think about it", "v" => [nil, nil, 4, 6] },
-        { "l" => "No — what happens off the pitch isn't the club to me", "v" => [nil, nil, 1, 8] }
-      ] },
-      { "id" => "E3", "t" => "Your favorite spot, the one you actually look forward to, gets bought by someone you'd cross the street to avoid. Nothing else about it changes.", "load" => [0, 0, 0.9, 0], "a" => [
-        { "l" => "I'd stop going for good", "v" => [nil, nil, 10, nil] },
-        { "l" => "I'd go less, and it'd feel off every time", "v" => [nil, nil, 6, nil] },
-        { "l" => "I'd keep going and try not to think about it", "v" => [nil, nil, 3, nil] },
-        { "l" => "I'd keep going, it's the same place", "v" => [nil, nil, 1, nil] }
-      ] },
-      { "id" => "F3", "t" => "The type of city or town you'd prefer to live", "load" => [0.4, 0, 0, 0.8], "a" => [
-        { "l" => "my hometown", "v" => [2, nil, nil, 10] },
-        { "l" => "somewhere unpretentious with character", "v" => [3, nil, nil, 8] },
-        { "l" => "a big city with everything available", "v" => [9, nil, nil, 3] },
-        { "l" => "wherever the best opportunities are", "v" => [7, nil, nil, 2] }
-      ] },
-      { "id" => "F4", "t" => "How do you engage with the fandoms you're part of?", "load" => [0, 0, 0, 0.9], "a" => [
-        { "l" => "All in — I follow everything and I'm part of the community", "v" => [nil, nil, nil, 10] },
-        { "l" => "I consume all of it, but from home", "v" => [nil, nil, nil, 7] },
-        { "l" => "I follow it casually", "v" => [nil, nil, nil, 4] },
-        { "l" => "I only show up for the big moments", "v" => [nil, nil, nil, 1] }
-      ] },
-      { "id" => "F5", "t" => "The crowd you'd rather be part of", "load" => [0.3, 0, 0, 0.8], "a" => [
-        { "l" => "loud and intense", "v" => [3, nil, nil, 10] },
-        { "l" => "passionate but well-behaved", "v" => [4, nil, nil, 6] },
-        { "l" => "relaxed and comfortable", "v" => [5, nil, nil, 3] },
-        { "l" => "quiet, with good facilities", "v" => [9, nil, nil, 1] }
-      ] },
-      { "id" => "F7", "t" => "The kind of place you'd choose to live", "load" => [0.4, 0, 0, 0.8], "a" => [
-        { "l" => "close-knit, families there for generations", "v" => [2, nil, nil, 10] },
-        { "l" => "mixed and up-and-coming", "v" => [6, nil, nil, 5] },
-        { "l" => "newly built and convenient", "v" => [7, nil, nil, 3] },
-        { "l" => "the most desirable area you can afford", "v" => [9, nil, nil, 1] }
-      ] }
-    ].freeze
-
-    SLIDERS = [
-      { "ax" => "Vibe",    "q" => "How much does the club's size and status matter?",
-        "lo" => "Doesn't matter", "hi" => "Matters a lot" },
-      { "ax" => "Play",    "q" => "How much does the style of football matter?",
-        "lo" => "Doesn't matter", "hi" => "Matters a lot" },
-      { "ax" => "Ethics",  "q" => "How much does who owns the club, and how they behave, matter?",
-        "lo" => "Doesn't matter", "hi" => "Matters a lot" },
-      { "ax" => "Fanbase", "q" => "How much does fitting in with the fanbase matter?",
-        "lo" => "Doesn't matter", "hi" => "Matters a lot" }
-    ].freeze
+    # The scoring skeleton: one file per question (id, loadings, per-option value
+    # vectors, all in AXES order). Files are numbered so they load in the canonical
+    # questionnaire order — the order stored answers and the client's answer array
+    # are indexed against, so it must not change (pinned in data_spec).
+    QUESTIONS_DIR = File.expand_path("../../../config/quiz/questions", __dir__)
+    # Sorted explicitly by filename (the numeric prefix is the canonical order);
+    # Dir.children is unordered, so the sort is load-bearing, not decorative.
+    SKELETON = Dir.children(QUESTIONS_DIR).grep(/\.yml\z/).sort.map do |name|
+      YAML.safe_load_file(File.join(QUESTIONS_DIR, name)).freeze
+    end.freeze
 
     module_function
 
-    # The questionnaire localized for `locale`. English (Q) is canonical; a
-    # translated locale supplies text-only overrides (Translations content) keyed
-    # by question id, leaving the numeric loadings/values untouched so the client
-    # and server still score against identical numbers. Returns a fresh array.
+    # The questionnaire localized for `locale`: the shared numeric skeleton with
+    # the locale's wording (question prompt + option labels) merged in, English
+    # filling anything a translation omits. Returns the same shape the client
+    # scorer and Quiz::Score consume, so neither can drift from the other.
     def questions(locale = Translations::DEFAULT)
-      overrides = Translations.content(locale)["questions"] || {}
-      Q.map { |question| localize_question(question, overrides[question["id"]]) }
-    end
-
-    # Text-only overlay of one question: swaps the prompt and answer labels when a
-    # translation exists, always keeping the numeric loadings and option values.
-    def localize_question(question, override)
-      return question unless override
-
-      localized = question.merge("t" => override["t"] || question["t"])
-      return localized unless override["a"]
-
-      localized.merge("a" => question["a"].each_with_index.map do |option, i|
-        override["a"][i] ? option.merge("l" => override["a"][i]) : option
-      end)
-    end
-
-    # The weight sliders localized for `locale` — text-only (q/lo/hi) overrides
-    # keyed by axis; the axis key itself is language-independent.
-    def sliders(locale = Translations::DEFAULT)
-      overrides = Translations.content(locale)["sliders"] || {}
-      SLIDERS.map do |slider|
-        override = overrides[slider["ax"]]
-        override ? slider.merge(override.slice("q", "lo", "hi").compact) : slider
+      wording = question_wording(locale)
+      SKELETON.map do |skeleton|
+        text = wording.fetch(skeleton["id"])
+        { "id" => skeleton["id"], "t" => text["t"], "load" => skeleton["load"],
+          "a" => skeleton["options"].each_with_index.map { |values, i| { "l" => text["a"][i], "v" => values } } }
       end
     end
+
+    # The weight sliders localized for `locale`. One slider per axis (in AXES
+    # order); only the prompt/endpoint text is translated, the axis key is not.
+    def sliders(locale = Translations::DEFAULT)
+      wording = slider_wording(locale)
+      AXES.map do |axis|
+        text = wording.fetch(axis)
+        { "ax" => axis, "q" => text["q"], "lo" => text["lo"], "hi" => text["hi"] }
+      end
+    end
+
+    # Question / slider wording for a locale, English-filled so a translation may
+    # omit a question (or a whole locale) and still render.
+    def question_wording(locale)
+      merge_wording(Translations.content(Translations::DEFAULT)["questions"],
+                    Translations.content(locale)["questions"])
+    end
+
+    def slider_wording(locale)
+      merge_wording(Translations.content(Translations::DEFAULT)["sliders"],
+                    Translations.content(locale)["sliders"])
+    end
+
+    # Per-id shallow merge: a localized entry overrides English for that id (its
+    # `t`/`a` or `q`/`lo`/`hi`); English fills any id the locale leaves out.
+    def merge_wording(english, localized)
+      (english || {}).merge(localized || {}) { |_id, en_text, loc_text| en_text.merge(loc_text) }
+    end
+
+    # The canonical English questionnaire, assembled once and frozen. Kept as
+    # constants because Quiz::Score and answer validation index them by id, and
+    # several specs assert the served payload equals them.
+    Q = questions(Translations::DEFAULT).freeze
+    SLIDERS = sliders(Translations::DEFAULT).freeze
   end
 end
