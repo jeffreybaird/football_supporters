@@ -79,14 +79,12 @@ RSpec.describe Translations do
   end
 
   describe ".content" do
-    it "carries the English questionnaire wording (questions + sliders)" do
+    it "carries the English questionnaire and archetype wording" do
       content = described_class.content("en")
       expect(content.dig("questions", "V2", "t")).to eq("A game's on with no team of yours involved. You want")
       expect(content.dig("sliders", "Play", "q")).to eq("How much does the style of football matter?")
-    end
-
-    it "does not carry English archetype copy (that stays canonical in Ruby)" do
-      expect(described_class.content("en")["archetypes"]).to be_nil
+      expect(content.dig("archetypes", "glory_hunter", "label")).to eq("The Glory Hunter")
+      expect(content.dig("archetypes", "all_mid", "label")).to eq("The All-Rounder")
     end
 
     it "carries the French question, slider and archetype overrides" do

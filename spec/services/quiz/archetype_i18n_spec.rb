@@ -47,4 +47,16 @@ RSpec.describe Quiz::Archetype do
       expect(fr["scatter"]).to eq(en["scatter"])
     end
   end
+
+  describe "translation coverage" do
+    it "provides a French label and sentence for every archetype and the all-mid fallback" do
+      fr = Translations.content("fr")["archetypes"]
+      ids = described_class::ARCHETYPES.keys.map(&:to_s) + ["all_mid"]
+
+      ids.each do |id|
+        expect(fr[id]).to include("label", "sentence"), "missing French copy for #{id}"
+        expect(fr.dig(id, "label")).not_to be_empty
+      end
+    end
+  end
 end

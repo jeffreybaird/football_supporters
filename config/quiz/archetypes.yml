@@ -1,0 +1,97 @@
+# The language-neutral archetype scoring model. The copy (label + sentence)
+# per id lives in config/locales/*.yml under content.archetypes (English +
+# translations); this holds only the numeric lattice Quiz::Archetype scores on.
+#
+# levels: per-axis low/mid/high anchors (percentiles of the user-vector
+#   distribution). cells: the 81 V-P-E-F codes, each mapped to the archetype
+#   that owns it (order is load-bearing — ties in nearest-cell keep this
+#   order). scatter: cross-axis coupling that makes slider weights meaningful.
+#   See Quiz::Archetype for the full algorithm and the SCATTER sweep.
+levels:
+  Vibe: { low: 4.14, mid: 5.235, high: 6.33 }
+  Play: { low: 5.0, mid: 6.07, high: 7.14 }
+  Ethics: { low: 2.0, mid: 4.12, high: 6.24 }
+  Fanbase: { low: 4.07, mid: 5.105, high: 6.14 }
+scatter: 0.12
+cells:
+  HHHH: club_idealist
+  HHHM: weekend_giant
+  HHHL: student_of_the_game
+  HHMH: glory_hunter
+  HHMM: big_club_believer
+  HHML: student_of_the_game
+  HHLH: glory_hunter
+  HHLM: big_club_believer
+  HHLL: student_of_the_game
+  HMHH: cathedral_builder
+  HMHM: pragmatic_winner
+  HMHL: student_of_the_game
+  HMMH: glory_hunter
+  HMMM: pragmatic_winner
+  HMML: student_of_the_game
+  HMLH: glory_hunter
+  HMLM: trophy_collector
+  HMLL: student_of_the_game
+  HLHH: cathedral_builder
+  HLHM: pragmatic_winner
+  HLHL: student_of_the_game
+  HLMH: glory_hunter
+  HLMM: pragmatic_winner
+  HLML: student_of_the_game
+  HLLH: glory_hunter
+  HLLM: trophy_collector
+  HLLL: student_of_the_game
+  MHHH: club_idealist
+  MHHM: principled_fan
+  MHHL: principled_fan
+  MHMH: club_idealist
+  MHMM: everyfan
+  MHML: everyfan
+  MHLH: terrace_dreamer
+  MHLM: easygoing_supporter
+  MHLL: free_agent
+  MMHH: club_idealist
+  MMHM: principled_fan
+  MMHL: principled_fan
+  MMMH: terrace_dreamer
+  MMMM: everyfan
+  MMML: everyfan
+  MMLH: terrace_dreamer
+  MMLM: easygoing_supporter
+  MMLL: free_agent
+  MLHH: club_idealist
+  MLHM: principled_fan
+  MLHL: principled_fan
+  MLMH: terrace_dreamer
+  MLMM: everyfan
+  MLML: everyfan
+  MLLH: terrace_dreamer
+  MLLM: easygoing_supporter
+  MLLL: free_agent
+  LHHH: parish_purist
+  LHHM: local_enthusiast
+  LHHL: family_day
+  LHMH: hometown_diehard
+  LHMM: local_enthusiast
+  LHML: family_day
+  LHLH: hometown_diehard
+  LHLM: local_casual
+  LHLL: local_casual
+  LMHH: parish_purist
+  LMHM: local_enthusiast
+  LMHL: family_day
+  LMMH: hometown_diehard
+  LMMM: local_enthusiast
+  LMML: family_day
+  LMLH: hometown_diehard
+  LMLM: local_casual
+  LMLL: local_casual
+  LLHH: parish_purist
+  LLHM: local_enthusiast
+  LLHL: family_day
+  LLMH: hometown_diehard
+  LLMM: local_enthusiast
+  LLML: family_day
+  LLLH: hometown_diehard
+  LLLM: local_casual
+  LLLL: local_casual
