@@ -1,0 +1,358 @@
+# English — the source language. These strings mirror the literals in the ERB
+# views and the React client so `t` always has an English fallback. The `content:`
+# section at the bottom holds the questionnaire and archetype WORDING (question,
+# slider, and archetype label/sentence text); the language-neutral scoring numbers
+# live in config/quiz/ (questions/*.yml and archetypes.yml). Every translated
+# locale (see fr.yml) mirrors the same keys.
+en:
+  language_name: "English"
+
+  # <html lang> and <title> fallback
+  html_lang: "en"
+
+  titles:
+    default: "Which Club Should You Support?"
+    profile: "Your Football Profile"
+    league: "Which %{name} Club Should You Support?"
+    club_result: "I should support %{name} — Which %{league} Club Should You Support?"
+    profile_result: "My Football Profile — %{label}"
+
+  # The language switcher drawer (server-rendered in the layout, on every page).
+  drawer:
+    trigger: "Language"
+    heading: "Language"
+    subheading: "Choose how this site reads."
+    close: "Close"
+    current: "Current"
+
+  result:
+    eyebrow_single: "Full time · your club"
+    eyebrow_close: "Full time · a close call"
+    share_label: "Share your result"
+    share_url_aria: "Shareable link to your result"
+    share_copy: "Copy link"
+    share_native: "Share ↗"
+    share_text: "I should support %{name}."
+    alts_label: "Or maybe you're more…"
+    take_quiz: "Take the quiz →"
+    feedback_link: "Have any feedback?"
+    badge_alt: "%{name} crest"
+
+  profile_result:
+    eyebrow: "Full time · your football profile"
+    clubs_aria: "Your club in each league"
+    share_label: "Share your profile"
+    share_text: "My football profile: %{label}."
+    match_unit: "% match"
+
+  not_found:
+    heading: "No match here"
+    body: "That result link doesn't exist — it may have been mistyped or removed."
+    take_quiz: "Take the quiz →"
+
+  feedback:
+    page_title: "Send feedback"
+    thanks_page_title: "Thanks"
+    eyebrow: "Extra time · over to you"
+    title_line1: "Have any"
+    title_accent: "feedback?"
+    lede: "Wrong club? A league missing? Copy that reads badly, a crest that won't load, a question that made no sense? Let me know!"
+    message_label: "Your feedback"
+    required: "Required"
+    optional: "Optional"
+    message_placeholder: "Tell me what's wrong — or what worked."
+    email_label: "Your email"
+    email_placeholder: "you@example.com"
+    email_hint: "Only so I can reply. Leave it blank and your note stays anonymous."
+    error_tag: "Error"
+    honeypot_label: "Leave this field empty"
+    submit: "Send it →"
+    cancel: "← Back to the quiz"
+    note: "No newsletter. No tracking. One person reads these."
+    generic_error: "Something went wrong."
+    thanks_eyebrow: "Full time · whistle gone"
+    thanks_title_line1: "Got it."
+    thanks_title_accent: "Thank you."
+    thanks_lede: "Your note is on its way to me. If you left an email I'll write back when I can — and if you didn't, it's still read."
+    thanks_back: "Back to the quiz →"
+
+  # ---- React client strings (embedded as window.QUIZ_I18N) ----
+  client:
+    boot:
+      loading: "Loading…"
+      error_title: "Something went wrong loading the quiz."
+      error_body: "This page needs an internet connection (it loads React from a CDN). If you are online and still see this, try a hard refresh."
+      libs_error: "Libraries did not load (React/ReactDOM/Babel). Check your connection or try again."
+
+    axes:
+      Vibe: "Vibe"
+      Play: "Play"
+      Ethics: "Ethics"
+      Fanbase: "Fanbase"
+
+    nav:
+      restart: "↺ Restart"
+      restart_title: "Restart from the first question"
+      coach_view: "Coach's view"
+
+    titles:
+      profile: "Your Football Profile"
+      league: "Which %{name} Club Should You Support?"
+
+    picker:
+      label: "League"
+      loading: "Loading clubs…"
+      error: "Couldn't load that. Try again."
+      all_leagues: "Matching against every league."
+      one_league: "Matching against %{name} clubs."
+      optgroup_leagues: "Leagues"
+      optgroup_all: "Across all leagues"
+      profile_option: "⚽ Football Profile"
+
+    intro:
+      headline_profile:
+        - ["BUILD YOUR", 0]
+        - ["FOOTBALL", 1]
+        - ["PROFILE.", 0]
+      headline_league:
+        - ["FIND THE", 0]
+        - ["%{league}", 1]
+        - ["CLUB YOU SHOULD", 0]
+        - ["SUPPORT.", 1]
+      para_profile_pre: "Did you watch the World Cup and fall in love with the beautiful game? If you’re still wondering which club deserves your loyalty"
+      para_profile_post: ", answer a few questions, and we’ll help you find a team in each league we cover."
+      para_league: "Still searching for your team? Take a few minutes to answer questions about your daily life, your values, and the little things that get under your skin. Tell us what matters most, and we'll find the %{league} club that fits you—flaws and all."
+      kickoff: "Kick off →"
+      footnote: "If you have a local club, support them!"
+      footnote_aria: "Footnote: %{text}"
+
+    quiz:
+      back: "← Back"
+      played: "%{pct}% played"
+      loadings: "Loadings:"
+
+    coach:
+      live_ranking_archetypes: "Live ranking · archetypes"
+      live_ranking_teams: "Live ranking · teams"
+      gap_move_neutral: "gap · move vs neutral"
+      equal_vs_yours: "equal vs your weights"
+      live_trait_board: "Live trait board"
+      col_team: "team"
+      col_equal: "equal"
+      col_yours: "yours"
+      leader: "leader"
+      four_attributes: "Your four attributes"
+      ranking_archetypes: "Ranking · archetypes"
+      ranking_teams: "Ranking · equal vs your weights"
+      move_vs_equal: "▲▼ move vs equal"
+      sim_table: "Similarity table · top-2 gap %{gap} · %{count} candidate%{plural} within %{threshold} · tap a team to read its blurb"
+      vector_weights: "Your vector · weights [%{weights}]"
+      per_league_fit: "Per-league fit · match %"
+      read_blurb: "Read this club's blurb"
+
+    sliders:
+      eyebrow: "Last bit · what matters to you"
+      heading: "How much does each thing count?"
+      intro: "These are relative priorities — sliding everything to the top is the same as leaving everything in the middle. Only the balance between them changes your match."
+      show_club: "Show my club →"
+
+    result:
+      eyebrow_close: "Full time · it's close — take your pick"
+      eyebrow_single: "Full time · your club"
+      alts: "Or maybe you're more…"
+      adjust: "← Adjust dials"
+      play_again: "Play again ↺"
+      share_text: "I should support %{pick}."
+
+    profile:
+      eyebrow: "Full time · your football profile"
+      clubs_heading: "Your club in every league"
+      match_unit: "% match"
+      play_again: "Play again ↺"
+      share_text: "My football profile: %{label}."
+
+    share:
+      label: "Share your result"
+      error: "Couldn't save a share link. You can still screenshot your result."
+      saving: "Saving your result…"
+      copy: "Copy link"
+      native: "Share ↗"
+      aria_label: "Shareable link to your result"
+      copied: "Link copied"
+      copy_failed: "Copy failed — select the link and copy"
+      select_manual: "Select the link and copy"
+
+    feedback_link: "Have any feedback?"
+
+  # ---- quiz content: English text for the questionnaire ----
+  # The numeric scoring skeleton (loadings/option values) is language-neutral
+  # and lives in config/quiz/questions/*.yml; this is only the wording. fr.yml
+  # mirrors these keys. Assembled by Quiz::Data.questions / .sliders.
+  content:
+    questions:
+      V2:
+        t: "A game's on with no team of yours involved. You want"
+        a:
+          - "the better team to win comfortably"
+          - "a close, exciting game either way"
+          - "the weaker team to cause an upset"
+          - "I only watch the teams I support"
+      V4:
+        t: "A team you love has a great year. When it's going well, you"
+        a:
+          - "make sure people know about it"
+          - "enjoy it privately"
+          - "celebrate with other fans of my team"
+          - "dislike being the one everyone wants to beat"
+      V10:
+        t: "Someone is clearly wrong in a comment section. You"
+        a:
+          - "reply and argue it out"
+          - "write the perfect response in your head but don't post"
+          - "scroll past it"
+          - "follow the internet's golden rule, never read the comments"
+      P1:
+        t: "Your ideal way to win"
+        a:
+          - "in control the whole way, 2-0"
+          - "a wild high-scoring game, 4-2"
+          - "defending a narrow lead, 1-0"
+          - "a chaotic game that ends in a draw with a last-minute equaliser"
+      P3:
+        t: "Away from sport, how you tend to operate"
+        a:
+          - "work to a clear plan"
+          - "keep a loose framework and adapt"
+          - "go on instinct"
+          - "deal with things as they come"
+      P5:
+        t: "The kind of person you'd want in charge"
+        a:
+          - "meticulous, has drilled every detail"
+          - "an idealist who wants to do it well"
+          - "a pragmatist focused on results"
+          - "a motivator who lets people off the leash"
+      P8:
+        t: "You'd rather watch a team that"
+        a:
+          - "controls the game and grinds it out"
+          - "attacks relentlessly and takes risks"
+          - "defends deep and counters"
+          - "competes hard regardless of style"
+      E2:
+        t: "Has anything a club did ever changed how you felt about supporting them?"
+        a:
+          - "Yes — enough that I stopped, or never started"
+          - "Yes — it changed things, but I stayed"
+          - "Not really — I've never had to think about it"
+          - "No — what happens off the pitch isn't the club to me"
+      E3:
+        t: "Your favorite spot, the one you actually look forward to, gets bought by someone you'd cross the street to avoid. Nothing else about it changes."
+        a:
+          - "I'd stop going for good"
+          - "I'd go less, and it'd feel off every time"
+          - "I'd keep going and try not to think about it"
+          - "I'd keep going, it's the same place"
+      F3:
+        t: "The type of city or town you'd prefer to live"
+        a:
+          - "my hometown"
+          - "somewhere unpretentious with character"
+          - "a big city with everything available"
+          - "wherever the best opportunities are"
+      F4:
+        t: "How do you engage with the fandoms you're part of?"
+        a:
+          - "All in — I follow everything and I'm part of the community"
+          - "I consume all of it, but from home"
+          - "I follow it casually"
+          - "I only show up for the big moments"
+      F5:
+        t: "The crowd you'd rather be part of"
+        a:
+          - "loud and intense"
+          - "passionate but well-behaved"
+          - "relaxed and comfortable"
+          - "quiet, with good facilities"
+      F7:
+        t: "The kind of place you'd choose to live"
+        a:
+          - "close-knit, families there for generations"
+          - "mixed and up-and-coming"
+          - "newly built and convenient"
+          - "the most desirable area you can afford"
+    sliders:
+      Vibe:
+        q: "How much does the club's size and status matter?"
+        lo: "Doesn't matter"
+        hi: "Matters a lot"
+      Play:
+        q: "How much does the style of football matter?"
+        lo: "Doesn't matter"
+        hi: "Matters a lot"
+      Ethics:
+        q: "How much does who owns the club, and how they behave, matter?"
+        lo: "Doesn't matter"
+        hi: "Matters a lot"
+      Fanbase:
+        q: "How much does fitting in with the fanbase matter?"
+        lo: "Doesn't matter"
+        hi: "Matters a lot"
+    archetypes:
+      club_idealist:
+        label: "The Club Idealist"
+        sentence: "You're looking for a club that stands for something, not just a name on a fixture list. It matters to you that the people in charge care about more than the next result, and that ambition doesn't come at the cost of decency. You want to walk into the ground and feel that what happens here means something, to you and to everyone else who shows up."
+      weekend_giant:
+        label: "The Weekend Giant"
+        sentence: "You want a club that fills the stands and plays to win, but you're not interested in shortcuts or secrets. You'll watch every match, cheer every goal, but you won't trade your conscience for a cup. The victories have to feel earned, or they don't feel like victories at all."
+      big_club_believer:
+        label: "The Big-Club Believer"
+        sentence: "You want a club that attacks, that gives you a reason to count down the days until kickoff. What happens on the pitch is what matters to you. The rest—the boardroom, the finances—you leave to someone else."
+      cathedral_builder:
+        label: "The Cathedral Builder"
+        sentence: "You want to see a team that moves the ball with purpose, led by people you'd trust with your own name. You want to stand shoulder to shoulder with a crowd that feels every pass and every goal as much as you do."
+      pragmatic_winner:
+        label: "The Pragmatic Winner"
+        sentence: "You want a club that gets the job done, no matter how it looks. A win is a win, as long as it's honest. You'll take the scrappy goals and the hard-fought points, but you won't celebrate a title that was bought instead of earned."
+      glory_hunter:
+        label: "The Glory Hunter"
+        sentence: "You want a club that fills your Saturdays, the kind you'd wear on your back and sing for until your voice is gone. However they play, whoever's in charge, you're there for every minute, no questions asked."
+      trophy_collector:
+        label: "The Trophy Collector"
+        sentence: "You want a club that brings home trophies, and you won't say sorry for wanting silverware. The rest—how they play, who owns them—doesn't matter as much as what's in the cabinet. That's what you'll remember, and that's what you'll show off."
+      student_of_the_game:
+        label: "The Student of the Game"
+        sentence: "You love the game for its own sake—the way a move unfolds, the players who make you sit up and take notice, the moments you replay in your mind days later. You'll follow a club, but only if it fits your love of football. The badge is just a detail."
+      terrace_dreamer:
+        label: "The Terrace Dreamer"
+        sentence: "You want a club where the faces are familiar and the songs feel like your own. The stand is a second home, and the people around you are more than strangers. You hope the owners are decent, and you trust what you're told."
+      everyfan:
+        label: "The Everyfan"
+        sentence: "You want a club that holds its own, with owners you can accept, and a place in your week that feels real but doesn't take over your life. However they play, you're just glad to call it yours."
+      principled_fan:
+        label: "The Principled Fan"
+        sentence: "You want a club you can support without second thoughts. Who owns it and how they act comes first. The football and the sense of belonging matter, but not enough to ignore what's wrong."
+      easygoing_supporter:
+        label: "The Easygoing Supporter"
+        sentence: "You want a club you can enjoy without needing to study up. Football is supposed to be a good afternoon out, not another job. You're not going to ruin it by worrying about the finances."
+      free_agent:
+        label: "The Free Agent"
+        sentence: "You want to watch football your way—wherever the best match is, whoever's on the pitch. No club owns your loyalty, and you don't feel bad about it for a second."
+      parish_purist:
+        label: "The Parish Purist"
+        sentence: "You want your local club, run the right way, and you want to be in the stands singing for them. However they play, it's about the town having something to call its own and making sure it's cared for."
+      hometown_diehard:
+        label: "The Hometown Diehard"
+        sentence: "You want the club just down the road, and you want every bit of it—every home match, every away trip, every song until your voice is gone. It's family, and you don't keep score with family."
+      local_enthusiast:
+        label: "The Local Enthusiast"
+        sentence: "You want the team that belongs to your town, whatever kind of football they play. It's one good thing in your week, not the only thing. But if the owners don't respect the place, you won't stand with them."
+      family_day:
+        label: "The Family Day"
+        sentence: "You want to spend the afternoon at the local ground, kids by your side, maybe an ice cream on the way home no matter the result. You hope the club is in good hands, but mostly you're here for the day out."
+      local_casual:
+        label: "The Local Casual"
+        sentence: "You want football to stay close to home, something you can take or leave. If a ticket comes your way, you'll enjoy it. If not, you're just as happy."
+      all_mid:
+        label: "The All-Rounder"
+        sentence: "This is the kind of club you want: no single thing dominates — you'll take a good club in almost any shape."

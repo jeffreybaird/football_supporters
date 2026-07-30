@@ -34,6 +34,9 @@ class App < Sinatra::Base
 
   CREST_BASE_URL = crest_base_url
 
+  # How long a chosen language preference sticks (one year, in seconds).
+  LOCALE_COOKIE_MAX_AGE = 31_536_000
+
   configure do
     set :root, __dir__
     set :erb, escape_html: true
@@ -104,6 +107,19 @@ class App < Sinatra::Base
     def remote_crests?
       CREST_BASE_URL.start_with?("http://", "https://")
     end
+
+    # The request's locale: an explicit "locale" cookie the visitor chose wins,
+    # otherwise their Accept-Language is negotiated, otherwise the default (en).
+    # Memoized for the request. Every view reaches text through this via #t.
+    def locale
+      @locale ||= Translations.resolve(cookie: request.cookies["locale"],
+                                       header: request.env["HTTP_ACCEPT_LANGUAGE"])
+    end
+
+    # Translate a dotted key in the request's locale (see Translations.t).
+    def t(key, **vars)
+      Translations.t(key, locale:, **vars)
+    end
   end
 
   # Liveness/readiness: 200 once the process can reach the DB.
@@ -134,7 +150,7 @@ class App < Sinatra::Base
     league = League.active.first(slug: params["slug"])
     halt 404, { error: "not_found" }.to_json unless league
 
-    Quiz::ClientData.call(league).to_json
+    Quiz::ClientData.call(league, locale:).to_json
   end
 
   # Every active league's dataset in one payload, for the "Football Profile" mode
@@ -142,7 +158,7 @@ class App < Sinatra::Base
   # picks Profile (see the client's enterProfile).
   get "/leagues" do
     content_type :json
-    Quiz::ProfileData.call.to_json
+    Quiz::ProfileData.call(locale:).to_json
   end
 
   # Persist a completed quiz and return its shareable slug. Called by the quiz's
@@ -184,18 +200,32 @@ class App < Sinatra::Base
     @share_url = url("/q/#{@record.slug}")
 
     pick = @score.pick
-    @page_title = "I should support #{pick.name} — Which #{@league.name} Club Should You Support?"
+    @page_title = t("titles.club_result", name: pick.name, league: @league.name)
     @meta_description = first_sentence(pick.blurb)
     @og = { "title" => @page_title, "description" => @meta_description, "url" => @share_url }
     @og["image"] = crest_url(pick.crest) if pick.crest
     erb :"quiz/result"
   end
 
+  # Persist the visitor's language choice as a cookie and send them back where
+  # they were. Posted by the language drawer (views/_language_drawer.erb). A plain
+  # form POST so it works without JavaScript; the cookie is what every subsequent
+  # request reads via #locale. An unsupported value falls back to the default
+  # rather than being stored, so the cookie is always a locale we can serve.
+  post "/locale" do
+    choice = params["locale"]
+    choice = Translations::DEFAULT unless Translations::SUPPORTED.include?(choice)
+    response.set_cookie("locale",
+                        value: choice, path: "/", max_age: LOCALE_COOKIE_MAX_AGE,
+                        same_site: :lax, http_only: true)
+    redirect safe_return_to(params["return_to"])
+  end
+
   # The feedback form. `from` carries the page the visitor clicked through from,
   # so a submission arrives with context; it is stored, never rendered back into
   # a link, so it can't be used to bounce anyone elsewhere.
   get "/feedback" do
-    @page_title = "Send feedback"
+    @page_title = t("feedback.page_title")
     @from = params["from"]
     @values = {}
     @errors = {}
@@ -209,15 +239,15 @@ class App < Sinatra::Base
     if result.success? || result.failure.first == :spam
       # A honeypot hit gets the same page a person gets: telling a bot it was
       # detected only teaches it to try again differently.
-      @page_title = "Thanks"
+      @page_title = t("feedback.thanks_page_title")
       status 201 if result.success?
       erb :"feedback/thanks"
     else
       status 422
-      @page_title = "Send feedback"
+      @page_title = t("feedback.page_title")
       @from = params["page"]
       @values = { message: params["message"], email: params["email"] }
-      @errors = result.failure.first == :validation ? result.failure.last : { message: "Something went wrong." }
+      @errors = result.failure.first == :validation ? result.failure.last : { message: t("feedback.generic_error") }
       erb :"feedback/new"
     end
   end
@@ -227,9 +257,9 @@ class App < Sinatra::Base
   # Server-rendered shared Football Profile: re-score every league and render the
   # per-league winners plus the archetype. Returns the HTML for the route to halt.
   def render_profile(record)
-    @profile = Quiz::ProfileScore.call(answers: record.answers, weights: record.weights)
+    @profile = Quiz::ProfileScore.call(answers: record.answers, weights: record.weights, locale:)
     @share_url = url("/q/#{record.slug}")
-    @page_title = "My Football Profile — #{@profile.archetype[:label]}"
+    @page_title = t("titles.profile_result", label: @profile.archetype[:label])
     @meta_description = @profile.archetype[:sentence]
     @og = { "title" => @page_title, "description" => @meta_description, "url" => @share_url }
     top = @profile.leagues.max_by(&:sim)
@@ -247,14 +277,18 @@ class App < Sinatra::Base
     @page_title = quiz_page_title
     # The single-league dataset is embedded either way: it seeds the client's
     # league globals, so leaving profile mode needs no fetch.
-    @quiz_data_json = json_for_script(Quiz::ClientData.call(@league))
+    @quiz_data_json = json_for_script(Quiz::ClientData.call(@league, locale:))
     # Embedded rather than left to the GET /leagues fetch, which in the default
     # mode would sit on every landing's critical path.
-    @profile_json = @profile_start ? json_for_script(Quiz::ProfileData.call) : "null"
+    @profile_json = @profile_start ? json_for_script(Quiz::ProfileData.call(locale:)) : "null"
     @leagues_json = json_for_script(@leagues.map { |l| { "slug" => l.slug, "name" => l.name } })
     # The client builds its own <img> src from the same base the server uses for
     # OG tags, so a CDN switch moves both at once.
     @crest_base_json = json_for_script(CREST_BASE_URL)
+    # The client's UI dictionary for this locale, English-merged (see
+    # Translations.client). The quiz CONTENT (questions/sliders/archetypes) is
+    # already localized inside @quiz_data_json/@profile_json above.
+    @i18n_json = json_for_script(Translations.client(locale))
     @coach = coach
     erb :"quiz/index"
   end
@@ -262,10 +296,10 @@ class App < Sinatra::Base
   # Reads @profile_start / @league, so call it after both are set. Nil when there
   # is no league at all to name — the layout falls back to its own default.
   def quiz_page_title
-    return "Your Football Profile" if @profile_start
+    return t("titles.profile") if @profile_start
     return unless @league
 
-    "Which #{@league.name} Club Should You Support?"
+    t("titles.league", name: @league.name)
   end
 
   # The active league matching slug, falling back to the default league. Used by
@@ -279,5 +313,17 @@ class App < Sinatra::Base
     JSON.parse(request.body.read)
   rescue JSON::ParserError
     {}
+  end
+
+  # Where to send the visitor back to after setting their language. Only a local
+  # path is honoured — the root, or "/" followed by a non-slash, non-backslash
+  # character. That rejects absolute URLs, scheme-relative "//host", and the
+  # "/\host" form some browsers normalise to "//host", so the language switcher
+  # can't be turned into an open redirect.
+  def safe_return_to(path)
+    return "/" unless path.is_a?(String)
+    return path if path == "/" || path.match?(%r{\A/[^/\\]})
+
+    "/"
   end
 end

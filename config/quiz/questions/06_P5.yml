@@ -1,0 +1,10 @@
+# Scoring skeleton for question P5 - language-neutral (no text).
+# load and each option vector are in AXES order: [Vibe, Play, Ethics, Fanbase];
+# the wording lives in config/locales/*.yml under content.questions.P5.
+id: P5
+load: [0.2, 0.8, 0, 0.15]
+options:
+  - [6, 6, null, 4]
+  - [5, 7, null, 3]
+  - [4, 3, null, 7]
+  - [5, 10, null, 5]

@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="<%= locale %>">
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title><%= @page_title || "Which Club Should You Support?" %></title>
+    <title><%= @page_title || t("titles.default") %></title>
     <% if @meta_description %><meta name="description" content="<%= @meta_description %>"><% end %>
     <meta property="og:type" content="website">
     <% (@og || {}).each do |key, value| %>
@@ -14,5 +14,6 @@
   </head>
   <body class="<%= @body_class %>">
     <%== yield %>
+    <%== erb :_language_drawer, layout: false %>
   </body>
 </html>

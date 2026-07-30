@@ -13,16 +13,16 @@ module Quiz
     # once at the top level instead of repeated in each league entry.
     SHARED_KEYS = %w[AXES Q SLIDERS].freeze
 
-    def call(leagues: League.active.ordered.all)
+    def call(leagues: League.active.ordered.all, locale: Translations::DEFAULT)
       # Skip leagues with no teams — an empty team cloud has no centroid to score
       # against (see Quiz::Score#centroid_of).
       scorable = leagues.select { |league| league.scored_teams.any? }
       {
         "AXES" => Data::AXES,
-        "Q" => Data::Q,
-        "SLIDERS" => Data::SLIDERS,
-        "ARCHETYPE" => Archetype.client_table,
-        "LEAGUES" => scorable.map { |league| ClientData.call(league).except(*SHARED_KEYS) }
+        "Q" => Data.questions(locale),
+        "SLIDERS" => Data.sliders(locale),
+        "ARCHETYPE" => Archetype.client_table(locale),
+        "LEAGUES" => scorable.map { |league| ClientData.call(league, locale:).except(*SHARED_KEYS) }
       }
     end
   end

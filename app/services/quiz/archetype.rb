@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require "yaml"
+
 require_relative "data"
 
 module Quiz
@@ -36,6 +38,13 @@ module Quiz
   module Archetype
     module_function
 
+    # The language-neutral scoring model — the per-axis level anchors, the 81-cell
+    # mapping, and the scatter constant — loaded once from config/quiz/archetypes.yml.
+    # The archetype COPY (label/sentence) is NOT here: it lives in the locale files
+    # (config/locales/*.yml -> content.archetypes) and is assembled into ARCHETYPES
+    # below, so English and every translation share one lattice and can't drift.
+    MODEL = YAML.safe_load_file(File.expand_path("../../../config/quiz/archetypes.yml", __dir__)).freeze
+
     # Per-axis level values. Percentiles of the raw user-vector distribution:
     # "low" = p20, "mid" = p50, "high" = p80. RECALIBRATE from real responses
     # once you have them, and again whenever the question set changes — these
@@ -45,135 +54,36 @@ module Quiz
     # and Fanbase mids are the midpoint of their own low/high, adopted when the
     # axes went from two levels to three. They are placeholders for a real p50
     # and should be replaced in the same pass that recalibrates the rest.
-    LEVELS = {
-      "Vibe" => { "low" => 4.14, "mid" => 5.235, "high" => 6.33 },   # mid provisional: (low + high) / 2
-      "Play" => { "low" => 5.00, "mid" => 6.07, "high" => 7.14 },    # mid provisional: (low + high) / 2
-      "Ethics" => { "low" => 2.00, "mid" => 4.12, "high" => 6.24 },  # mid is a real p50
-      "Fanbase" => { "low" => 4.07, "mid" => 5.105, "high" => 6.14 } # mid provisional: (low + high) / 2
-    }.freeze
+    LEVELS = MODEL.fetch("levels").each_value(&:freeze).freeze
 
     LEVEL_ORDER = %w[low mid high].freeze
     CODE_LEVEL = { "L" => "low", "M" => "mid", "H" => "high" }.freeze
     LEVEL_CODE = CODE_LEVEL.invert.freeze
 
-    # The 81 cells, in V-P-E-F order, mapped to the archetype that owns them.
-    # Transcribed from the "Full cell -> archetype mapping" table in
-    # db/seed-data/football-fan-archetypes-final-v2.md. Several cells share an
-    # archetype by design (e.g. :student_of_the_game owns all nine H-*-*-L cells:
-    # if the badge is incidental to you, the rest of the answers stop mattering).
-    CELLS = {
-      "HHHH" => :club_idealist, "HHHM" => :weekend_giant, "HHHL" => :student_of_the_game,
-      "HHMH" => :glory_hunter, "HHMM" => :big_club_believer, "HHML" => :student_of_the_game,
-      "HHLH" => :glory_hunter, "HHLM" => :big_club_believer, "HHLL" => :student_of_the_game,
-      "HMHH" => :cathedral_builder, "HMHM" => :pragmatic_winner, "HMHL" => :student_of_the_game,
-      "HMMH" => :glory_hunter, "HMMM" => :pragmatic_winner, "HMML" => :student_of_the_game,
-      "HMLH" => :glory_hunter, "HMLM" => :trophy_collector, "HMLL" => :student_of_the_game,
-      "HLHH" => :cathedral_builder, "HLHM" => :pragmatic_winner, "HLHL" => :student_of_the_game,
-      "HLMH" => :glory_hunter, "HLMM" => :pragmatic_winner, "HLML" => :student_of_the_game,
-      "HLLH" => :glory_hunter, "HLLM" => :trophy_collector, "HLLL" => :student_of_the_game,
-      "MHHH" => :club_idealist, "MHHM" => :principled_fan, "MHHL" => :principled_fan,
-      "MHMH" => :club_idealist, "MHMM" => :everyfan, "MHML" => :everyfan,
-      "MHLH" => :terrace_dreamer, "MHLM" => :easygoing_supporter, "MHLL" => :free_agent,
-      "MMHH" => :club_idealist, "MMHM" => :principled_fan, "MMHL" => :principled_fan,
-      "MMMH" => :terrace_dreamer, "MMMM" => :everyfan, "MMML" => :everyfan,
-      "MMLH" => :terrace_dreamer, "MMLM" => :easygoing_supporter, "MMLL" => :free_agent,
-      "MLHH" => :club_idealist, "MLHM" => :principled_fan, "MLHL" => :principled_fan,
-      "MLMH" => :terrace_dreamer, "MLMM" => :everyfan, "MLML" => :everyfan,
-      "MLLH" => :terrace_dreamer, "MLLM" => :easygoing_supporter, "MLLL" => :free_agent,
-      "LHHH" => :parish_purist, "LHHM" => :local_enthusiast, "LHHL" => :family_day,
-      "LHMH" => :hometown_diehard, "LHMM" => :local_enthusiast, "LHML" => :family_day,
-      "LHLH" => :hometown_diehard, "LHLM" => :local_casual, "LHLL" => :local_casual,
-      "LMHH" => :parish_purist, "LMHM" => :local_enthusiast, "LMHL" => :family_day,
-      "LMMH" => :hometown_diehard, "LMMM" => :local_enthusiast, "LMML" => :family_day,
-      "LMLH" => :hometown_diehard, "LMLM" => :local_casual, "LMLL" => :local_casual,
-      "LLHH" => :parish_purist, "LLHM" => :local_enthusiast, "LLHL" => :family_day,
-      "LLMH" => :hometown_diehard, "LLMM" => :local_enthusiast, "LLML" => :family_day,
-      "LLLH" => :hometown_diehard, "LLLM" => :local_casual, "LLLL" => :local_casual
-    }.freeze
+    # The 81 cells, in V-P-E-F order, mapped to the archetype that owns them. The
+    # mapping lives in config/quiz/archetypes.yml (transcribed from the "Full cell
+    # -> archetype mapping" table in db/seed-data/football-fan-archetypes-final-v2.md).
+    # Several cells share an archetype by design (e.g. :student_of_the_game owns
+    # all nine H-*-*-L cells: if the badge is incidental to you, the rest of the
+    # answers stop mattering). The file's order is preserved — nearest-cell ties
+    # keep it — and the values are symbolised to match the archetype ids.
+    CELLS = MODEL.fetch("cells").transform_values(&:to_sym).freeze
 
-    # The 18 archetypes. This is the copy table — the one place to edit a label
-    # or a sentence. Order follows the source doc.
-    ARCHETYPES = {
-      club_idealist: {
-        "label" => "The Club Idealist",
-        "sentence" => "You're looking for a club that stands for something, not just a name on a fixture list. It matters to you that the people in charge care about more than the next result, and that ambition doesn't come at the cost of decency. You want to walk into the ground and feel that what happens here means something, to you and to everyone else who shows up."
-      },
-      weekend_giant: {
-        "label" => "The Weekend Giant",
-        "sentence" => "You want a club that fills the stands and plays to win, but you're not interested in shortcuts or secrets. You'll watch every match, cheer every goal, but you won't trade your conscience for a cup. The victories have to feel earned, or they don't feel like victories at all."
-      },
-      big_club_believer: {
-        "label" => "The Big-Club Believer",
-        "sentence" => "You want a club that attacks, that gives you a reason to count down the days until kickoff. What happens on the pitch is what matters to you. The rest—the boardroom, the finances—you leave to someone else."
-      },
-      cathedral_builder: {
-        "label" => "The Cathedral Builder",
-        "sentence" => "You want to see a team that moves the ball with purpose, led by people you'd trust with your own name. You want to stand shoulder to shoulder with a crowd that feels every pass and every goal as much as you do."
-      },
-      pragmatic_winner: {
-        "label" => "The Pragmatic Winner",
-        "sentence" => "You want a club that gets the job done, no matter how it looks. A win is a win, as long as it's honest. You'll take the scrappy goals and the hard-fought points, but you won't celebrate a title that was bought instead of earned."
-      },
-      glory_hunter: {
-        "label" => "The Glory Hunter",
-        "sentence" => "You want a club that fills your Saturdays, the kind you'd wear on your back and sing for until your voice is gone. However they play, whoever's in charge, you're there for every minute, no questions asked."
-      },
-      trophy_collector: {
-        "label" => "The Trophy Collector",
-        "sentence" => "You want a club that brings home trophies, and you won't say sorry for wanting silverware. The rest—how they play, who owns them—doesn't matter as much as what's in the cabinet. That's what you'll remember, and that's what you'll show off."
-      },
-      student_of_the_game: {
-        "label" => "The Student of the Game",
-        "sentence" => "You love the game for its own sake—the way a move unfolds, the players who make you sit up and take notice, the moments you replay in your mind days later. You'll follow a club, but only if it fits your love of football. The badge is just a detail."
-      },
-      terrace_dreamer: {
-        "label" => "The Terrace Dreamer",
-        "sentence" => "You want a club where the faces are familiar and the songs feel like your own. The stand is a second home, and the people around you are more than strangers. You hope the owners are decent, and you trust what you're told."
-      },
-      everyfan: {
-        "label" => "The Everyfan",
-        "sentence" => "You want a club that holds its own, with owners you can accept, and a place in your week that feels real but doesn't take over your life. However they play, you're just glad to call it yours."
-      },
-      principled_fan: {
-        "label" => "The Principled Fan",
-        "sentence" => "You want a club you can support without second thoughts. Who owns it and how they act comes first. The football and the sense of belonging matter, but not enough to ignore what's wrong."
-      },
-      easygoing_supporter: {
-        "label" => "The Easygoing Supporter",
-        "sentence" => "You want a club you can enjoy without needing to study up. Football is supposed to be a good afternoon out, not another job. You're not going to ruin it by worrying about the finances."
-      },
-      free_agent: {
-        "label" => "The Free Agent",
-        "sentence" => "You want to watch football your way—wherever the best match is, whoever's on the pitch. No club owns your loyalty, and you don't feel bad about it for a second."
-      },
-      parish_purist: {
-        "label" => "The Parish Purist",
-        "sentence" => "You want your local club, run the right way, and you want to be in the stands singing for them. However they play, it's about the town having something to call its own and making sure it's cared for."
-      },
-      hometown_diehard: {
-        "label" => "The Hometown Diehard",
-        "sentence" => "You want the club just down the road, and you want every bit of it—every home match, every away trip, every song until your voice is gone. It's family, and you don't keep score with family."
-      },
-      local_enthusiast: {
-        "label" => "The Local Enthusiast",
-        "sentence" => "You want the team that belongs to your town, whatever kind of football they play. It's one good thing in your week, not the only thing. But if the owners don't respect the place, you won't stand with them."
-      },
-      family_day: {
-        "label" => "The Family Day",
-        "sentence" => "You want to spend the afternoon at the local ground, kids by your side, maybe an ice cream on the way home no matter the result. You hope the club is in good hands, but mostly you're here for the day out."
-      },
-      local_casual: {
-        "label" => "The Local Casual",
-        "sentence" => "You want football to stay close to home, something you can take or leave. If a ticket comes your way, you'll enjoy it. If not, you're just as happy."
-      }
-    }.freeze
+    # The 18 archetypes, English canonical. The copy now lives in the locale files
+    # (config/locales/en.yml -> content.archetypes, with translations in fr.yml);
+    # this assembles the English rows as a symbol-keyed table so the rest of the
+    # module — and client_table — can overlay a locale over it. Order follows
+    # en.yml, which follows the source doc.
+    ARCHETYPES = Translations.content(Translations::DEFAULT).fetch("archetypes")
+                             .except("all_mid")
+                             .to_h { |id, row| [id.to_sym, { "label" => row["label"], "sentence" => row["sentence"] }.freeze] }
+                             .freeze
 
     # Fallback when a vector can't be scored at all (nil / wrong arity). Not one
-    # of the 18 — no valid vector reaches it.
-    ALL_MID_LABEL = "The All-Rounder"
-    ALL_MID_SENTENCE =
-      "This is the kind of club you want: no single thing dominates — " \
-      "you'll take a good club in almost any shape."
+    # of the 18 — no valid vector reaches it. Its copy is content.archetypes.all_mid.
+    ALL_MID = Translations.content(Translations::DEFAULT).fetch("archetypes").fetch("all_mid").freeze
+    ALL_MID_LABEL = ALL_MID.fetch("label")
+    ALL_MID_SENTENCE = ALL_MID.fetch("sentence")
 
     # Equal weighting, used when a caller has no slider weights to offer.
     EQUAL_WEIGHTS = Array.new(4, 0.25).freeze
@@ -198,7 +108,8 @@ module Quiz
     # from the anchor values its cell is supposed to stand for. 0.12 is the value
     # the previous 24-archetype table used. Both directions are pinned in
     # archetype_spec.rb — keep them green if you retune LEVELS or this.
-    SCATTER = 0.12
+    # The value lives in config/quiz/archetypes.yml alongside the lattice it tunes.
+    SCATTER = MODEL.fetch("scatter")
 
     # The 4-D point each cell stands for: its per-axis LEVELS anchor, scattered
     # off the lattice. Derived rather than hand-authored so recalibrating LEVELS
@@ -215,12 +126,21 @@ module Quiz
     # club space; the archetype describes the person as they actually answered.
     # weights: the raw 1..10 slider values, or nil for equal weighting.
     # Returns { label:, sentence: } (unchanged interface).
-    def call(vec, weights: nil)
+    def call(vec, weights: nil, locale: Translations::DEFAULT)
+      overrides = Translations.content(locale)["archetypes"] || {}
       code = code_for(vec, weights:)
-      return { label: ALL_MID_LABEL, sentence: ALL_MID_SENTENCE } if code.nil?
+      return localized_row(:all_mid, ALL_MID_LABEL, ALL_MID_SENTENCE, overrides) if code.nil?
 
-      row = ARCHETYPES.fetch(CELLS.fetch(code))
-      { label: row["label"], sentence: row["sentence"] }
+      id = CELLS.fetch(code)
+      row = ARCHETYPES.fetch(id)
+      localized_row(id, row["label"], row["sentence"], overrides)
+    end
+
+    # Merge a translation override (if any) over the canonical English label and
+    # sentence. `key` is the archetype id (or :all_mid for the fallback row).
+    def localized_row(key, label, sentence, overrides)
+      override = overrides[key.to_s] || {}
+      { label: override["label"] || label, sentence: override["sentence"] || sentence }
     end
 
     # Nearest cell centroid by weighted Euclidean distance, using the same
@@ -291,16 +211,28 @@ module Quiz
 
     # The table shipped to the browser so its archetypeFor matches #call exactly.
     # CELL_VECS is deliberately absent: the client rebuilds it from these, so the
-    # scatter has one definition rather than two that can drift.
-    def client_table
+    # scatter has one definition rather than two that can drift. `locale` swaps in
+    # the translated labels/sentences (numeric levels/cells/scatter are unchanged,
+    # so client and server still build identical centroids).
+    def client_table(locale = Translations::DEFAULT)
+      overrides = Translations.content(locale)["archetypes"] || {}
+      all_mid = overrides["all_mid"] || {}
       {
         "levels" => LEVELS,
         "cells" => CELLS,
-        "archetypes" => ARCHETYPES,
+        "archetypes" => localized_archetypes(overrides),
         "scatter" => SCATTER,
-        "allMidLabel" => ALL_MID_LABEL,
-        "allMidSentence" => ALL_MID_SENTENCE
+        "allMidLabel" => all_mid["label"] || ALL_MID_LABEL,
+        "allMidSentence" => all_mid["sentence"] || ALL_MID_SENTENCE
       }
+    end
+
+    # The ARCHETYPES table with each row's label/sentence overlaid by the locale's
+    # translation where present (numeric model is not part of this table).
+    def localized_archetypes(overrides)
+      ARCHETYPES.to_h do |id, row|
+        [id, row.merge((overrides[id.to_s] || {}).slice("label", "sentence").compact)]
+      end
     end
   end
 end

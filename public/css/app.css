@@ -403,3 +403,132 @@ button, .btn { cursor: pointer; font-family: inherit; }
 @media (prefers-reduced-motion: reduce) {
   * { transition: none !important; animation: none !important; }
 }
+
+/* ---- language switcher drawer ---- */
+/* A small fixed trigger bottom-left that raises a bottom sheet. Built on
+   <details>, so [open] is the state; the sheet is a fixed overlay shown only when
+   open. z-index sits above the quiz's own fixed content. */
+.langdrawer {
+  position: fixed;
+  left: 16px;
+  bottom: 14px;
+  z-index: 1000;
+}
+
+.langdrawer__trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 44px;
+  padding: 10px 14px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: rgba(10, 28, 19, 0.85);
+  color: var(--chalk-dim);
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  list-style: none;
+  -webkit-backdrop-filter: blur(4px);
+  backdrop-filter: blur(4px);
+}
+.langdrawer__trigger::-webkit-details-marker { display: none; }
+.langdrawer__trigger:hover { color: var(--chalk); border-color: var(--amber-dim); }
+.langdrawer__globe { font-size: 14px; }
+
+/* The sheet: a full-width fixed layer with a dimmed backdrop; the panel rises
+   from the bottom edge. Only rendered when the <details> is open. */
+.langdrawer__sheet {
+  position: fixed;
+  inset: 0;
+  z-index: 1001;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.5);
+  animation: langdrawer-fade 0.2s ease;
+}
+
+.langdrawer__panel {
+  width: 100%;
+  max-width: 480px;
+  margin: 0 12px 12px;
+  padding: 20px 18px calc(18px + env(safe-area-inset-bottom, 0px));
+  background: var(--pitch2);
+  border: 1px solid var(--line);
+  border-radius: 16px 16px 12px 12px;
+  box-shadow: 0 -12px 40px var(--shadow);
+  animation: langdrawer-rise 0.28s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+@keyframes langdrawer-fade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes langdrawer-rise {
+  from { transform: translateY(100%); opacity: 0; }
+  to   { transform: translateY(0); opacity: 1; }
+}
+
+.langdrawer__head { margin-bottom: 14px; }
+.langdrawer__title {
+  display: block;
+  font-family: var(--disp);
+  font-weight: 800;
+  font-size: 18px;
+  color: var(--chalk);
+}
+.langdrawer__sub {
+  display: block;
+  margin-top: 2px;
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--chalk-dim);
+}
+
+.langdrawer__form { display: grid; gap: 8px; }
+.langdrawer__option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 48px;
+  padding: 12px 14px;
+  text-align: left;
+  background: var(--pitch);
+  color: var(--chalk);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  font-family: var(--body);
+  font-size: 16px;
+  transition: border-color 0.15s;
+}
+.langdrawer__option:hover { border-color: var(--amber); }
+.langdrawer__option--current { border-color: var(--amber); background: rgba(240, 178, 62, 0.12); }
+.langdrawer__option-name { flex: 1; }
+.langdrawer__check { color: var(--amber); font-weight: 700; }
+.langdrawer__current-label {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--amber-dim);
+}
+
+.langdrawer__close {
+  width: 100%;
+  min-height: 44px;
+  margin-top: 12px;
+  padding: 10px 14px;
+  background: transparent;
+  color: var(--chalk-dim);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+.langdrawer__close:hover { color: var(--chalk); border-color: var(--amber-dim); }
+
+@media (prefers-reduced-motion: reduce) {
+  .langdrawer__sheet, .langdrawer__panel { animation: none; }
+}

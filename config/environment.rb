@@ -7,6 +7,7 @@ Bundler.require(:default, ENV.fetch("RACK_ENV", "development").to_sym)
 require_relative "database"
 
 require_relative "../app/current"
+require_relative "../app/translations"
 Dir[File.expand_path("../app/clients/**/*.rb", __dir__)].each  { |f| require f }
 Dir[File.expand_path("../app/models/**/*.rb", __dir__)].each   { |f| require f }
 Dir[File.expand_path("../app/services/**/*.rb", __dir__)].each { |f| require f }

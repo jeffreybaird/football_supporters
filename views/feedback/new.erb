@@ -1,13 +1,12 @@
 <% message_error = Array(@errors[:message]).join(" ") %>
 <% email_error = Array(@errors[:email]).join(" ") %>
 <div class="feedback" data-testid="feedback-form">
-  <p class="feedback__eyebrow">Extra time · over to you</p>
+  <p class="feedback__eyebrow"><%= t("feedback.eyebrow") %></p>
 
-  <h1 class="feedback__title">Have any<br><span class="feedback__accent">feedback?</span></h1>
+  <h1 class="feedback__title"><%= t("feedback.title_line1") %><br><span class="feedback__accent"><%= t("feedback.title_accent") %></span></h1>
 
   <p class="feedback__lede">
-    Wrong club? A league missing? Copy that reads badly, a crest that won't load,
-    a question that made no sense? Let me know!
+    <%= t("feedback.lede") %>
   </p>
 
   <form class="feedback__form" method="post" action="/feedback" novalidate>
@@ -16,35 +15,35 @@
     <div class="card">
       <div class="field">
         <label class="field__label" for="feedback-message">
-          Your feedback <span class="pill pill--req">Required</span>
+          <%= t("feedback.message_label") %> <span class="pill pill--req"><%= t("feedback.required") %></span>
         </label>
         <textarea class="field__input field__input--area" id="feedback-message" name="message" rows="7"
                   required maxlength="<%= Feedback::MAX_MESSAGE_LENGTH %>"
-                  placeholder="Tell me what's wrong — or what worked."
+                  placeholder="<%= t("feedback.message_placeholder") %>"
                   data-testid="feedback-message"
                   <%= message_error.empty? ? "" : 'aria-invalid="true" aria-describedby="feedback-message-error"' %>
         ><%= @values[:message] %></textarea>
         <% unless message_error.empty? %>
           <p class="field__error" id="feedback-message-error" data-testid="feedback-message-error">
-            <span class="field__error-tag">Error</span><%= message_error %>
+            <span class="field__error-tag"><%= t("feedback.error_tag") %></span><%= message_error %>
           </p>
         <% end %>
       </div>
 
       <div class="field field--last">
         <label class="field__label" for="feedback-email">
-          Your email <span class="pill">Optional</span>
+          <%= t("feedback.email_label") %> <span class="pill"><%= t("feedback.optional") %></span>
         </label>
         <input class="field__input" id="feedback-email" name="email" type="email" autocomplete="email"
                maxlength="<%= Feedback::MAX_EMAIL_LENGTH %>" value="<%= @values[:email] %>"
-               placeholder="you@example.com"
+               placeholder="<%= t("feedback.email_placeholder") %>"
                data-testid="feedback-email"
                aria-describedby="<%= email_error.empty? ? "feedback-email-hint" : "feedback-email-error" %>"
                <%= email_error.empty? ? "" : 'aria-invalid="true"' %>>
-        <p class="field__hint" id="feedback-email-hint">Only so I can reply. Leave it blank and your note stays anonymous.</p>
+        <p class="field__hint" id="feedback-email-hint"><%= t("feedback.email_hint") %></p>
         <% unless email_error.empty? %>
           <p class="field__error" id="feedback-email-error" data-testid="feedback-email-error">
-            <span class="field__error-tag">Error</span><%= email_error %>
+            <span class="field__error-tag"><%= t("feedback.error_tag") %></span><%= email_error %>
           </p>
         <% end %>
       </div>
@@ -52,17 +51,17 @@
 
     <%# Honeypot: off-screen for people and assistive tech, catnip to form-filling bots. %>
     <div class="honeypot" aria-hidden="true">
-      <label for="feedback-website">Leave this field empty</label>
+      <label for="feedback-website"><%= t("feedback.honeypot_label") %></label>
       <input id="feedback-website" name="<%= Feedbacks::Create::HONEYPOT_FIELD %>" type="text" tabindex="-1" autocomplete="off">
     </div>
 
     <div class="feedback__actions">
-      <button class="btn btn--primary" type="submit" data-testid="feedback-submit">Send it →</button>
-      <a class="btn btn--quiet" href="/" data-testid="feedback-cancel">← Back to the quiz</a>
+      <button class="btn btn--primary" type="submit" data-testid="feedback-submit"><%= t("feedback.submit") %></button>
+      <a class="btn btn--quiet" href="/" data-testid="feedback-cancel"><%= t("feedback.cancel") %></a>
     </div>
 
     <p class="feedback__note">
-      No newsletter. No tracking. One person reads these.
+      <%= t("feedback.note") %>
     </p>
   </form>
 </div>

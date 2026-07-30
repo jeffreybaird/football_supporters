@@ -1,0 +1,46 @@
+<%#
+  Language switcher. A small fixed link at the bottom of every page; activating it
+  raises a bottom sheet offering the supported languages. Built on <details> so it
+  works with no JavaScript and is keyboard-accessible for free (the summary toggles
+  on Enter/Space); public/js/locale.js only adds Escape-to-close, click-outside,
+  and closing after a choice. The choice is a plain form POST to /locale, which
+  sets the cookie #locale reads. return_to brings the visitor back to this exact
+  page (server-sanitised in App#safe_return_to).
+%>
+<details class="langdrawer" data-langdrawer>
+  <summary class="langdrawer__trigger" aria-label="<%= t("drawer.trigger") %>" data-testid="language-trigger">
+    <span class="langdrawer__globe" aria-hidden="true">🌐</span>
+    <span><%= t("drawer.trigger") %></span>
+  </summary>
+
+  <div class="langdrawer__sheet" data-langdrawer-sheet>
+    <div class="langdrawer__panel" role="group" aria-label="<%= t("drawer.heading") %>">
+      <div class="langdrawer__head">
+        <span class="langdrawer__title"><%= t("drawer.heading") %></span>
+        <span class="langdrawer__sub"><%= t("drawer.subheading") %></span>
+      </div>
+
+      <form class="langdrawer__form" method="post" action="/locale">
+        <input type="hidden" name="return_to" value="<%= request.fullpath %>">
+        <% Translations::SUPPORTED.each do |code| %>
+          <% current = code == locale %>
+          <button type="submit" name="locale" value="<%= code %>"
+                  class="langdrawer__option<%= " langdrawer__option--current" if current %>"
+                  lang="<%= code %>"
+                  <%== 'aria-current="true"' if current %>
+                  data-testid="language-option-<%= code %>">
+            <span class="langdrawer__option-name"><%= Translations.t("language_name", locale: code) %></span>
+            <% if current %>
+              <span class="langdrawer__check" aria-hidden="true">✓</span>
+              <span class="langdrawer__current-label"><%= t("drawer.current") %></span>
+            <% end %>
+          </button>
+        <% end %>
+      </form>
+
+      <button type="button" class="langdrawer__close" data-langdrawer-close><%= t("drawer.close") %></button>
+    </div>
+  </div>
+</details>
+
+<script src="/js/locale.js" defer></script>
