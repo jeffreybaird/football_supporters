@@ -10,6 +10,9 @@ RSpec.describe Quiz::ProfileData do
     expect(payload["Q"]).to eq(Quiz::Data::Q)
     expect(payload["SLIDERS"]).to eq(Quiz::Data::SLIDERS)
     expect(payload["ARCHETYPE"]).to eq(Quiz::Archetype.client_table)
+    expect(payload["ALPHA"]).to eq(Quiz::Data::POPULARITY_ALPHA)
+    expect(payload["USER_MEAN"]).to eq(Quiz::Data::USER_MEAN)
+    expect(payload["USER_SD"]).to eq(Quiz::Data::USER_SD)
   end
 
   it "includes one entry per active scorable league" do
@@ -20,8 +23,10 @@ RSpec.describe Quiz::ProfileData do
 
   it "carries per-league keys but not the hoisted shared keys in each entry" do
     entry = payload["LEAGUES"].first
-    expect(entry.keys).to include("LEAGUE", "TEAMS", "FLAVOR", "BADGE", "CHOOSER_THRESHOLD", "MAX_CHOICES", "AMPLIFY")
-    expect(entry.keys).not_to include("AXES", "Q", "SLIDERS")
+    expect(entry.keys).to include("LEAGUE", "TEAMS", "FLAVOR", "BADGE", "CHOOSER_THRESHOLD",
+                                  "MAX_CHOICES", "POPULARITY")
+    # ALPHA and the USER distribution are global scoring inputs, hoisted once.
+    expect(entry.keys).not_to include("AXES", "Q", "SLIDERS", "ALPHA", "USER_MEAN", "USER_SD")
   end
 
   it "skips a league with no teams" do

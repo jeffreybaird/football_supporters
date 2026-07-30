@@ -457,6 +457,20 @@ module Quiz
       end
     end
 
+    # PROVISIONAL global-popularity weights for the aligned scorer's target
+    # (Quiz::Score#target_of), Premier League only for now. These are illustrative
+    # placeholders standing in for a real engagement metric (international
+    # supporters' clubs, active members) rather than ad-driven reach; every other
+    # league falls back to the column default (1.0 = unweighted), so it scores as a
+    # plain coordinate distribution until curated. Tune per league from real data.
+    EPL_POPULARITY = {
+      "Man United" => 100.0, "Liverpool" => 95.0, "Man City" => 85.0, "Arsenal" => 85.0,
+      "Chelsea" => 80.0, "Tottenham" => 55.0, "Newcastle" => 35.0, "Everton" => 25.0,
+      "Aston Villa" => 22.0, "Leeds" => 18.0, "Sunderland" => 15.0, "Nott'm Forest" => 12.0,
+      "Crystal Palace" => 12.0, "Fulham" => 10.0, "Brighton" => 10.0, "Bournemouth" => 8.0,
+      "Brentford" => 8.0, "Ipswich" => 7.0, "Coventry" => 6.0, "Hull" => 6.0
+    }.freeze
+
     def upsert_league(meta, position)
       league = League.first(slug: meta[:slug]) || League.new(slug: meta[:slug])
       league.set(name: meta[:name], season: meta[:season], active: true, position:,
@@ -474,8 +488,9 @@ module Quiz
 
     def upsert_team(league, name, scores, crest, blurb, position)
       vibe, play, ethics, fanbase = scores
+      popularity = league.slug == "premier-league" ? EPL_POPULARITY.fetch(name, 1.0) : 1.0
       team = Team.first(league_id: league.id, name:) || Team.new(league_id: league.id, name:)
-      team.set(vibe:, play:, ethics:, fanbase:, blurb:, crest:, position:)
+      team.set(vibe:, play:, ethics:, fanbase:, blurb:, crest:, position:, popularity:)
       team.save_changes
       team
     end

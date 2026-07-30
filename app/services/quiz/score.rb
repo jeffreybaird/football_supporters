@@ -7,7 +7,7 @@ module Quiz
   #
   #   answers (per question: chosen option index or nil)
   #     -> loadings-weighted mean per axis  (score_axes)
-  #     -> centrality-amplified, slider-weighted nearest-team ranking (rank_teams)
+  #     -> distribution-aligned, slider-weighted nearest-team ranking (rank_teams)
   #     -> conditional top-N chooser
   #
   # Similarity is 1/(1+distance) so higher = better; ties break by the team's
@@ -33,14 +33,15 @@ module Quiz
     # teams:   ordered Array of Team (a league's kept teams).
     # answers: Array(len Q) of chosen option index or nil.
     # weights: Array(4) of slider values.
-    # chooser_threshold / max_choices / amplify: per-league tuning (see
-    #   Quiz::Data); default to the shared constants for callers with no league.
+    # chooser_threshold / max_choices: per-league tuning (see Quiz::Data).
+    # alpha: popularity-trust dial for the matching target (see Quiz::Data);
+    #   defaults to the shared constant.
     def call(teams:, answers:, weights:,
              chooser_threshold: Data::CHOOSER_THRESHOLD,
              max_choices: Data::MAX_CHOICES,
-             amplify: Data::AMPLIFY)
+             alpha: Data::POPULARITY_ALPHA)
       vec  = score_axes(answers)
-      rank = rank_teams(vec, weights, teams, amplify)
+      rank = rank_teams(vec, weights, teams, alpha)
       candidates = rank.each_with_index
                        .select { |r, i| i.zero? || (r.dist - rank[0].dist) < chooser_threshold }
                        .first(max_choices)
@@ -82,23 +83,22 @@ module Quiz
       Data::Q.each_index.to_h { |i| [Data::Q[i]["id"], answers[i]] }
     end
 
-    # slider-weighted distance matching (nearest team). The user's vector is first
-    # stretched outward from the team centroid (AMPLIFY) so moderate answers stop
-    # collapsing onto the centre team.
-    def rank_teams(vec, weights, teams, amplify)
-      centroid = centroid_of(teams)
+    # slider-weighted distance matching (nearest team). The user's answer vector is
+    # first distribution-aligned (see Quiz::Data): each axis is standardised against
+    # the USER population and re-placed in the TARGET distribution — the league's
+    # team cloud weighted by popularity**alpha. This de-biases the self-report and
+    # matches each axis's spread, and it is what makes popular clubs reachable.
+    def rank_teams(vec, weights, teams, alpha)
+      target = target_of(teams, alpha)
       wsum = weights.sum.to_f
       wsum = 1.0 if wsum.zero?
       w = weights.map { |x| x / wsum }
-      u = vec.each_index.map do |k|
-        a = centroid[k] + ((vec[k] - centroid[k]) * amplify)
-        a.clamp(0.0, 10.0)
-      end
+      u = vec.each_index.map { |k| aligned(vec[k], k, target).clamp(0.0, 10.0) }
       ranked = teams.each_with_index.map do |team, idx|
         t = team.vector
         dist = Math.sqrt(w.each_index.sum { |k| w[k] * ((u[k] - t[k])**2) })
-        # match% is derived from the RAW user vector (no amplify): amplify is a
-        # ranking spread trick and must not distort the human-facing percentage.
+        # match% is derived from the RAW user vector (no alignment): alignment is a
+        # ranking device and must not distort the human-facing percentage.
         raw = Math.sqrt(w.each_index.sum { |k| w[k] * ((vec[k] - t[k])**2) })
         match = (1.0 - (raw / DIAMETER)).clamp(0.0, 1.0)
         [Ranked.new(team, dist, 1.0 / (1.0 + dist), match), idx]
@@ -106,11 +106,32 @@ module Quiz
       ranked.sort_by { |r, idx| [-r.sim, idx] }.map(&:first)
     end
 
-    # per-axis mean of the supplied teams' vectors — the centre of the team cloud
-    def centroid_of(teams)
-      Data::AXES.each_index.map do |k|
-        teams.sum { |team| team.vector[k] } / teams.length.to_f
+    # Standardise one axis of the user vector against the USER population, then
+    # re-place it in the target distribution:
+    #   target_mean + (value - user_mean) * (target_sd / user_sd).
+    # A zero user_sd (degenerate axis) falls back to no rescale.
+    def aligned(value, axis, target)
+      user_sd = Data::USER_SD[axis]
+      ratio = user_sd.zero? ? 1.0 : (target[:sd][axis] / user_sd)
+      target[:mean][axis] + ((value - Data::USER_MEAN[axis]) * ratio)
+    end
+
+    # The matching target: the popularity-weighted mean and sd of the teams'
+    # vectors, per axis. Weight is popularity**alpha, so alpha=0 is the plain
+    # (unweighted) coordinate distribution and larger alpha leans toward popular
+    # clubs. Kept public and mirrored by targetOf in views/quiz/index.erb.
+    def target_of(teams, alpha)
+      pw = teams.map { |team| (team.popularity || 1.0)**alpha }
+      wsum = pw.sum.to_f
+      wsum = 1.0 if wsum.zero?
+      mean = Data::AXES.each_index.map do |k|
+        teams.each_index.sum { |i| pw[i] * teams[i].vector[k] } / wsum
       end
+      sd = Data::AXES.each_index.map do |k|
+        var = teams.each_index.sum { |i| pw[i] * ((teams[i].vector[k] - mean[k])**2) } / wsum
+        Math.sqrt(var)
+      end
+      { mean:, sd: }
     end
   end
 end

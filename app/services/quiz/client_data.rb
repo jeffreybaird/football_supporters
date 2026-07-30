@@ -20,7 +20,13 @@ module Quiz
         "BADGE" => teams.reject { |t| t.crest.nil? }.to_h { |t| [t.name, t.crest] },
         "CHOOSER_THRESHOLD" => league ? league.chooser_threshold : Data::CHOOSER_THRESHOLD,
         "MAX_CHOICES" => league ? league.max_choices : Data::MAX_CHOICES,
-        "AMPLIFY" => league ? league.amplify : Data::AMPLIFY,
+        # Distribution-aligned scoring inputs (replaces AMPLIFY): per-team
+        # popularity plus the global alpha and user distribution, so the browser
+        # rebuilds the same target and standardisation the server uses.
+        "POPULARITY" => teams.to_h { |t| [t.name, t.popularity] },
+        "ALPHA" => Data::POPULARITY_ALPHA,
+        "USER_MEAN" => Data::USER_MEAN,
+        "USER_SD" => Data::USER_SD,
         "ARCHETYPE" => Archetype.client_table(locale)
       }
     end

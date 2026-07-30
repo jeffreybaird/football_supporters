@@ -27,12 +27,41 @@ module Quiz
     #
     # CHOOSER_THRESHOLD: max weighted-distance gap from the winner for an
     # alternate to be offered. MAX_CHOICES: cap on offered alternates. AMPLIFY:
-    # user-vector centrality amplification — stretch the user's vector outward
-    # from the team centroid before matching so moderate answers stop collapsing
-    # onto the centre team (1 = off).
+    # superseded — the scorer now aligns the user distribution to the club
+    # distribution rather than stretching from the centroid (see below). The
+    # constant and the leagues.amplify column are kept only so existing seed/DB
+    # rows and their specs are undisturbed; nothing reads them for scoring.
     CHOOSER_THRESHOLD = 0.25
     MAX_CHOICES = 3
     AMPLIFY = 2.5
+
+    # Distribution-aligned matching (replaces AMPLIFY). Instead of stretching the
+    # user's raw vector outward from the team centroid, Quiz::Score standardises
+    # each answered axis against the USER population and re-places it in a TARGET
+    # distribution built from the league's teams, weighted by
+    # popularity**POPULARITY_ALPHA:
+    #
+    #   u_k = target_mean_k + (vec_k - USER_MEAN_k) * (target_sd_k / USER_SD_k)
+    #
+    # This does two things AMPLIFY could not: it removes the systematic self-report
+    # bias (people over-state ethics and belonging, under-state glory) by
+    # recentring on the real user mean, and it matches each axis's spread instead
+    # of applying one blunt multiplier. POPULARITY_ALPHA is the "how much do we
+    # trust popularity" dial: 0 ignores it (pure coordinate fit), 1 trusts raw
+    # popularity fully. 0.2 leans mostly on de-biasing with a light popularity
+    # nudge. Shipped to the browser via Quiz::ClientData so the client scorer
+    # rebuilds the SAME target and can't drift — keep views/quiz/index.erb in step.
+    POPULARITY_ALPHA = 0.2
+
+    # PROVISIONAL user-answer distribution per axis [Vibe, Play, Ethics, Fanbase]:
+    # the reference the scorer standardises incoming answers against. These are
+    # ESTIMATED from a modelled social-desirability response population, NOT
+    # measured — Ethics (~7) and Fanbase (~6) sit well above the club means
+    # because takers over-report caring and belonging. Recompute both from real
+    # stored responses once enough accumulate; that is the single most impactful
+    # calibration. Pinned into score_spec's reference outputs — retune together.
+    USER_MEAN = [4.74, 6.06, 7.13, 6.16].freeze
+    USER_SD   = [1.30, 1.21, 2.18, 1.09].freeze
 
     # The scoring skeleton: one file per question (id, loadings, per-option value
     # vectors, all in AXES order). Files are numbered so they load in the canonical

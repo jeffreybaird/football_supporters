@@ -30,4 +30,21 @@ RSpec.describe Team do
     twin = Team.new(league_id: other.id, name: "Everton", vibe: 1, play: 1, ethics: 1, fanbase: 1, blurb: "b")
     expect(twin).to be_valid
   end
+
+  it "defaults popularity to 1.0 (unweighted) when unseeded" do
+    other = League.create(slug: "other", name: "Other")
+    plain = Team.create(league_id: other.id, name: "Anon", vibe: 5, play: 5, ethics: 5, fanbase: 5, blurb: "b")
+    expect(plain.popularity).to eq(1.0)
+  end
+
+  it "seeds the reference league's per-club popularity for the aligned target" do
+    expect(team("Man United").popularity).to eq(100.0)
+    expect(team("Leeds").popularity).to eq(18.0)
+  end
+
+  it "rejects a negative popularity (it is raised to a fractional power)" do
+    bad = Team.new(league_id: league.id, name: "Neg", vibe: 5, play: 5, ethics: 5, fanbase: 5,
+                   blurb: "b", popularity: -1.0)
+    expect(bad).not_to be_valid
+  end
 end

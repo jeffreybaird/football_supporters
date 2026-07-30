@@ -67,6 +67,12 @@ const AXES = D.AXES;
 const AXIS_LABEL = I18N.axes || { Vibe: "Vibe", Play: "Play", Ethics: "Ethics", Fanbase: "Fanbase" };
 const Q = D.Q;
 const SLIDERS = D.SLIDERS;
+// Global user-answer distribution (Quiz::Data::USER_MEAN / USER_SD): the scorer
+// standardises each answered axis against this before re-placing it in a league's
+// target, so the self-report bias is removed the same way on both sides. These are
+// league-agnostic, so they live for the page's life.
+const USER_MEAN = D.USER_MEAN;
+const USER_SD = D.USER_SD;
 
 // Render a localized headline: an array of [text, highlight] segments joined by
 // <br>, with amber-highlighted segments and %{league} substituted. Keeps both
@@ -99,7 +105,7 @@ function shuffle(arr) {
 // applyLeague when the picker changes (fed by GET /leagues/:slug). Every swap is
 // immediately followed by a re-render and a quiz reset, and all reads happen
 // during render, so components never see a half-switched dataset.
-let LEAGUE, TEAMS, TEAM_NAMES, FLAVOR, BADGE, CHOOSER_THRESHOLD, MAX_CHOICES, AMPLIFY, CENTROID;
+let LEAGUE, TEAMS, TEAM_NAMES, FLAVOR, BADGE, CHOOSER_THRESHOLD, MAX_CHOICES, POPULARITY, ALPHA, TARGET;
 
 // Football Profile mode scores against every league at once, and is the DEFAULT
 // mode (see App#render_quiz). Its dataset (all leagues + the archetype table)
@@ -111,11 +117,16 @@ const PROFILE_SLUG = "__profile__";
 const START_PROFILE = !!window.QUIZ_START_PROFILE;
 let PROFILE_DATA = window.QUIZ_PROFILE || null;
 
-// Centre of a team cloud — the point the user's vector is amplified away from
-// (see Quiz::Score#centroid_of). One implementation shared by applyLeague and
-// the per-league profile bundles.
-function centroidOf(teams, names) {
-  return AXES.map((_, k) => names.reduce((s, n) => s + teams[n][k], 0) / names.length);
+// The matching target for a team cloud: popularity**alpha weighted mean and sd
+// per axis (a literal transcription of Quiz::Score#target_of). The user vector is
+// re-placed into this distribution, so popular clubs pull it toward themselves.
+// Shared by applyLeague and the per-league profile bundles.
+function targetOf(teams, names, popularity, alpha) {
+  const w = names.map((n) => Math.pow(popularity && popularity[n] != null ? popularity[n] : 1, alpha));
+  const W = w.reduce((a, b) => a + b, 0) || 1;
+  const mean = AXES.map((_, k) => names.reduce((s, n, i) => s + w[i] * teams[n][k], 0) / W);
+  const sd = AXES.map((_, k) => Math.sqrt(names.reduce((s, n, i) => s + w[i] * (teams[n][k] - mean[k]) * (teams[n][k] - mean[k]), 0) / W));
+  return { mean, sd };
 }
 
 function applyLeague(d) {
@@ -126,16 +137,18 @@ function applyLeague(d) {
   BADGE = d.BADGE;
   CHOOSER_THRESHOLD = d.CHOOSER_THRESHOLD;
   MAX_CHOICES = d.MAX_CHOICES;
-  AMPLIFY = d.AMPLIFY;
-  CENTROID = centroidOf(TEAMS, TEAM_NAMES);
+  POPULARITY = d.POPULARITY;
+  ALPHA = d.ALPHA;
+  TARGET = targetOf(TEAMS, TEAM_NAMES, POPULARITY, ALPHA);
 }
 applyLeague(D);
 
 // A scoring bundle for one PROFILE_DATA.LEAGUES entry, shaped like the globals
-// rankTeamsIn reads.
+// rankTeamsIn reads. ALPHA is hoisted to the profile top level (a shared key), so
+// it is read from PROFILE_DATA here, not the per-league entry.
 function leagueBundle(entry) {
   const names = Object.keys(entry.TEAMS);
-  return { TEAMS: entry.TEAMS, TEAM_NAMES: names, CENTROID: centroidOf(entry.TEAMS, names), AMPLIFY: entry.AMPLIFY };
+  return { TEAMS: entry.TEAMS, TEAM_NAMES: names, TARGET: targetOf(entry.TEAMS, names, entry.POPULARITY, PROFILE_DATA.ALPHA) };
 }
 
 // ---- scoring: loadings-weighted mean per axis (league-independent) ----
@@ -157,16 +170,19 @@ function scoreAxes(answers) {
 function rankTeamsIn(data, vec, weights) {
   const wsum = weights.reduce((s, x) => s + x, 0) || 1;
   const w = weights.map((x) => x / wsum);
+  // Distribution-align each axis: standardise against the user population and
+  // re-place in the league target (Quiz::Score#aligned). A zero user sd = no rescale.
   const u = vec.map((x, k) => {
-    const a = data.CENTROID[k] + (x - data.CENTROID[k]) * data.AMPLIFY;
+    const sd = USER_SD[k] || 1;
+    const a = data.TARGET.mean[k] + (x - USER_MEAN[k]) * (data.TARGET.sd[k] / sd);
     return Math.max(0, Math.min(10, a));
   });
   return data.TEAM_NAMES
     .map((name) => {
       const t = data.TEAMS[name];
       const dist = Math.sqrt(w.reduce((s, wk, k) => s + wk * (u[k] - t[k]) * (u[k] - t[k]), 0));
-      // match% is derived from the RAW user vector (no amplify): amplify is a
-      // ranking spread trick and must not distort the human-facing percentage.
+      // match% is derived from the RAW user vector (no alignment): alignment is a
+      // ranking device and must not distort the human-facing percentage.
       // Mirrors Quiz::Score#rank_teams: match = 1 - raw_dist / DIAMETER (10).
       const raw = Math.sqrt(w.reduce((s, wk, k) => s + wk * (vec[k] - t[k]) * (vec[k] - t[k]), 0));
       const match = Math.max(0, Math.min(1, 1 - raw / 10));
@@ -176,7 +192,7 @@ function rankTeamsIn(data, vec, weights) {
 }
 
 function rankTeams(vec, weights) {
-  return rankTeamsIn({ TEAMS, TEAM_NAMES, CENTROID, AMPLIFY }, vec, weights);
+  return rankTeamsIn({ TEAMS, TEAM_NAMES, TARGET }, vec, weights);
 }
 
 // Slider weights as a normalized 4-vector summing to 1; anything malformed
