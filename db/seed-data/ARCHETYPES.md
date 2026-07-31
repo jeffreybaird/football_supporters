@@ -82,7 +82,7 @@ You want to watch football your way—wherever the best match is, whoever’s on
 
 `parish_purist`
 
-You want your local club, run the right way, and you want to be in the stands singing for them. However they play, it’s about the town having something to call its own and making sure it’s cared for.
+You want a club that belongs to its town — not an asset in a private equity firm’s portfolio, not a name some marketing department reworked. It’s the ground down the road, the same faces every week, the thing the place calls its own. What division it’s in matters less than that it’s run by people who love it and left in good hands for whoever comes next.
 
 ## The Hometown Diehard
 
