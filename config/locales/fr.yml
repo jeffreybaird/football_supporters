@@ -308,7 +308,7 @@ fr:
         sentence: "Tu veux un club en pleine ascension, qui joue avec le sentiment que chaque passe s'inscrit dans un projet plus vaste. Chaque saison, une direction compétente est un pas de plus vers quelque chose de durable. Dans les tribunes, tu ressens l'espoir de gens qui croient en une vision commune."
       pragmatic_winner:
         label: "Le Gagnant pragmatique"
-        sentence: "Tu veux un club qui fait le travail, peu importe la manière. Une victoire est une victoire, tant qu'elle est honnête. Tu prendras les buts brouillons et les points arrachés, mais tu ne célébreras pas un titre acheté plutôt que mérité."
+        sentence: "Tu veux un club qui fait le travail, peu importe la manière. Une victoire est une victoire, et tu prends les buts brouillons et les points arrachés plutôt qu'un beau football qui s'effondre. Tu veux juste que ça se gagne sur le terrain, pas que ça s'achète en dehors."
       glory_hunter:
         label: "Le Chasseur de gloire"
         sentence: "Tu veux un club qui remplit tes samedis, celui que tu porterais sur ton dos et pour qui tu chanterais jusqu'à en perdre la voix. Peu importe le jeu, peu importe les dirigeants, tu es là à chaque minute, sans discuter."
@@ -320,10 +320,10 @@ fr:
         sentence: "Tu aimes le jeu pour lui-même — la façon dont une action se déploie, les joueurs qui te font relever la tête, les moments que tu rejoues dans ta tête des jours plus tard. Tu suivras un club, mais seulement s'il colle à ton amour du football. Le blason n'est qu'un détail."
       terrace_dreamer:
         label: "Le Rêveur des tribunes"
-        sentence: "Tu veux un club où les visages sont familiers et où les chants sonnent comme les tiens. La tribune est un deuxième chez-toi, et les gens autour de toi sont plus que des inconnus. Tu espères que les propriétaires sont corrects, et tu fais confiance à ce qu'on te dit."
+        sentence: "Tu veux un club où tu connais les visages autour de toi et où les chants font partie de ton histoire. La tribune est ton deuxième chez-toi, les gens à côté de toi sont des amis, et ces quatre-vingt-dix minutes ensemble sont le meilleur moment de ta semaine. Que tu gagnes ou que tu perdes, tu seras de retour à ta place, à chanter avec les autres."
       everyfan:
         label: "Le Supporter ordinaire"
-        sentence: "Tu veux un club qui tient son rang, avec des propriétaires que tu peux accepter, et une place dans ta semaine qui compte vraiment sans envahir ta vie. Peu importe le jeu, tu es simplement content de pouvoir dire que c'est le tien."
+        sentence: "Tu veux un club qui tient son rang. Rien à défendre, pas de quoi se prendre la tête. Ça fait vraiment partie de ta semaine, mais ça ne prend pas toute ta vie. Peu importe le jeu, tu es simplement content de pouvoir dire que c'est le tien."
       principled_fan:
         label: "Le Supporter de principes"
         sentence: "Tu veux un club que tu peux soutenir sans arrière-pensée. Qui le possède et comment ils se comportent passe avant tout. Le football et le sentiment d'appartenance comptent, mais pas assez pour fermer les yeux sur ce qui ne va pas."
@@ -341,7 +341,7 @@ fr:
         sentence: "Tu veux le club du bout de la rue, et tu en veux chaque morceau — chaque match à domicile, chaque déplacement, chaque chant jusqu'à en perdre la voix. C'est la famille, et avec la famille on ne compte pas."
       local_enthusiast:
         label: "Le Passionné local"
-        sentence: "Tu veux l'équipe qui appartient à ta ville, quel que soit le football qu'elle pratique. C'est une bonne chose dans ta semaine, pas la seule. Mais si les propriétaires ne respectent pas l'endroit, tu ne les suivras pas."
+        sentence: "Tu veux l'équipe qui appartient à ta ville, quel que soit le football qu'elle pratique. C'est une bonne chose dans ta semaine, pas toute ta semaine. Et tu tiens à ce qu'elle soit bien traitée — un club comme celui-ci mérite des gens qui respectent l'endroit."
       family_day:
         label: "La Sortie en famille"
         sentence: "Tu veux passer l'après-midi au stade du coin, les enfants à tes côtés, peut-être une glace sur le chemin du retour quel que soit le résultat. Tu espères que le club est entre de bonnes mains, mais tu es surtout là pour la sortie."

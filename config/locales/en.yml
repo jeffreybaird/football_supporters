@@ -313,7 +313,7 @@ en:
         sentence: "You want a club on the rise that plays with a sense that each pass is part of a bigger picture. Every season, a competent back office is a step toward something lasting. In the stands, you feel the hope of people who believe in a shared vision."
       pragmatic_winner:
         label: "The Pragmatic Winner"
-        sentence: "You want a club that gets the job done, no matter how it looks. A win is a win, as long as it's honest. You'll take the scrappy goals and the hard-fought points, but you won't celebrate a title that was bought instead of earned."
+        sentence: "You want a club that gets the job done, no matter how it looks. A win's a win, and you'll take the scrappy goals and the hard-fought points over pretty football that folds. You just want it earned on the pitch, not bought off it."
       glory_hunter:
         label: "The Glory Hunter"
         sentence: "You want a club that fills your Saturdays, the kind you'd wear on your back and sing for until your voice is gone. However they play, whoever's in charge, you're there for every minute, no questions asked."
@@ -325,10 +325,10 @@ en:
         sentence: "You love the game for its own sake—the way a move unfolds, the players who make you sit up and take notice, the moments you replay in your mind days later. You'll follow a club, but only if it fits your love of football. The badge is just a detail."
       terrace_dreamer:
         label: "The Terrace Dreamer"
-        sentence: "You want a club where the faces are familiar and the songs feel like your own. The stand is a second home, and the people around you are more than strangers. You hope the owners are decent, and you trust what you're told."
+        sentence: "You want a club where you know the faces around you and the songs feel like they belong to your story. The stand is your second home, the people beside you are friends, and those ninety minutes together are the highlight of your week. Win or lose, you'll be back in your spot, singing with the rest."
       everyfan:
         label: "The Everyfan"
-        sentence: "You want a club that holds its own, with owners you can accept, and a place in your week that feels real but doesn't take over your life. However they play, you're just glad to call it yours."
+        sentence: "You want a club that holds its own. There's nothing to defend, nothing to overthink. It's a real part of your week, but it doesn't take over your life. However they play, you're just glad to call it yours."
       principled_fan:
         label: "The Principled Fan"
         sentence: "You want a club you can support without second thoughts. Who owns it and how they act comes first. The football and the sense of belonging matter, but not enough to ignore what's wrong."
@@ -346,7 +346,7 @@ en:
         sentence: "You want the club just down the road, and you want every bit of it—every home match, every away trip, every song until your voice is gone. It's family, and you don't keep score with family."
       local_enthusiast:
         label: "The Local Enthusiast"
-        sentence: "You want the team that belongs to your town, whatever kind of football they play. It's one good thing in your week, not the only thing. But if the owners don't respect the place, you won't stand with them."
+        sentence: "You want the team that belongs to your town, whatever kind of football they play. It's one good thing in your week, not the whole of it. And you care that it's looked after — a club like this deserves people who respect the place."
       family_day:
         label: "The Family Day"
         sentence: "You want to spend the afternoon at the local ground, kids by your side, maybe an ice cream on the way home no matter the result. You hope the club is in good hands, but mostly you're here for the day out."

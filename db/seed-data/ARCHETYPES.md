@@ -28,7 +28,7 @@ You want a club on the rise that plays with a sense that each pass is part of a 
 
 `pragmatic_winner`
 
-You want a club that gets the job done, no matter how it looks. A win is a win, as long as it’s honest. You’ll take the scrappy goals and the hard-fought points, but you won’t celebrate a title that was bought instead of earned.
+You want a club that gets the job done, no matter how it looks. A win’s a win, and you’ll take the scrappy goals and the hard-fought points over pretty football that folds. You just want it earned on the pitch, not bought off it.
 
 ## The Glory Hunter
 
@@ -52,13 +52,13 @@ You love the game for its own sake—the way a move unfolds, the players who mak
 
 `terrace_dreamer`
 
-You want a club where the faces are familiar and the songs feel like your own. The stand is a second home, and the people around you are more than strangers. You hope the owners are decent, and you trust what you’re told.
+You want a club where you know the faces around you and the songs feel like they belong to your story. The stand is your second home, the people beside you are friends, and those ninety minutes together are the highlight of your week. Win or lose, you’ll be back in your spot, singing with the rest.
 
 ## The Everyfan
 
 `everyfan`
 
-You want a club that holds its own, with owners you can accept, and a place in your week that feels real but doesn’t take over your life. However they play, you’re just glad to call it yours.
+You want a club that holds its own. There’s nothing to defend, nothing to overthink. It’s a real part of your week, but it doesn’t take over your life. However they play, you’re just glad to call it yours.
 
 ## The Principled Fan
 
@@ -94,7 +94,7 @@ You want the club just down the road, and you want every bit of it—every home 
 
 `local_enthusiast`
 
-You want the team that belongs to your town, whatever kind of football they play. It’s one good thing in your week, not the only thing. But if the owners don’t respect the place, you won’t stand with them.
+You want the team that belongs to your town, whatever kind of football they play. It’s one good thing in your week, not the whole of it. And you care that it’s looked after — a club like this deserves people who respect the place.
 
 ## The Family Day
 
