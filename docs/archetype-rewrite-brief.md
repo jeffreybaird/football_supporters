@@ -89,6 +89,30 @@ match on success, so any such claim will read as a mismatch against the actual c
 
 ---
 
+## Locked labels (decided — write sentences to match, don't re-propose)
+
+Six labels are final. Change only the `label` string for each; the `id`/key and its
+cells stay exactly as-is. Write (or rewrite) each `sentence` to fit the new label and
+the archetype's axis profile, following the two rules. `weekend_giant` already has a
+finished sentence (see the worked example) — use it as the template for tone and length.
+
+| id | new label |
+|---|---|
+| `big_club_believer` | The Cavalier |
+| `club_idealist` | The Romantic |
+| `parish_purist` | The Village Green |
+| `cathedral_builder` | The Architect |
+| `easygoing_supporter` | The Matinee |
+| `weekend_giant` | The Light Brigade |
+
+`The Cavalier` (flamboyant, no scruples) and `The Village Green` (austere, principled)
+are deliberate opposites — Cavalier vs. Roundhead — so let their sentences play off each
+other. `The Romantic`, `The Village Green` and `The Architect` are the Ethics-HIGH three:
+keep a values beat, but lead with belonging / anti-glory / grand-patient-ambition
+respectively, not with a sermon.
+
+---
+
 ## Per-archetype axis cheat sheet (derived from the `cells` lattice)
 
 Numbers are the mean level across the cells that map to each archetype, on a
@@ -161,5 +185,8 @@ candidates, not just rewrite candidates:
   Reframe to the *appetite* for status/silverware (e.g. wanting the club that acts like
   it should be winning), not a record of winning.
 - `pragmatic_winner` — "Winner" as fact. Reframe to results-over-style *taste*.
-- `glory_hunter`, `big_club_believer` — check the copy for stray "honest/earned/win"
-  claims; the names are borderline (they name a pursuit, not an achievement).
+- `glory_hunter` — the name is borderline (it names a pursuit, not an achievement);
+  check the copy for stray "honest/earned/win" claims but the label can likely stay.
+
+(`big_club_believer` and `weekend_giant` are already handled — renamed to `The Cavalier`
+and `The Light Brigade` in the locked-labels table above.)
