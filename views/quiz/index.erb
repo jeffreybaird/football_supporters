@@ -30,6 +30,9 @@
 <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
 <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
 <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<%# firstSentence() — shared with the server-rendered pages via App#first_sentence.
+    Not deferred: the app source below is eval'd from a load handler and calls it. %>
+<script src="/js/text.js"></script>
 
 <script id="app-src" type="text/plain">
 const { useState } = React;
@@ -960,7 +963,7 @@ function App() {
                         <span>
                           <span style={{ ...disp, fontWeight: 800, fontSize: 16 }}>{o.name}</span>
                           <span style={{ display: "block", color: C.chalkDim, fontSize: 12.5, lineHeight: 1.3, marginTop: 2 }}>
-                            {FLAVOR[o.name].split(". ")[0]}.
+                            {firstSentence(FLAVOR[o.name])}
                           </span>
                         </span>
                       </button>
@@ -1033,7 +1036,7 @@ function App() {
                     <span style={{ minWidth: 0 }}>
                       <span style={{ ...mono, fontSize: 10, letterSpacing: 1, textTransform: "uppercase", color: C.amberDim, display: "block" }}>{l.name}</span>
                       <span style={{ ...disp, fontWeight: 800, fontSize: 16 }}>{l.winner}</span>
-                      <span style={{ display: "block", color: C.chalkDim, fontSize: 12.5, lineHeight: 1.3, marginTop: 2 }}>{l.flavor.split(". ")[0]}.</span>
+                      <span style={{ display: "block", color: C.chalkDim, fontSize: 12.5, lineHeight: 1.3, marginTop: 2 }}>{firstSentence(l.flavor)}</span>
                     </span>
                     <span style={{ textAlign: "right", whiteSpace: "nowrap" }}>
                       <span style={{ ...disp, fontWeight: 900, fontSize: 22, color: C.amber }}>{l.matchPct}</span>

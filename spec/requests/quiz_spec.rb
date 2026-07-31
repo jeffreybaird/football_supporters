@@ -20,6 +20,17 @@ RSpec.describe "Quiz", type: :request do
       expect(last_response.body).to include("window.QUIZ_DATA")
       expect(last_response.body).to include('id="app-src"')
     end
+
+    # The client view trims blurbs to their first sentence too. It must use the
+    # shared firstSentence() helper, not a bare split on ". ", or "St. Pauli"
+    # gets cut in half on the end-of-quiz screen (the /q/:slug pages already use
+    # App#first_sentence and are correct).
+    it "trims client-rendered blurbs with the shared firstSentence helper" do
+      get "/"
+
+      expect(last_response.body).to include('src="/js/text.js"')
+      expect(last_response.body).not_to include('.split(". ")[0]')
+    end
   end
 
   describe "Football Profile as the default mode" do
