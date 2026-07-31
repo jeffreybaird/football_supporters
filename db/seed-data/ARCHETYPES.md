@@ -16,7 +16,7 @@ You want the big club, the full ground, and a team that rides at everything with
 
 `big_club_believer`
 
-You want a club that attacks, that gives you a reason to count down the days until kickoff. What happens on the pitch is what matters to you. The rest—the boardroom, the finances—you leave to someone else.
+You want the big club and the bright lights. A team that steps onto the pitch with swagger, playing for the crowd, the cameras, and the silverware. The business side, the politics, the fine print—let someone else worry about that. You’re here for the show, and you’re not sorry about it.
 
 ## The Architect
 
