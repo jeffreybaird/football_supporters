@@ -1,24 +1,24 @@
 # Archetypes
 
-## The Club Idealist
+## The Romantic
 
 `club_idealist`
 
 You’re looking for a club that stands for something, not just a name on a fixture list. It matters to you that the people in charge care about more than the next result, and that ambition doesn’t come at the cost of decency. You want to walk into the ground and feel that what happens here means something, to you and to everyone else who shows up.
 
-## The Weekend Giant
+## The Light Brigade
 
 `weekend_giant`
 
 You want a club that fills the stands and plays to win, but you’re not interested in shortcuts or secrets. You’ll watch every match, cheer every goal, but you won’t trade your conscience for a cup. The victories have to feel earned, or they don’t feel like victories at all.
 
-## The Big-Club Believer
+## The Cavalier
 
 `big_club_believer`
 
 You want a club that attacks, that gives you a reason to count down the days until kickoff. What happens on the pitch is what matters to you. The rest—the boardroom, the finances—you leave to someone else.
 
-## The Cathedral Builder
+## The Architect
 
 `cathedral_builder`
 
@@ -66,7 +66,7 @@ You want a club that holds its own, with owners you can accept, and a place in y
 
 You want a club you can support without second thoughts. Who owns it and how they act comes first. The football and the sense of belonging matter, but not enough to ignore what’s wrong.
 
-## The Easygoing Supporter
+## The Matinee
 
 `easygoing_supporter`
 
@@ -78,7 +78,7 @@ You want a club you can enjoy without needing to study up. Football is supposed 
 
 You want to watch football your way—wherever the best match is, whoever’s on the pitch. No club owns your loyalty, and you don’t feel bad about it for a second.
 
-## The Parish Purist
+## The Village Green
 
 `parish_purist`
 

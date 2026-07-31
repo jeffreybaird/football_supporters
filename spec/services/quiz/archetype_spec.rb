@@ -7,13 +7,14 @@ RSpec.describe Quiz::Archetype do
   def label(vec) = described_class.call(vec)[:label]
   def sentence(vec) = described_class.call(vec)[:sentence]
 
-  # The doc's 18 archetype names (db/seed-data/football-fan-archetypes-final-v2.md).
+  # The 18 archetype labels as shipped in config/locales (six renamed from the
+  # source doc db/seed-data/football-fan-archetypes-final-v2.md).
   let(:doc_labels) do
-    ["The Weekend Giant", "The Big-Club Believer", "The Cathedral Builder",
+    ["The Light Brigade", "The Cavalier", "The Architect",
      "The Pragmatic Winner", "The Glory Hunter", "The Trophy Collector",
-     "The Student of the Game", "The Club Idealist", "The Terrace Dreamer",
-     "The Everyfan", "The Principled Fan", "The Easygoing Supporter",
-     "The Free Agent", "The Parish Purist", "The Hometown Diehard",
+     "The Student of the Game", "The Romantic", "The Terrace Dreamer",
+     "The Everyfan", "The Principled Fan", "The Matinee",
+     "The Free Agent", "The Village Green", "The Hometown Diehard",
      "The Local Enthusiast", "The Family Day", "The Local Casual"]
   end
 
@@ -56,15 +57,15 @@ RSpec.describe Quiz::Archetype do
 
   describe "selection" do
     it "selects the archetype whose cell centroid is nearest the given vector" do
-      expect(label(centroid("HHHH"))).to eq("The Club Idealist")
+      expect(label(centroid("HHHH"))).to eq("The Romantic")
       expect(label(centroid("LLLL"))).to eq("The Local Casual")
       # A vector nudged a hair off a centroid still resolves to that archetype.
-      expect(label(centroid("HHHH").map { |x| x + 0.05 })).to eq("The Club Idealist")
+      expect(label(centroid("HHHH").map { |x| x + 0.05 })).to eq("The Romantic")
     end
 
     # Spot checks from the source doc's verification list.
     {
-      "HHHH" => "The Club Idealist", "HLMH" => "The Glory Hunter",
+      "HHHH" => "The Romantic", "HLMH" => "The Glory Hunter",
       "MMLH" => "The Terrace Dreamer", "MLMM" => "The Everyfan",
       "LLLL" => "The Local Casual"
     }.each do |code, expected|

@@ -295,16 +295,16 @@ fr:
 
     archetypes:
       club_idealist:
-        label: "L'Idéaliste du club"
+        label: "Le Romantique"
         sentence: "Tu cherches un club qui défend quelque chose, pas juste un nom sur un calendrier de matchs. Il t'importe que les dirigeants se soucient de plus que du prochain résultat, et que l'ambition ne se fasse pas au prix de la décence. Tu veux entrer dans le stade et sentir que ce qui s'y passe a du sens, pour toi comme pour tous ceux qui sont là."
       weekend_giant:
-        label: "Le Géant du week-end"
+        label: "La Brigade légère"
         sentence: "Tu veux un club qui remplit les tribunes et joue pour gagner, mais les raccourcis et les secrets ne t'intéressent pas. Tu regarderas chaque match, tu célébreras chaque but, mais tu n'échangeras pas ta conscience contre une coupe. Les victoires doivent se mériter, sinon ce ne sont pas vraiment des victoires."
       big_club_believer:
-        label: "L'Adepte des grands clubs"
+        label: "Le Cavalier"
         sentence: "Tu veux un club qui attaque, qui te donne une raison de compter les jours jusqu'au coup d'envoi. Ce qui compte pour toi, c'est ce qui se passe sur le terrain. Le reste — les bureaux, les finances — tu le laisses à d'autres."
       cathedral_builder:
-        label: "Le Bâtisseur de cathédrale"
+        label: "L'Architecte"
         sentence: "Tu veux voir une équipe qui fait circuler le ballon avec intention, menée par des gens à qui tu confierais ton propre nom. Tu veux te tenir épaule contre épaule avec un public qui ressent chaque passe et chaque but autant que toi."
       pragmatic_winner:
         label: "Le Gagnant pragmatique"
@@ -328,13 +328,13 @@ fr:
         label: "Le Supporter de principes"
         sentence: "Tu veux un club que tu peux soutenir sans arrière-pensée. Qui le possède et comment ils se comportent passe avant tout. Le football et le sentiment d'appartenance comptent, mais pas assez pour fermer les yeux sur ce qui ne va pas."
       easygoing_supporter:
-        label: "Le Supporter décontracté"
+        label: "La Matinée"
         sentence: "Tu veux un club dont tu peux profiter sans avoir à réviser. Le football est censé être un bon après-midi de sortie, pas un travail de plus. Tu ne vas pas gâcher ça en te souciant des finances."
       free_agent:
         label: "L'Électron libre"
         sentence: "Tu veux regarder le football à ta façon — là où se joue le meilleur match, peu importe qui est sur le terrain. Aucun club ne possède ta loyauté, et tu ne culpabilises pas une seconde pour ça."
       parish_purist:
-        label: "Le Puriste du coin"
+        label: "Le Pré du village"
         sentence: "Tu veux ton club local, géré comme il faut, et tu veux être dans les tribunes à chanter pour lui. Peu importe le jeu, l'essentiel est que la ville ait quelque chose à elle et qu'on en prenne soin."
       hometown_diehard:
         label: "Le Fidèle du pays"

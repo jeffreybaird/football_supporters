@@ -300,16 +300,16 @@ en:
         hi: "Matters a lot"
     archetypes:
       club_idealist:
-        label: "The Club Idealist"
+        label: "The Romantic"
         sentence: "You're looking for a club that stands for something, not just a name on a fixture list. It matters to you that the people in charge care about more than the next result, and that ambition doesn't come at the cost of decency. You want to walk into the ground and feel that what happens here means something, to you and to everyone else who shows up."
       weekend_giant:
-        label: "The Weekend Giant"
+        label: "The Light Brigade"
         sentence: "You want a club that fills the stands and plays to win, but you're not interested in shortcuts or secrets. You'll watch every match, cheer every goal, but you won't trade your conscience for a cup. The victories have to feel earned, or they don't feel like victories at all."
       big_club_believer:
-        label: "The Big-Club Believer"
+        label: "The Cavalier"
         sentence: "You want a club that attacks, that gives you a reason to count down the days until kickoff. What happens on the pitch is what matters to you. The rest—the boardroom, the finances—you leave to someone else."
       cathedral_builder:
-        label: "The Cathedral Builder"
+        label: "The Architect"
         sentence: "You want to see a team that moves the ball with purpose, led by people you'd trust with your own name. You want to stand shoulder to shoulder with a crowd that feels every pass and every goal as much as you do."
       pragmatic_winner:
         label: "The Pragmatic Winner"
@@ -333,13 +333,13 @@ en:
         label: "The Principled Fan"
         sentence: "You want a club you can support without second thoughts. Who owns it and how they act comes first. The football and the sense of belonging matter, but not enough to ignore what's wrong."
       easygoing_supporter:
-        label: "The Easygoing Supporter"
+        label: "The Matinee"
         sentence: "You want a club you can enjoy without needing to study up. Football is supposed to be a good afternoon out, not another job. You're not going to ruin it by worrying about the finances."
       free_agent:
         label: "The Free Agent"
         sentence: "You want to watch football your way—wherever the best match is, whoever's on the pitch. No club owns your loyalty, and you don't feel bad about it for a second."
       parish_purist:
-        label: "The Parish Purist"
+        label: "The Village Green"
         sentence: "You want your local club, run the right way, and you want to be in the stands singing for them. However they play, it's about the town having something to call its own and making sure it's cared for."
       hometown_diehard:
         label: "The Hometown Diehard"

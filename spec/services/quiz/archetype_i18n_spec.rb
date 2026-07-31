@@ -13,11 +13,11 @@ RSpec.describe Quiz::Archetype do
   describe ".call" do
     it "returns English copy by default" do
       result = described_class.call(vec)
-      expect(result[:label]).to eq("The Weekend Giant")
+      expect(result[:label]).to eq("The Light Brigade")
     end
 
     it "returns French copy for the fr locale, for the same pick" do
-      expect(described_class.call(vec, locale: "fr")[:label]).to eq("Le Géant du week-end")
+      expect(described_class.call(vec, locale: "fr")[:label]).to eq("La Brigade légère")
     end
 
     it "localizes the all-mid fallback (unscoreable vector) too" do

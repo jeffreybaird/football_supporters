@@ -2,6 +2,7 @@
 
 require "spec_helper"
 require "json"
+require "cgi"
 
 RSpec.describe "Locale and the language switcher", type: :request do
   describe "language negotiation on the quiz page" do
@@ -144,9 +145,11 @@ RSpec.describe "Locale and the language switcher", type: :request do
 
       expect(last_response.body).to include('<html lang="fr">')
       expect(last_response.body).to include("Fin du match · ton profil football")
-      # the archetype label rendered is the French one (ProfileScore localized)
+      # the archetype label rendered is the French one (ProfileScore localized).
+      # Unescape the body first: a label with an apostrophe (e.g. "L'Architecte")
+      # renders as an HTML entity (&#39;), so a raw substring match would miss it.
       fr_profile = Quiz::ProfileScore.call(answers: record.answers, weights: record.weights, locale: "fr")
-      expect(last_response.body).to include(fr_profile.archetype[:label])
+      expect(CGI.unescapeHTML(last_response.body)).to include(fr_profile.archetype[:label])
     end
 
     it "renders the 404 page in French" do
