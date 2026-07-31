@@ -1,34 +1,34 @@
 # Archetypes
 
-## The Club Idealist
+## The Romantic
 
 `club_idealist`
 
-You’re looking for a club that stands for something, not just a name on a fixture list. It matters to you that the people in charge care about more than the next result, and that ambition doesn’t come at the cost of decency. You want to walk into the ground and feel that what happens here means something, to you and to everyone else who shows up.
+You want a club you can love, not just follow. One with a story you can tell, a sense of purpose you can feel. It’s the people beside you in the stands, the songs that echo after the final whistle, the feeling that you’re part of something bigger than a single season. Wins and losses fade, but the meaning keeps you coming back.
 
-## The Weekend Giant
+## The Light Brigade
 
 `weekend_giant`
 
-You want a club that fills the stands and plays to win, but you’re not interested in shortcuts or secrets. You’ll watch every match, cheer every goal, but you won’t trade your conscience for a cup. The victories have to feel earned, or they don’t feel like victories at all.
+You want the big club, the full ground, and a team that rides at everything with the handbrake off. Up the hill, into the valley, over the wall — running towards the enemy with bayonets fixed. Glory over caution, the charge over a safe draw. You want a club with an identity that outshines its trophy case.
 
-## The Big-Club Believer
+## The Cavalier
 
 `big_club_believer`
 
-You want a club that attacks, that gives you a reason to count down the days until kickoff. What happens on the pitch is what matters to you. The rest—the boardroom, the finances—you leave to someone else.
+You want the big club and the bright lights. A team that steps onto the pitch with swagger, playing for the crowd, the cameras, and the silverware. The business side, the politics, the fine print—let someone else worry about that. You’re here for the show, and you’re not sorry about it.
 
-## The Cathedral Builder
+## The Architect
 
 `cathedral_builder`
 
-You want to see a team that moves the ball with purpose, led by people you’d trust with your own name. You want to stand shoulder to shoulder with a crowd that feels every pass and every goal as much as you do.
+You want a club on the rise that plays with a sense that each pass is part of a bigger picture. Every season, a competent back office is a step toward something lasting. In the stands, you feel the hope of people who believe in a shared vision.
 
 ## The Pragmatic Winner
 
 `pragmatic_winner`
 
-You want a club that gets the job done, no matter how it looks. A win is a win, as long as it’s honest. You’ll take the scrappy goals and the hard-fought points, but you won’t celebrate a title that was bought instead of earned.
+You want a club that gets the job done, no matter how it looks. A win’s a win, and you’ll take the scrappy goals and the hard-fought points over pretty football that folds. You just want it earned on the pitch, not bought off it.
 
 ## The Glory Hunter
 
@@ -52,13 +52,13 @@ You love the game for its own sake—the way a move unfolds, the players who mak
 
 `terrace_dreamer`
 
-You want a club where the faces are familiar and the songs feel like your own. The stand is a second home, and the people around you are more than strangers. You hope the owners are decent, and you trust what you’re told.
+You want a club where you know the faces around you and the songs feel like they belong to your story. The stand is your second home, the people beside you are friends, and those ninety minutes together are the highlight of your week. Win or lose, you’ll be back in your spot, singing with the rest.
 
 ## The Everyfan
 
 `everyfan`
 
-You want a club that holds its own, with owners you can accept, and a place in your week that feels real but doesn’t take over your life. However they play, you’re just glad to call it yours.
+You want a club that holds its own. There’s nothing to defend, nothing to overthink. It’s a real part of your week, but it doesn’t take over your life. However they play, you’re just glad to call it yours.
 
 ## The Principled Fan
 
@@ -66,11 +66,11 @@ You want a club that holds its own, with owners you can accept, and a place in y
 
 You want a club you can support without second thoughts. Who owns it and how they act comes first. The football and the sense of belonging matter, but not enough to ignore what’s wrong.
 
-## The Easygoing Supporter
+## The Matinee
 
 `easygoing_supporter`
 
-You want a club you can enjoy without needing to study up. Football is supposed to be a good afternoon out, not another job. You’re not going to ruin it by worrying about the finances.
+You’re here for a good time, not a lifelong commitment. Football is a matinee, a relaxed afternoon, a decent match, a few hours you don’t have to plan for. You don’t worry about the league table, the money, or who’s in charge. You show up, enjoy the game, and head home. No drama, just football.
 
 ## The Free Agent
 
@@ -78,11 +78,11 @@ You want a club you can enjoy without needing to study up. Football is supposed 
 
 You want to watch football your way—wherever the best match is, whoever’s on the pitch. No club owns your loyalty, and you don’t feel bad about it for a second.
 
-## The Parish Purist
+## The Village Green
 
 `parish_purist`
 
-You want your local club, run the right way, and you want to be in the stands singing for them. However they play, it’s about the town having something to call its own and making sure it’s cared for.
+You want a club that belongs to its town and isn’t an asset in a private equity firm’s portfolio. It’s the ground down the road and the same faces every week. What division or league the team plays in matters less than their place in the table and their connection to your community.
 
 ## The Hometown Diehard
 
@@ -94,7 +94,7 @@ You want the club just down the road, and you want every bit of it—every home 
 
 `local_enthusiast`
 
-You want the team that belongs to your town, whatever kind of football they play. It’s one good thing in your week, not the only thing. But if the owners don’t respect the place, you won’t stand with them.
+You want the team that belongs to your town, whatever kind of football they play. It’s one good thing in your week, not the whole of it. And you care that it’s looked after — a club like this deserves people who respect the place.
 
 ## The Family Day
 
