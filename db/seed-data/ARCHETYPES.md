@@ -70,7 +70,7 @@ You want a club you can support without second thoughts. Who owns it and how the
 
 `easygoing_supporter`
 
-You want a club you can enjoy without needing to study up. Football is supposed to be a good afternoon out, not another job. You’re not going to ruin it by worrying about the finances.
+You’re here for a good time, not a lifelong commitment. Football is a matinee, a relaxed afternoon, a decent match, a few hours you don’t have to plan for. You don’t worry about the league table, the money, or who’s in charge. You show up, enjoy the game, and head home. No drama, just football.
 
 ## The Free Agent
 
