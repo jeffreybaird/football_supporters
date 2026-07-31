@@ -10,7 +10,7 @@ You’re looking for a club that stands for something, not just a name on a fixt
 
 `weekend_giant`
 
-You want a club that fills the stands and plays to win, but you’re not interested in shortcuts or secrets. You’ll watch every match, cheer every goal, but you won’t trade your conscience for a cup. The victories have to feel earned, or they don’t feel like victories at all.
+You want the big club, the full ground, and a team that rides at everything with the handbrake off. Up the hill, into the valley, over the wall — running towards the enemy with bayonets fixed. Glory over caution, the charge over a safe draw. You want a club with an identity that outshines its trophy case.
 
 ## The Cavalier
 
