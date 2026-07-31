@@ -50,10 +50,11 @@ RSpec.describe League do
     end
 
     it "exposes scoring_params keyword-ready for Quiz::Score.call" do
+      # amplify is no longer a scoring input (the matcher aligns distributions and
+      # reads the global POPULARITY_ALPHA), so it is deliberately not threaded here.
       expect(League.default.scoring_params).to eq(
         chooser_threshold: Quiz::Data::CHOOSER_THRESHOLD,
-        max_choices: Quiz::Data::MAX_CHOICES,
-        amplify: Quiz::Data::AMPLIFY
+        max_choices: Quiz::Data::MAX_CHOICES
       )
     end
 

@@ -4,10 +4,12 @@ require "spec_helper"
 
 RSpec.describe Quiz::Score do
   # Values below are pinned reference outputs of this scorer, re-derived after the
-  # ethics questions (E5/E6 -> E2/E3) were replaced in Quiz::Data. The algorithm
-  # itself was originally validated against a Node replay of the browser scorer on
-  # 712 random cases (vector, full ranking, candidates and gap to 1e-9); these pins
-  # guard against unintended drift in either the scorer or the question data.
+  # matcher moved from centroid+amplify to distribution alignment (Quiz::Score
+  # standardises the user vector against Quiz::Data::USER_MEAN/USER_SD and re-places
+  # it in the popularity-weighted team target). The axis vector (score_axes) is
+  # unchanged by that move, so the vec pins hold; the picks, candidates and gaps
+  # shifted deliberately and are the new contract. Retune together with USER_MEAN/
+  # USER_SD, POPULARITY_ALPHA or the seeded popularity.
   let(:teams) { League.default.scored_teams }
 
   def rounded(vec) = vec.map { |x| x.round(4) }
@@ -26,9 +28,9 @@ RSpec.describe Quiz::Score do
     r = described_class.call(teams:, answers: Array.new(13, 0), weights: [5, 5, 5, 5])
 
     expect(r.pick.name).to eq("Man United")
-    expect(r.candidates.map(&:name)).to eq(["Man United", "Everton"])
+    expect(r.candidates.map(&:name)).to eq(["Man United"])
     expect(rounded(r.vec)).to eq([6.3396, 4.5946, 10.0, 7.3524])
-    expect(r.gap.round(4)).to eq(0.0196)
+    expect(r.gap.round(4)).to eq(0.6884)
   end
 
   it "matches the reference scorer for the all-last-option answer set" do
@@ -43,10 +45,10 @@ RSpec.describe Quiz::Score do
     answers = [1, 2, 0, 3, 1, 2, 3, 0, 1, 2, 3, 0, 1]
     r = described_class.call(teams:, answers:, weights: [5, 5, 5, 5])
 
-    expect(r.pick.name).to eq("Liverpool")
-    expect(r.candidates.map(&:name)).to eq(["Liverpool"])
+    expect(r.pick.name).to eq("Arsenal")
+    expect(r.candidates.map(&:name)).to eq(["Arsenal"])
     expect(rounded(r.vec)).to eq([5.8868, 6.3784, 7.8824, 4.981])
-    expect(r.gap.round(4)).to eq(0.3201)
+    expect(r.gap.round(4)).to eq(0.419)
   end
 
   it "defaults every axis with no evidence to 5.0" do
@@ -80,28 +82,42 @@ RSpec.describe Quiz::Score do
     expect(r.candidates.map(&:name)).to eq(r.rank.first(5).map(&:name))
   end
 
-  it "applies a per-call amplify when ranking" do
+  it "applies a per-call alpha when ranking" do
     answers = Array.new(13, 0)
-    tight = described_class.call(teams:, answers:, weights: [5, 5, 5, 5], amplify: 1.0)
-    wide  = described_class.call(teams:, answers:, weights: [5, 5, 5, 5], amplify: 2.5)
+    fit = described_class.call(teams:, answers:, weights: [5, 5, 5, 5], alpha: 0.0)
+    pop = described_class.call(teams:, answers:, weights: [5, 5, 5, 5], alpha: 1.0)
 
-    # vec is amplify-independent; the ranking distances are not.
-    expect(rounded(tight.vec)).to eq(rounded(wide.vec))
-    expect(tight.rank.first.dist).not_to eq(wide.rank.first.dist)
+    # vec is transform-independent; the ranking distances shift with the target.
+    expect(rounded(fit.vec)).to eq(rounded(pop.vec))
+    expect(fit.rank.first.dist).not_to eq(pop.rank.first.dist)
   end
 
-  it "derives match from the raw (pre-amplify) distance, so match% is amplify-independent" do
+  it "leans the matching target toward popular clubs as alpha rises" do
+    fit = described_class.target_of(teams, 0.0) # unweighted coordinate distribution
+    pop = described_class.target_of(teams, 1.0) # popularity-weighted
+
+    # EPL's most-supported clubs are its high-Vibe giants, so trusting popularity
+    # pulls the Vibe target upward.
+    expect(pop[:mean][0]).to be > fit[:mean][0]
+    expect(fit[:mean].length).to eq(4)
+    expect(fit[:sd].length).to eq(4)
+  end
+
+  it "derives match from the raw (pre-alignment) distance, so match% is alpha-independent" do
     answers = Array.new(13, 0)
-    tight = described_class.call(teams:, answers:, weights: [5, 5, 5, 5], amplify: 1.0)
-    wide  = described_class.call(teams:, answers:, weights: [5, 5, 5, 5], amplify: 2.5)
+    fit = described_class.call(teams:, answers:, weights: [5, 5, 5, 5], alpha: 0.0)
+    pop = described_class.call(teams:, answers:, weights: [5, 5, 5, 5], alpha: 1.0)
 
-    tight_match = tight.rank.to_h { |r| [r.name, r.match] }
-    wide_match  = wide.rank.to_h { |r| [r.name, r.match] }
-    tight_match.each { |name, m| expect(m).to be_within(1e-9).of(wide_match[name]) }
+    fit_match = fit.rank.to_h { |r| [r.name, r.match] }
+    pop_match = pop.rank.to_h { |r| [r.name, r.match] }
+    fit_match.each { |name, m| expect(m).to be_within(1e-9).of(pop_match[name]) }
 
-    # at amplify 1.0 the ranking distance IS the raw distance, so match = 1 - dist/10.
-    tight.rank.each do |r|
-      expect(r.match).to be_within(1e-9).of(1.0 - (r.dist / Quiz::Score::DIAMETER))
+    # match is 1 - raw_dist/DIAMETER over the RAW user vector (equal weights here),
+    # independent of the alignment used for ranking.
+    w = [0.25, 0.25, 0.25, 0.25]
+    fit.rank.each do |r|
+      raw = Math.sqrt(w.each_index.sum { |k| w[k] * ((fit.vec[k] - r.team.vector[k])**2) })
+      expect(r.match).to be_within(1e-9).of(1.0 - (raw / Quiz::Score::DIAMETER))
       expect(r.match).to be_between(0.0, 1.0)
     end
   end

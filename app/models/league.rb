@@ -21,9 +21,12 @@ class League < Sequel::Model
     teams_dataset.where(deleted_at: nil).order(:position, :name).all
   end
 
-  # The league's recommender tuning, keyword-ready for Quiz::Score.call.
+  # The league's recommender tuning, keyword-ready for Quiz::Score.call. The
+  # popularity-trust dial (alpha) is a global Data constant for now, not a
+  # per-league column, so it is not threaded here; amplify is no longer read by
+  # the scorer (see Quiz::Data) and is deliberately omitted.
   def scoring_params
-    { chooser_threshold:, max_choices:, amplify: }
+    { chooser_threshold:, max_choices: }
   end
 
   def validate

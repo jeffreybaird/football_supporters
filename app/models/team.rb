@@ -32,6 +32,10 @@ class Team < Sequel::Model
 
       errors.add(col, "must be between 0 and 10") unless value.between?(0, 10)
     end
+    # Global popularity weight for the aligned scorer (Quiz::Score#target_of).
+    # Not required — the DB default (1.0) stands in for un-curated clubs — but it
+    # must be non-negative, since it is raised to a fractional power.
+    errors.add(:popularity, "must be >= 0") if !popularity.nil? && popularity.negative?
   end
 
   def soft_delete!
