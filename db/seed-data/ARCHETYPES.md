@@ -22,7 +22,7 @@ You want the big club and the bright lights. A team that steps onto the pitch wi
 
 `cathedral_builder`
 
-You want to see a team that moves the ball with purpose, led by people you’d trust with your own name. You want to stand shoulder to shoulder with a crowd that feels every pass and every goal as much as you do.
+You want a club on the rise that plays with a sense that each pass is part of a bigger picture. Every season, a competent back office is a step toward something lasting. In the stands, you feel the hope of people who believe in a shared vision.
 
 ## The Pragmatic Winner
 
