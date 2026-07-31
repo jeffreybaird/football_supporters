@@ -296,7 +296,7 @@ fr:
     archetypes:
       club_idealist:
         label: "Le Romantique"
-        sentence: "Tu cherches un club qui défend quelque chose, pas juste un nom sur un calendrier de matchs. Il t'importe que les dirigeants se soucient de plus que du prochain résultat, et que l'ambition ne se fasse pas au prix de la décence. Tu veux entrer dans le stade et sentir que ce qui s'y passe a du sens, pour toi comme pour tous ceux qui sont là."
+        sentence: "Tu veux un club que tu peux aimer, pas seulement suivre. Un club avec une histoire que tu peux raconter, une raison d'être que tu peux ressentir. Ce sont les gens à côté de toi dans les tribunes, les chants qui résonnent après le coup de sifflet final, le sentiment de faire partie de quelque chose de plus grand qu'une seule saison. Les victoires et les défaites s'effacent, mais c'est le sens qui te fait revenir."
       weekend_giant:
         label: "La Brigade légère"
         sentence: "Tu veux le grand club, les tribunes pleines, et une équipe qui fonce sur tout, frein desserré. À l'assaut de la colline, dans la vallée, par-dessus le mur — droit sur l'ennemi, baïonnette au canon. La gloire plutôt que la prudence, la charge plutôt qu'un match nul tranquille. Tu veux un club dont l'identité éclipse le palmarès."

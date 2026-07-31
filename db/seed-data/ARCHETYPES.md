@@ -4,7 +4,7 @@
 
 `club_idealist`
 
-You’re looking for a club that stands for something, not just a name on a fixture list. It matters to you that the people in charge care about more than the next result, and that ambition doesn’t come at the cost of decency. You want to walk into the ground and feel that what happens here means something, to you and to everyone else who shows up.
+You want a club you can love, not just follow. One with a story you can tell, a sense of purpose you can feel. It’s the people beside you in the stands, the songs that echo after the final whistle, the feeling that you’re part of something bigger than a single season. Wins and losses fade, but the meaning keeps you coming back.
 
 ## The Light Brigade
 
