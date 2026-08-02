@@ -51,4 +51,11 @@ RSpec.describe MCP::Server do
     book = JSON.parse(read["result"]["contents"].first["text"])
     expect(book["axes"].keys).to eq(Quiz::Data::AXES)
   end
+
+  it "exposes the conversation guide as a resource" do
+    uris = req("resources/list")["result"]["resources"].map { |resource| resource["uri"] }
+    expect(uris).to include("footballsupporters://conversation-guide")
+    read = req("resources/read", { "uri" => "footballsupporters://conversation-guide" })
+    expect(read["result"]["contents"].first["text"]).to match(/never ask/i)
+  end
 end
