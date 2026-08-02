@@ -12,13 +12,19 @@ module MCP
     module_function
 
     EQUAL_WEIGHTS = [5, 5, 5, 5].freeze
+    # Fit gap (on the 0..1 match scale) within which an alternative counts as a
+    # near-tie with the pick — i.e. worth offering as "or maybe you're more…".
+    CLOSE_MATCH = 0.03
 
     # ---- input-schema fragments (JSON Schema, shared across tools) --------------
     LEAGUE_PROP = { "type" => "string",
                     "description" => "League slug, e.g. \"premier-league\". Call list_leagues for valid slugs." }.freeze
     VECTOR_PROP = { "type" => "array", "items" => { "type" => "number" }, "minItems" => 4, "maxItems" => 4,
-                    "description" => "Supporter DESIRE vector [Vibe, Play, Ethics, Fanbase], each 0-10, on the " \
-                                     "self-report scale — do NOT de-bias, the engine does. See the axis-codebook resource." }.freeze
+                    "description" => "YOUR inferred estimate of the supporter's position on each axis " \
+                                     "[Vibe, Play, Ethics, Fanbase], each 0-10. Infer it from conversation — do NOT ask " \
+                                     "the person for numbers or ratings. Estimate genuinely (the tool matches it directly " \
+                                     "to club attributes; don't inflate or deflate). See the conversation-guide and " \
+                                     "axis-codebook resources." }.freeze
     ANSWERS_PROP = { "type" => "array", "items" => { "type" => "integer" },
                      "description" => "Alternative to vector: the 13 quiz answers as option indices (0-3)." }.freeze
     WEIGHTS_PROP = { "type" => "array", "items" => { "type" => "number" }, "minItems" => 4, "maxItems" => 4,
@@ -57,16 +63,20 @@ module MCP
 
     def score_supporter_tool
       Tool.new(name: "score_supporter", input_schema: SCORE_SCHEMA, handler: method(:score_supporter),
-               description: "Match a supporter to clubs in one league. Give a DESIRE vector (or the 13 answers) and " \
-                            "an optional weights array; returns the pick, close alternatives, the full ranking with " \
-                            "match %, and the supporter's archetype.")
+               description: "Recommend clubs for a supporter in one league. Infer the four axes yourself from natural " \
+                            "conversation about what the person loves and can't stand in football — NEVER ask them to " \
+                            "rate axes or give numbers; the axes are internal and they should never see them. Pass your " \
+                            "inferred vector (or the 13 answers) and optional weights; returns the pick, close " \
+                            "alternatives, the full ranking (highest match first), and their archetype. Read the " \
+                            "conversation-guide and axis-codebook resources before your first call.")
     end
 
     def build_profile_tool
       Tool.new(name: "build_profile", input_schema: PROFILE_SCHEMA, handler: method(:build_profile),
                description: "Build a cross-league Football Profile: the supporter's archetype (what they WANT) plus " \
-                            "their best-matching club in every league. Give a DESIRE vector (or answers) and " \
-                            "optional weights.")
+                            "their best-matching club in every league. Infer the four axes from conversation — never " \
+                            "ask for numbers or ratings. Pass your inferred vector (or answers) and optional weights. " \
+                            "Read the conversation-guide and axis-codebook resources first.")
     end
 
     def explain_match_tool
@@ -109,13 +119,25 @@ module MCP
     end
 
     # ---- views -----------------------------------------------------------------
+    # Rank by raw weighted fit (Ranked#match) so the list is monotonic in the % it
+    # shows and the pick is the genuinely closest club. The engine's aligned/
+    # popularity-weighted ordering exists to de-bias human slider self-reports; an
+    # LLM-inferred vector has no such bias, so direct fit is both correct and
+    # consistent (and matches what explain_match reports).
     def score_view(result, vec, weights)
-      ranked = result.rank.to_h { |r| [r.team, r] }
+      ranked = result.rank.sort_by { |r| [-r.match, r.name] }
       { "supporter_vector" => axis_view(vec),
         "archetype" => Quiz::Archetype.call(vec, weights:),
-        "pick" => club_match(result.pick, ranked),
-        "candidates" => result.candidates.map { |team| club_match(team, ranked) },
-        "ranking" => result.rank.map { |r| { "club" => r.name, "match_pct" => pct(r.match) } } }
+        "pick" => club_match(ranked.first),
+        "candidates" => close_alternatives(ranked).map { |r| club_match(r) },
+        "ranking" => ranked.map { |r| { "club" => r.name, "match_pct" => pct(r.match) } } }
+    end
+
+    # Clubs within CLOSE_MATCH of the best fit (excluding the pick itself), capped
+    # at three — the genuine "or maybe you're more…" near-ties.
+    def close_alternatives(ranked)
+      best = ranked.first.match
+      ranked.drop(1).select { |r| (best - r.match) <= CLOSE_MATCH }.first(3)
     end
 
     def profile_leagues(vec, weights)
@@ -123,7 +145,7 @@ module MCP
         teams = league.scored_teams
         next if teams.empty?
 
-        top = Quiz::Score.rank_vector(vec:, teams:, weights:, **league.scoring_params).rank.first
+        top = Quiz::Score.rank_vector(vec:, teams:, weights:, **league.scoring_params).rank.max_by(&:match)
         { "league" => league.name, "slug" => league.slug, "pick" => top.name, "match_pct" => pct(top.match) }
       end
     end
@@ -157,9 +179,9 @@ module MCP
         "popularity" => team.popularity, "blurb" => team.blurb }
     end
 
-    def club_match(team, ranked)
-      { "name" => team.name, "match_pct" => pct(ranked[team].match),
-        "attributes" => axis_view(team.vector), "blurb" => team.blurb }
+    def club_match(ranked)
+      { "name" => ranked.name, "match_pct" => pct(ranked.match),
+        "attributes" => axis_view(ranked.team.vector), "blurb" => ranked.team.blurb }
     end
 
     def axis_view(vec)

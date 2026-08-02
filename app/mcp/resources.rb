@@ -10,8 +10,19 @@ module MCP
   module Resources
     module_function
 
+    GUIDE = File.read(File.expand_path("../../config/quiz/conversation_guide.md", __dir__), encoding: "UTF-8").freeze
+
     def all
-      [axis_codebook, archetype_catalog]
+      [conversation_guide, axis_codebook, archetype_catalog]
+    end
+
+    def conversation_guide
+      Resource.new(
+        uri: "footballsupporters://conversation-guide", name: "Conversation guide", mime_type: "text/markdown",
+        description: "How to run the club match as a conversation: infer the four axes from natural talk and NEVER " \
+                     "ask the person to rate axes or give numbers. Read this before your first score_supporter call.",
+        reader: -> { GUIDE }
+      )
     end
 
     def axis_codebook

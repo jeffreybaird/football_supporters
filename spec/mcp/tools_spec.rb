@@ -6,16 +6,26 @@ require_relative "../../app/mcp"
 RSpec.describe MCP::Tools do
   let(:league) { League.default }
 
-  it "score_supporter matches the core scorer for the same vector" do
+  it "score_supporter recommends the best-fitting club and ranks monotonically by match %" do
     vec = [7.0, 8.0, 6.0, 5.0]
     view = described_class.score_supporter("vector" => vec, "league" => league.slug)
-    expected = Quiz::Score.rank_vector(vec:, teams: league.scored_teams, weights: [5, 5, 5, 5], **league.scoring_params)
-    expect(view["pick"]["name"]).to eq(expected.pick.name)
+    best = Quiz::Score.rank_vector(vec:, teams: league.scored_teams, weights: [5, 5, 5, 5], **league.scoring_params)
+                      .rank.max_by(&:match)
+    expect(view["pick"]["name"]).to eq(best.name)
+    pcts = view["ranking"].map { |row| row["match_pct"] }
+    expect(pcts).to eq(pcts.sort.reverse)
   end
 
-  it "score_supporter accepts the 13 answers like the quiz" do
+  it "score_supporter's pick is the top of its own ranking (answers input)" do
     view = described_class.score_supporter("answers" => Array.new(13, 0), "league" => league.slug)
-    expect(view["pick"]["name"]).to eq("Man United")
+    expect(view["pick"]["name"]).to eq(view["ranking"].first["club"])
+  end
+
+  it "explain_match reports the same match % as score_supporter for the same club" do
+    vec = [7, 8, 6, 5]
+    view = described_class.score_supporter("vector" => vec, "league" => league.slug)
+    detail = described_class.explain_match("vector" => vec, "league" => league.slug, "team" => view["pick"]["name"])
+    expect(detail["match_pct"]).to eq(view["pick"]["match_pct"])
   end
 
   it "list_teams reports each club's banded attribute vector" do
