@@ -1,0 +1,46 @@
+# The two-sided axis codebook: the semantic layer over the 4-D supporter/club
+# space. Each axis is read TWO ways — as a DESIRE (where a supporter sits: "what
+# I want") and as an ATTRIBUTE (where a club sits: "what it is"). The two are
+# distinct quantities forced into one coordinate frame so the recommender can
+# measure distance; Quiz::Score reconciles them by distribution alignment, not by
+# their being natively identical. The numeric reference frame (range, level
+# anchors, self-report population) and the per-axis weight gloss are assembled
+# from the live scoring model by Quiz::AxisCodebook — this file holds only prose.
+axes:
+  Vibe:
+    captures: "Scale, status, glamour, ambition."
+    desire:
+      low: "I want a small, local, unpretentious, grassroots club."
+      high: "I want a big, high-status, glamorous, ambitious club."
+    attribute:
+      low: "A small, low-profile, unglamorous club."
+      high: "A big, high-status, high-profile club."
+  Play:
+    captures: "Style of football — expressive and attacking versus pragmatic and controlled."
+    desire:
+      low: "I want a team that grinds out results, however it looks."
+      high: "I want thrilling, attacking, front-foot football."
+    attribute:
+      low: "A pragmatic, defensive, results-first club."
+      high: "An attacking, expansive, entertaining club."
+  Ethics:
+    captures: "How much clean ownership and conduct matter (supporter) / how cleanly the club is owned and run (club)."
+    desire:
+      low: "I don't much care who owns the club or how they got their money."
+      high: "Clean ownership and conduct are close to a dealbreaker for me."
+    attribute:
+      low: "A club with controversial ownership, dubious money, or a sportswashing project."
+      high: "A cleanly-owned, well-run, community-rooted club."
+  Fanbase:
+    captures: "Belonging and tribal togetherness (supporter) / the strength of the club's fan community (club)."
+    desire:
+      low: "I'm happy following casually, from a distance."
+      high: "I want to be all-in — rooted, part of an intense community."
+    attribute:
+      low: "A casual, transient, or quiet fanbase."
+      high: "A rooted, intense, participatory community fanbase."
+notes:
+  - "Shared frame is engineered, not natural. Desire poles and attribute poles are made comparable only so distance works, and only after Quiz::Score standardises the supporter vector (self-report mean/sd) and re-places it in the club distribution. Directions are aligned so high-matches-high: a high-caring supporter should land on a high-cleanliness club."
+  - "The desire/attribute gap is widest on Ethics and Fanbase. There the SUPPORTER score is really 'how much this matters to me' (a priority — the questions literally ask 'would you walk away?'), while the CLUB score is an attribute the club possesses. On Play and Vibe it is closer to a symmetric taste match. An archetype describes a supporter and is never a club; do not label a club with an archetype."
+  - "Self-report is inflated: the population Ethics mean sits at or above the 'high' club anchor, and Fanbase is close behind — people over-report caring and belonging. When inferring a supporter vector from conversation, score on this same inflated self-report scale; the engine de-biases downstream. If you pre-correct for cynicism the engine corrects again and every supporter lands on ruthless mega-clubs."
+  - "Three quantities per axis, not two: supporter POSITION (from the answers or an inferred vector), supporter WEIGHT (the slider — how much the axis counts in the distance), and club POSITION. The two pole descriptions are the two positions; the weight is a separate dial."

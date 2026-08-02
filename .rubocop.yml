@@ -30,12 +30,15 @@ Layout/LineLength:
     - "app/services/quiz/archetype.rb" # long copywritten sentences, one per line
     - "app/services/quiz/seed.rb"      # club blurb copy, one long string per line
     - "app/services/quiz/data.rb"      # quiz question copy, one long string per line
+    - "app/mcp/tools.rb"               # JSON-schema + tool descriptions written for the model
+    - "app/mcp/resources.rb"           # resource descriptions written for the model
 
 Metrics/ModuleLength:
   Exclude:
     - "app/services/quiz/archetype.rb" # data table, not logic
     - "app/services/quiz/data.rb"      # questionnaire data table, not logic
     - "app/services/quiz/seed.rb"
+    - "app/mcp/tools.rb"               # tool definition table + thin view builders
 
 Metrics/BlockLength:
   Exclude:
