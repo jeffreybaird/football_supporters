@@ -5,6 +5,8 @@ require "securerandom"
 require "json"
 require "erb"
 
+require_relative "app/mcp"
+
 # The application. Routes stay thin: parse params, call a service object, render.
 # Business rules and SQL live in app/services and app/models — never here.
 class App < Sinatra::Base
@@ -36,6 +38,12 @@ class App < Sinatra::Base
 
   # How long a chosen language preference sticks (one year, in seconds).
   LOCALE_COOKIE_MAX_AGE = 31_536_000
+
+  # The MCP (Model Context Protocol) server, built once and shared across
+  # requests — it is read-only and thread-safe, so one instance serves Puma's
+  # whole thread pool. Exposes the supporter/club tools over the /mcp route below,
+  # the same handlers the stdio server (bin/mcp) uses.
+  MCP_TRANSPORT = MCP::Http.new(MCP.server)
 
   configure do
     set :root, __dir__
@@ -127,6 +135,25 @@ class App < Sinatra::Base
     DB.test_connection
     content_type :json
     '{"status":"ok"}'
+  end
+
+  # Model Context Protocol endpoint (Streamable HTTP). One POST of JSON-RPC in,
+  # one JSON response out — read-only and stateless. A remote Claude client adds
+  # this URL as a custom connector and calls the same tools bin/mcp exposes over
+  # stdio. The transport is a thin adapter; all protocol logic lives in MCP::Server.
+  post "/mcp" do
+    request.body.rewind
+    status_code, type, body = MCP_TRANSPORT.post(request.body.read)
+    content_type(type) if type
+    status status_code
+    body
+  end
+
+  # This transport is request/response only — there is no server-initiated stream
+  # to open, so a GET has nothing to return.
+  get "/mcp" do
+    content_type :json
+    halt 405, { "Allow" => "POST" }, { error: "method_not_allowed" }.to_json
   end
 
   # The quiz itself — a client-rendered recommender fed the very same dataset the

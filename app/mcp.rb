@@ -4,6 +4,7 @@ require_relative "mcp/server"
 require_relative "mcp/tools"
 require_relative "mcp/resources"
 require_relative "mcp/stdio"
+require_relative "mcp/http"
 
 # The MCP server assembly. Requires the protocol core plus the tool and resource
 # tables; `MCP.server` wires them into a ready Server. Loaded by bin/mcp (after the
