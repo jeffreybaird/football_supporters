@@ -1,0 +1,22 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+# Standalone MCP (Model Context Protocol) server over stdio. Boots the app
+# environment (DB, models, Quiz services) and speaks newline-delimited JSON-RPC on
+# stdin/stdout so a Claude client can call the read-only supporter/club tools.
+#
+# The DB is chosen the usual way: DATABASE_PATH, or db/<RACK_ENV>.sqlite3. Point it
+# at a seeded database (e.g. RACK_ENV=production DATABASE_PATH=/data/app.sqlite3).
+#
+# stdout must carry ONLY protocol messages, so any boot-time logging is redirected
+# to stderr while the environment loads, then stdout is restored for the loop.
+require "json"
+
+real_stdout = $stdout
+$stdout = $stderr
+require_relative "../config/environment"
+require_relative "../app/mcp"
+$stdout = real_stdout
+$stdout.sync = true
+
+MCP::Stdio.new(MCP.server).run
