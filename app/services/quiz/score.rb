@@ -40,7 +40,17 @@ module Quiz
              chooser_threshold: Data::CHOOSER_THRESHOLD,
              max_choices: Data::MAX_CHOICES,
              alpha: Data::POPULARITY_ALPHA)
-      vec  = score_axes(answers)
+      rank_vector(vec: score_axes(answers), teams:, weights:, chooser_threshold:, max_choices:, alpha:)
+    end
+
+    # Rank a KNOWN axis vector against a league's teams — the shared core of #call
+    # and the entry point for callers that already hold a vector rather than the 13
+    # answers (e.g. an LLM inferring a supporter vector from conversation). Returns
+    # the same Result as #call; #call is just this with score_axes in front.
+    def rank_vector(vec:, teams:, weights:,
+                    chooser_threshold: Data::CHOOSER_THRESHOLD,
+                    max_choices: Data::MAX_CHOICES,
+                    alpha: Data::POPULARITY_ALPHA)
       rank = rank_teams(vec, weights, teams, alpha)
       candidates = rank.each_with_index
                        .select { |r, i| i.zero? || (r.dist - rank[0].dist) < chooser_threshold }
