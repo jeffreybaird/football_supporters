@@ -1,0 +1,16 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "hooks": [
+          {
+            "command": "python3 -B /Users/jeffreybaird/src/football_supporters/.codex/hooks/workflow_guard.py --platform codex --root /Users/jeffreybaird/src/football_supporters --policy /Users/jeffreybaird/src/football_supporters/.codex/hooks/policy.json",
+            "timeout": 5,
+            "type": "command"
+          }
+        ],
+        "matcher": ".*"
+      }
+    ]
+  }
+}
