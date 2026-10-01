@@ -9,7 +9,7 @@ ruby file: ".ruby-version"
 gem "dry-monads", "~> 1.8", require: "dry/monads" # Success/Failure Results
 gem "erubi", "~> 1.13" # makes `set :erb, escape_html: true` real (ERB auto-escaping)
 gem "faraday", "~> 2.13" # HTTP client for service wrappers
-gem "puma", "~> 6.6" # app server (config/puma.rb)
+gem "puma", "~> 7.2.1" # app server (config/puma.rb)
 gem "rackup", "~> 2.2" # `run App` entrypoint (config.ru)
 gem "rake", "~> 13.2" # `rake db:migrate` (the deploy gate)
 gem "sequel", "~> 5.90" # ORM + migrations
@@ -17,6 +17,7 @@ gem "sinatra", "~> 4.1", require: "sinatra/base" # modular app, no classic DSL
 gem "sqlite3", "~> 2.6" # the only DB backend
 
 group :development, :test do
+  gem "bundler-audit", "~> 0.9", require: false
   gem "csv", "~> 3.3" # seed-tuning specs read db/seed-data/*.csv; not a default gem from Ruby 3.4
   gem "dotenv", "~> 3.1"
   gem "factory_bot", "~> 6.5"
