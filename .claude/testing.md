@@ -16,31 +16,16 @@ class is always `App` (a fixed name), booted by `run App` in `config.ru`.
 
 ---
 
-## 1. Tests Are a Contract, Not an Obstacle
+## 1. Tests Are a Contract
 
-Existing tests describe **intended behavior**. They are specifications, not
-suggestions. These rules are absolute:
+Follow [the canonical project test-contract rules](../.docs/project-guidance.md#tests-are-a-contract).
+They apply to both platforms, including authorized behavior changes and bug fixes.
 
-1. **Never modify an existing test to make it pass.** A previously-passing test
-   that fails after your change means your change broke intended behavior. Fix
-   the code, not the test. Only exception: a deliberate, explicitly-stated
-   behavior change.
-2. **Never weaken an assertion** to pass a failing test.
-3. **Never delete a test to resolve a failure** — flag it for discussion.
-4. **Never change existing function behavior to satisfy a new test** — add a new
-   method/parameter instead.
-5. **A new feature that breaks existing tests** carries the burden of proof —
-   integrate without breaking existing behavior.
-6. **If you believe a test is genuinely wrong**, flag it with a comment and ask
-   before changing.
-7. **Given a bug report**, write a failing test for the expected behavior first,
-   then fix the code.
-8. **Find the root cause** — don't take the shortest route around an error
-   message.
-
-The suite is a ratchet: it only moves forward.
-
----
+See [the shared workflow](../.docs/agent-workflow.md) for current role names,
+direct-edit enforcement, shell auditing, and their limits. Test writers assert
+on observable public behavior, not private names or internal call order. The
+runner reports failures verbatim; the reviewer accepts tests before implementation
+and independently reviews the final result.
 
 ## 2. Test Layout
 
@@ -582,13 +567,15 @@ end
 ## 9. CI Gates
 
 All must pass before merge/deploy. Run the fast suite locally before every
-commit.
+commit. First run `bundle exec rubocop --autocorrect` locally, with corrections
+performed by the role that owns each file. The CI lint command below remains
+read-only; stop for unresolved offenses after safe autocorrection.
 
 ```bash
 bundle exec rspec --tag ~js               # fast: unit + request + rack-test feature specs
 bundle exec rspec --tag js                # browser specs (separate CI job; needs Chrome)
 bundle exec rubocop                       # style + lint (add rubocop-sequel, rubocop-rspec)
-bundle exec bundler-audit check --update  # dependency CVE scan
+bundle exec bundle-audit check --update  # dependency CVE scan
 bundle exec erb_lint --lint-all           # ERB lint (optional)
 ```
 
