@@ -16,7 +16,7 @@
     ".codex/agents/workflow_runner.toml": "33dc52779943238a061732b82a33ef95fcd0d96c7e7a6935768b4a4d19a244b0",
     ".codex/agents/workflow_spec_writer.toml": "7a50fb0268225412edc602479d5fe64fe3cfb3aa156c991cf13030be62917b65",
     ".codex/config.toml": "48ad6a21fc22f83dee228c346601ad47486da4062d40069853f38b55ffdac5b7",
-    ".codex/hooks.json": "a6f8a7f06cd0af0f22c459067ddac7a4e0ee32d2a84680325f19a5692652ca89",
+    ".codex/hooks.json": "3ad011d24b6d108abd2d053ceb268588f4c18dde226a2fc6d996cc0197a7d54c",
     ".codex/hooks/policy.json": "f4e18aa01b47ef5975c4dcbe5d702888912530eb7f5cbc732b3ad2efa768b895",
     ".codex/hooks/workflow_audit.py": "5474b963a35b168980a8fdbf47d2438d3d1a160b53c78f8dc9190e83e2d3abb7",
     ".codex/hooks/workflow_guard.py": "65994a7959d9cfd06a7ba5114706fcae8316914cd8b1e950aafd529b1a747807",
